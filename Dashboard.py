@@ -64,9 +64,9 @@ experiment_dict = {
 
 # Read in experimental data as dictionary
 decoy_dfs = {}
-for file in os.listdir("DE_probs_dfs"):
+for file in os.listdir("Output/DE_probs_dfs"):
         file_name = file.split(".")[0]
-        df = pd.read_csv(f"DE_probs_dfs/{file}", index_col = 0) # Set first column as index column 
+        df = pd.read_csv(f"Output/DE_probs_dfs/{file}", index_col = 0) # Set first column as index column 
         decoy_dfs[file_name] = df
         
         
