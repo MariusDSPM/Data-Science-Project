@@ -63,11 +63,20 @@ experiment_dict = {
 }
 
 # Read in experimental data as dictionary
+# Decoy Effect
 decoy_dfs = {}
 for file in os.listdir("Output/DE_probs_dfs"):
         file_name = file.split(".")[0]
         df = pd.read_csv(f"Output/DE_probs_dfs/{file}", index_col = 0) # Set first column as index column 
         decoy_dfs[file_name] = df
+
+# Prospect Theory
+prospect_dfs = {}
+for file in os.listdir("Output/PT_probs_dfs"):
+    file_name = file.split(".")[0]
+    df = pd.read_csv(f"Output/PT_probs_dfs/{file}", index_col = 0) # Set first column as index column
+    prospect_dfs[file_name] = df
+
         
         
 
@@ -190,26 +199,26 @@ start_page = [
 
 # Decoy Page
 decoy_page = [
-    html.H1("Decoy Experiment", className="page-heading"),
+    html.H1("Decoy Effect Experiment", className="page-heading"),
     dcc.Dropdown(
         id="decoy-plot-dropdown",
         options=[
-            {'label': 'Experiment 1_1', 'value': 'DE_probs_1_1'},
-            {'label': 'Experiment 1_2', 'value': 'DE_probs_1_2'},
-            {'label': 'Experiment 1_3', 'value': 'DE_probs_1_3'},
-            {'label': 'Experiment 1_4', 'value': 'DE_probs_1_4'},
-            {'label': 'Experiment 1_5', 'value': 'DE_probs_1_5'},
-            {'label': 'Experiment 1_6', 'value': 'DE_probs_1_6'},
-            {'label': 'Experiment 1_7', 'value': 'DE_probs_1_7'},
-            {'label': 'Experiment 1_8', 'value': 'DE_probs_1_8'},
-            {'label': 'Experiment 2_1', 'value': 'DE_probs_2_1'},
-            {'label': 'Experiment 2_2', 'value': 'DE_probs_2_2'},
-            {'label': 'Experiment 2_3', 'value': 'DE_probs_2_3'},
-            {'label': 'Experiment 2_4', 'value': 'DE_probs_2_4'},
-            {'label': 'Experiment 2_5', 'value': 'DE_probs_2_5'},
-            {'label': 'Experiment 2_6', 'value': 'DE_probs_2_6'},
-            {'label': 'Experiment 2_7', 'value': 'DE_probs_2_7'},
-            {'label': 'Experiment 2_8', 'value': 'DE_probs_2_8'},
+            {'label': 'Experiment 1.1', 'value': 'DE_probs_1_1'},
+            {'label': 'Experiment 1.2', 'value': 'DE_probs_1_2'},
+            {'label': 'Experiment 1.3', 'value': 'DE_probs_1_3'},
+            {'label': 'Experiment 1.4', 'value': 'DE_probs_1_4'},
+            {'label': 'Experiment 1.5', 'value': 'DE_probs_1_5'},
+            {'label': 'Experiment 1.6', 'value': 'DE_probs_1_6'},
+            {'label': 'Experiment 1.7', 'value': 'DE_probs_1_7'},
+            {'label': 'Experiment 1.8', 'value': 'DE_probs_1_8'},
+            {'label': 'Experiment 2.1', 'value': 'DE_probs_2_1'},
+            {'label': 'Experiment 2.2', 'value': 'DE_probs_2_2'},
+            {'label': 'Experiment 2.3', 'value': 'DE_probs_2_3'},
+            {'label': 'Experiment 2.4', 'value': 'DE_probs_2_4'},
+            {'label': 'Experiment 2.5', 'value': 'DE_probs_2_5'},
+            {'label': 'Experiment 2.6', 'value': 'DE_probs_2_6'},
+            {'label': 'Experiment 2.7', 'value': 'DE_probs_2_7'},
+            {'label': 'Experiment 2.8', 'value': 'DE_probs_2_8'},
         ],
         value='DE_probs_1_1',  
         style={'width': '50%'}
@@ -220,6 +229,53 @@ decoy_page = [
            which is the same as the large one, but more expensive. This should make the large one more attractive, as it is now the middle option. 
            This experiment is a replication of the experiment conducted by Huber et al. (1982)."""),
 ]
+
+# Prospect Page
+prospect_page = [
+     html.H1("Prospect Theory Experiment", className="page-heading"),
+     dcc.Dropdown( 
+          id = "prospect-plot-dropdown",
+          options = [
+                {'label': 'Experiment 1.1', 'value': 'PT_probs_1_1'},
+                {'label': 'Experiment 1.2', 'value': 'PT_probs_1_2'},
+                {'label': 'Experiment 1.3', 'value': 'PT_probs_1_3'},
+                {'label': 'Experiment 1.4', 'value': 'PT_probs_1_4'},
+                {'label': 'Experiment 1.5', 'value': 'PT_probs_1_5'},
+                {'label': 'Experiment 1.6', 'value': 'PT_probs_1_6'},
+                {'label': 'Experiment 1.7', 'value': 'PT_probs_1_7'},
+                {'label': 'Experiment 1.8', 'value': 'PT_probs_1_8'},
+                {'label': 'Experiment 2.1', 'value': 'PT_probs_2_1'},
+                {'label': 'Experiment 2.2', 'value': 'PT_probs_2_2'},
+                {'label': 'Experiment 2.3', 'value': 'PT_probs_2_3'},
+                {'label': 'Experiment 2.4', 'value': 'PT_probs_2_4'},
+                {'label': 'Experiment 2.5', 'value': 'PT_probs_2_5'},
+                {'label': 'Experiment 2.6', 'value': 'PT_probs_2_6'},
+                {'label': 'Experiment 2.7', 'value': 'PT_probs_2_7'},
+                {'label': 'Experiment 2.8', 'value': 'PT_probs_2_8'},
+          ],
+          value = 'PT_probs_1_1',
+            style = {'width': '50%'}
+        ),
+        dcc.Graph(id="prospect-plot-output"),
+        html.P("""Prospect theory is a theory of decision making under risk. It is based on the idea that people evaluate their options relative to a reference point, 
+               and that losses and gains are valued differently. This experiment is a replication of the experiment conducted by Tversky and Kahneman (1981)."""),
+]
+
+
+# Callback for prospect page
+@app.callback(
+    Output("prospect-plot-output", "figure"),
+    [Input("prospect-plot-dropdown", "value")]
+)
+def update_prospect_plot(selected_plot):
+    # Check if the selected plot exists in the dfs dictionary
+    if selected_plot in prospect_dfs:
+        # Call the plot_results function with the selected dataframe
+        return plot_results(prospect_dfs[selected_plot])
+    else:
+        # Return an empty figure
+        return []
+
 
 # Callback for decoy page
 @app.callback(
@@ -250,7 +306,7 @@ def render_page_content(pathname):
     elif pathname == "/experiments/decoy":
         return html.P(decoy_page)
     elif pathname == "/experiments/prospect":
-        return html.P("Prospect experiment is not yet implemented. Sorry!")
+        return html.P(prospect_page)
     elif pathname == "/experiments/sunk-cost":
         return html.P("Sunk Cost experiment is not yet implemented. Sorry!")
     elif pathname == "/experiments/ultimatum":
