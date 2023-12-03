@@ -76,7 +76,15 @@ for file in os.listdir("Output/PT_probs_dfs"):
     file_name = file.split(".")[0]
     df = pd.read_csv(f"Output/PT_probs_dfs/{file}", index_col = 0) # Set first column as index column
     prospect_dfs[file_name] = df
+    
 
+# Function for getting data of Sunk Cost Experiment 1
+def get_sunk_cost_data(selected_temperature, selected_sunk_cost):
+    sunk_cost_1 = pd.read_csv('Output/Sunk_cost_experiment_1.csv', index_col=0)
+    df = sunk_cost_1[(sunk_cost_1['Temperature'] == selected_temperature) & 
+                     (sunk_cost_1['Sunk Cost ($)'] == selected_sunk_cost)]
+    
+    return df
         
         
 
@@ -127,6 +135,38 @@ def plot_results(df):
     )
 
     return fig 
+
+
+# Function for plotting Sunk Cost Experiment 1
+def plot_sunk_cost_1(selected_temperature, selected_sunk_cost):
+    # Assuming you have a function to get data for Sunk Cost Fallacy experiment based on selected temperature
+    df_sunk_cost = get_sunk_cost_data(selected_temperature, selected_sunk_cost)
+    
+    # Create a bar plot using Plotly.graph_objects
+    fig_sunk_cost = go.Figure()
+    fig_sunk_cost.add_trace(go.Bar(
+        x=df_sunk_cost['Model'],
+        y=df_sunk_cost['Share Theater Performance'],
+        name='Share Theater Performance',
+        hovertemplate="Theater Performance: %{y:.2f}<extra></extra>"
+    ))
+    fig_sunk_cost.add_trace(go.Bar(
+        x=df_sunk_cost['Model'],
+        y=df_sunk_cost['Share Rock Concert'],
+        name='Share Rock Concert',
+        hovertemplate="Rock Concert: %{y:.2f}<extra></extra>"
+    ))
+    
+    fig_sunk_cost.update_layout(
+        barmode='group',
+        xaxis=dict(title='Model'),
+        yaxis=dict(title='Share', range=[0, 1.1]),
+        title=f"Sunk Cost Fallacy Experiment - Temperature: {selected_temperature}; Sunk Cost: ${selected_sunk_cost}",
+        legend=dict(),
+        bargap=0.3  # Gap between models
+    )
+
+    return fig_sunk_cost
 
 
 # Initialize the app
@@ -261,6 +301,61 @@ prospect_page = [
                and that losses and gains are valued differently. This experiment is a replication of the experiment conducted by Tversky and Kahneman (1981)."""),
 ]
 
+# Sunk Cost Fallacy Page
+sunk_cost_page = [
+    html.H1("Sunk Cost Fallacy", className="page-heading"),
+    
+    html.P(["""Assume that you have spent $90/$250/$10,000 for a ticket to a theater performance. \
+            Several weeks later you buy a $30 ticket to a rock concert. You think you will \
+                enjoy the rock concert more than the theater performance. As you are putting your \
+                    just-purchased rock concert ticket in your wallet, you notice that both events \
+                            are scheduled for the same evening. The tickets are non-transferable, nor \
+                                can they be exchanged. You can use only one of the tickets and not the other. \
+                                    Which ticket will you use? """,
+                                    html.Br(),  # Line break
+                                    html.Br(),  # Line break
+                                    "A: Theater performance.",
+                                    html.Br(),  # Line break
+                                    "B: Rock concert."
+    ]),
+
+    html.Div(
+        style={'display': 'flex', 'justify-content': 'space-between', 'align-items': 'center'},  # Adjust align-items
+        children=[
+            html.Div(
+                style={'width': '25%', 'margin-right': '30px', 'align-self': 'flex-start', 'margin-top': '170px'},  # Adjust margin-top for slider
+                children=[
+                    html.H5('Temperature Value'),
+                    dcc.Slider(
+                        id="Temperature",
+                        min=0.5,
+                        max=1.5,
+                        step=0.5,
+                        marks={0.5: '0.5', 1: '1', 1.5: '1.5'},
+                        value=1,
+                    ),
+                    
+                    html.H6('Amount of Sunk Cost (Cost of Theater Performance)', style={'margin-top': '50px'}),  # Adjust margin-top for dropdown
+                    dcc.Dropdown(
+                        id="Sunk-Cost",
+                        options=[
+                            {'label': '$90', 'value': 90},
+                            {'label': '$250', 'value': 250},
+                            {'label': '$10,000', 'value': 10_000}
+                        ],
+                        value=90,
+                        style={'width': '100%'}  # Adjust the width as needed
+                    ),
+                ]
+            ),
+            
+            dcc.Graph(id="sunk-cost-plot-1-output", style={'width': '65%', 'height': '70vh'}),  # Adjust height as needed
+        ]
+    ),
+    
+    html.P("""Sunk Cost Fallacy experiment description goes here..."""),
+]
+
 
 # Callback for prospect page
 @app.callback(
@@ -290,6 +385,17 @@ def update_decoy_plot(selected_plot):
     else:
         # Return an empty figure
         return []
+    
+    
+# Callback for Sunk Cost Fallacy page
+@app.callback(
+    Output("sunk-cost-plot-1-output", "figure"),
+    [Input("Temperature", "value"),
+     Input("Sunk-Cost", "value")]
+)
+def update_decoy_plot(selected_temperature, selected_sunk_cost):
+    return plot_sunk_cost_1(selected_temperature, selected_sunk_cost)
+    
 
 
         
@@ -308,7 +414,7 @@ def render_page_content(pathname):
     elif pathname == "/experiments/prospect":
         return html.P(prospect_page)
     elif pathname == "/experiments/sunk-cost":
-        return html.P("Sunk Cost experiment is not yet implemented. Sorry!")
+        return html.P(sunk_cost_page)
     elif pathname == "/experiments/ultimatum":
         return html.P("Ultimatum experiment is not yet implemented. Sorry!")
     elif pathname == "/experiments/loss-aversion":
