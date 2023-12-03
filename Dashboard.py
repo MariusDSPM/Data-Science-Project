@@ -148,10 +148,9 @@ def plot_results(df):
 
 # Function for plotting Sunk Cost Experiment 1
 def plot_sunk_cost_1(selected_temperature, selected_sunk_cost):
-    # Assuming you have a function to get data for Sunk Cost Fallacy experiment based on selected temperature
     df_sunk_cost = get_sunk_cost_data_1(selected_temperature, selected_sunk_cost)
     
-    # Create a bar plot using Plotly.graph_objects
+    # Create a bar plot
     fig_sunk_cost = go.Figure()
     fig_sunk_cost.add_trace(go.Bar(
         x=df_sunk_cost['Model'],
@@ -170,7 +169,7 @@ def plot_sunk_cost_1(selected_temperature, selected_sunk_cost):
         barmode='group',
         xaxis=dict(title='Model'),
         yaxis=dict(title='Share', range=[0, 1.1]),
-        title=f"Sunk Cost Fallacy Experiment - Temperature: {selected_temperature}; Sunk Cost: ${selected_sunk_cost}",
+        title=f"Shares for Answer Options (Sunk Cost: ${selected_sunk_cost}, Temperature: {selected_temperature})",
         legend=dict(),
         bargap=0.3  # Gap between models
     )
@@ -221,7 +220,7 @@ def plot_sunk_cost_2(selected_temperature, selected_model):
         xaxis=dict(tickvals=np.arange(len(df.columns[3:])) + ((len(prompts) - 1) / 2 * bar_width),
                 ticktext=['$0', '$20', '$20 plus interest', '$75', '-$55']),
         yaxis=dict(title='Share', range=[0, 1.1]),
-        title=f'Shares for Answer Options: Model = {selected_model}, Temperature = {selected_temperature}',
+        title=f'Shares for Answer Options (Model: {selected_model}, Temperature: {selected_temperature})',
         legend=dict(title=dict(text="Categories")),
         bargap=0.3  # Gap between bars
     )
@@ -364,6 +363,7 @@ prospect_page = [
 # Sunk Cost Fallacy Page
 sunk_cost_page = [
     html.H1("Sunk Cost Fallacy", className="page-heading"),
+    html.P('Description of how the experiments were conducted: ...'),
     
     # Experiment 1
     html.H3("Experiment 1"),
@@ -387,7 +387,7 @@ sunk_cost_page = [
             html.Div(
                 style={'width': '25%', 'margin-right': '30px', 'align-self': 'flex-start', 'margin-top': '170px'}, 
                 children=[
-                    html.H5('Temperature Value'),
+                    html.H6('Temperature Value'),
                     dcc.Slider(
                         id="Temperature_1",
                         min=0.5,
@@ -441,7 +441,7 @@ sunk_cost_page = [
             html.Div(
                 style={'width': '25%', 'margin-right': '30px', 'align-self': 'flex-start', 'margin-top': '170px'},  
                 children=[
-                    html.H5('Temperature Value'),
+                    html.H6('Temperature Value'),
                     dcc.Slider(
                         id="Temperature_2",
                         min=0.5,
@@ -466,7 +466,7 @@ sunk_cost_page = [
             
             dcc.Graph(id="sunk-cost-plot-2-output", style={'width': '65%', 'height': '70vh'}),  # Adjust height as needed
         ]
-    )
+    ),
 ]
 
 
