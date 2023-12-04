@@ -62,6 +62,9 @@ experiment_dict = {
     "2_8": f"Experiment 1_8 uses {model_dict['2_8']}, deals with the segregation of *silver linings*, and is primed.",
 }
 
+
+#########################################  Data Import Functions  #########################################
+
 # Read in experimental data as dictionary
 # Decoy Effect
 decoy_dfs = {}
@@ -94,8 +97,18 @@ def get_sunk_cost_data_2(selected_temperature, selected_model):
             (df['Model'] == 'Real Experiment')]
     
     return df
+
+# Function for getting data of Loss Aversion Experiment
+def get_loss_aversion_data(selected_temperature):
+    df = pd.read_csv('Output/Loss_aversion_experiment.csv', index_col=0)
+    df = df[(df['Temperature'] == selected_temperature)|
+            (df['Model'] == 'Real Experiment')] 
+    
+    return df   
         
         
+
+#########################################  Data Plotting Functions  #########################################
 
 # Function for plotting results of decoy effect/prospect theory experiments
 def plot_results(df):
@@ -176,6 +189,7 @@ def plot_sunk_cost_1(selected_temperature, selected_sunk_cost):
 
     return fig_sunk_cost
 
+
 # Function for plotting Sunk Cost Experiment 2
 def plot_sunk_cost_2(selected_temperature, selected_model):
     df = get_sunk_cost_data_2(selected_temperature, selected_model)
@@ -226,6 +240,43 @@ def plot_sunk_cost_2(selected_temperature, selected_model):
     )
 
     return fig
+
+
+# Function for plotting Loss Aversion Experiment
+def plot_loss_aversion(selected_temperature):
+    df = get_loss_aversion_data(selected_temperature)
+    
+    # Extract unique models
+    models = df['Model'].unique()
+
+    # Set up figure
+    fig = go.Figure()
+
+    # Plotting bars for 'B' for each prompt
+    for i, prompt in enumerate(df['Scenario'].unique()):
+        values_B = df[df['Scenario'] == prompt]['B']
+        scenario_label = 'Scenario with gains' if prompt == 1 else 'Scenario with losses'
+        fig.add_trace(go.Bar(
+            x=models,
+            y=values_B,
+            name=scenario_label,
+            offsetgroup=i,
+            hovertemplate="%{y:.2f}"
+        ))
+
+    # Update layout
+    fig.update_layout(
+        barmode='group',
+        xaxis=dict(tickmode='array', tickvals=list(range(len(models))), ticktext=models),
+        yaxis=dict(title='Shares for "B"'),
+        title='Shares for "B" (risk-seeking option) by Model and Scenario',
+    )
+    
+    return fig
+
+
+
+
 
 
 # Initialize the app
@@ -286,7 +337,7 @@ content = html.Div(id="page-content", style=CONTENT_STYLE)
 
 app.layout = html.Div([dcc.Location(id="url"), sidebar, content])
 
-#####################################################################################################################################################################
+#########################################  Experiment Page Designs  #########################################
 # Add content for pages
 # Start Page
 start_page = [
@@ -470,6 +521,60 @@ sunk_cost_page = [
 ]
 
 
+# Loss Aversion Page
+loss_aversion_page = [
+    html.H1("Loss Aversion", className="page-heading"),
+    html.P('Description of how the experiment was conducted: ...'),
+    
+    html.Div([
+        # Experiment 1
+        html.Div([
+            html.H6("Scenario with gains:"),
+            html.P(["You are offered two choices. Which choice would you prefer?",
+                    html.Br(),  # Line break
+                    html.Br(),  # Line break
+                    "A: A sure gain of $100.",
+                    html.Br(),  # Line break
+                    "B: A 50% chance to gain $200 and a 50% chance to lose $0."
+            ]),
+        ], style={'width': '30%', 'display': 'inline-block', 'margin-bottom': '60px'}),
+
+        html.Div([
+            html.H6("Scenario with losses:"),
+            html.P(["You are offered two choices. Which choice would you prefer?",
+                    html.Br(),  # Line break
+                    html.Br(),  # Line break
+                    "A: A sure loss of $100.",
+                    html.Br(),  # Line break
+                    "B: A 50% chance to lose $200 and a 50% chance to lose $0."
+            ]),
+        ], style={'width': '30%', 'display': 'inline-block', 'margin-bottom': '60px'})
+    ]),
+
+    html.Div(
+        style={'display': 'flex', 'justify-content': 'space-between', 'align-items': 'center'},
+        children=[
+            html.Div(
+                style={'width': '25%', 'margin-right': '30px', 'align-self': 'center'}, 
+                children=[
+                    html.H6('Temperature Value'),
+                    dcc.Slider(
+                        id="Temperature",
+                        min=0.5,
+                        max=1.5,
+                        step=0.5,
+                        marks={0.5: '0.5', 1: '1', 1.5: '1.5'},
+                        value=1,
+                    ),
+                ]
+            ),
+            
+            dcc.Graph(id="loss_aversion_plot_output", style={'width': '65%', 'height': '70vh'}),
+        ]
+    )
+]
+
+
 # Callback for prospect page
 @app.callback(
     Output("prospect-plot-output", "figure"),
@@ -520,6 +625,14 @@ def update_sunk_cost_plot_2(selected_temperature, selected_model):
     return plot_sunk_cost_2(selected_temperature, selected_model)
 
 
+# Callback for Loss Aversion Experiment
+@app.callback(
+    Output("loss_aversion_plot_output", "figure"),
+    [Input("Temperature", "value")]
+)
+def update_loss_averion_plot(selected_temperature):
+    return plot_loss_aversion(selected_temperature)
+
         
 
 # Callback for navigation bar
@@ -540,7 +653,7 @@ def render_page_content(pathname):
     elif pathname == "/experiments/ultimatum":
         return html.P("Ultimatum experiment is not yet implemented. Sorry!")
     elif pathname == "/experiments/loss-aversion":
-        return html.P("Loss Aversion experiment is not yet implemented. Sorry!")
+        return html.P(loss_aversion_page)
     elif pathname == "/page-2":
         return html.P("Live experiment is not yet implemented. Sorry!")
     elif pathname == "/page-3":
