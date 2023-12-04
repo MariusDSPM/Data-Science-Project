@@ -112,9 +112,9 @@ def get_loss_aversion_data(selected_temperature):
 #########################################  Data Plotting Functions  #########################################
 
 # Function for plotting results of decoy effect/prospect theory experiments
-def plot_results(scenario, model, priming):
+def plot_results(model, priming, scenario):
     # Get dataframe as specified by user
-    df = get_prospect_data(scenario, model, priming) # long format for variable selection 
+    df = get_prospect_data(model, priming, scenario) # long format for variable selection 
     df = df.transpose()
     # Get number of observations per temperature value
     n_observations = df.loc["Obs."]
@@ -125,25 +125,25 @@ def plot_results(scenario, model, priming):
     fig = go.Figure(data=[
         go.Bar(
             name="p(A)", 
-            x=temperature, 
-            y=df.loc["p(A)"].str.rstrip('%').astype('float'),
+            x = temperature, 
+            y = df.loc["p(A)"].str.rstrip('%').astype('float'),
             customdata = n_observations,
-            hovertemplate="Temperature: %{x}<br>Probability: %{y:.2f}%<br>Observations: %{customdata}<extra></extra>",
+            hovertemplate = "Temperature: %{x}<br>Probability: %{y:.2f}%<br>Observations: %{customdata}<extra></extra>",
         ),
         go.Bar(
-            name="p(B)", 
-            x=temperature, 
-            y=df.loc["p(B)"].str.rstrip('%').astype('float'),
+            name = "p(B)", 
+            x = temperature, 
+            y = df.loc["p(B)"].str.rstrip('%').astype('float'),
             customdata = n_observations,
-            hovertemplate="Temperature: %{x}<br>Probability: %{y:.2f}%<br> Observations: %{customdata}<extra></extra>",
+            hovertemplate = "Temperature: %{x}<br>Probability: %{y:.2f}%<br> Observations: %{customdata}<extra></extra>",
             
         ),
         go.Bar(
-            name="p(C)", 
-            x=temperature, 
-            y=df.loc["p(C)"].str.rstrip('%').astype('float'),
+            name = "p(C)", 
+            x = temperature, 
+            y = df.loc["p(C)"].str.rstrip('%').astype('float'),
             customdata = n_observations,
-            hovertemplate="Temperature: %{x}<br>Probability: %{y:.2f}%<br> Observations: %{customdata}<extra></extra>",
+            hovertemplate = "Temperature: %{x}<br>Probability: %{y:.2f}%<br> Observations: %{customdata}<extra></extra>",
         )
     ])
 
@@ -170,7 +170,6 @@ def plot_results(scenario, model, priming):
     ),
     bargap = 0.3  # Gap between temperature values
 )
-
     return fig 
 
 
@@ -707,9 +706,7 @@ loss_aversion_page = [
 
 )
 def update_prospect_plot1(selected_model, selected_priming):
-        print("Selected Model:", selected_model)
-        print("Selected Priming:", selected_priming)
-        return plot_results(1, selected_model, selected_priming) # set scenario to 1 in function call 
+        return plot_results(selected_model, selected_priming, scenario = 1) # set scenario to 1 in function call 
 
 # Scenario 2
 @app.callback(
@@ -719,9 +716,7 @@ def update_prospect_plot1(selected_model, selected_priming):
 
 )
 def update_prospect_plot2(selected_model, selected_priming):
-        print("Selected Model:", selected_model)
-        print("Selected Priming:", selected_priming)
-        return plot_results(2, selected_model, selected_priming)
+        return plot_results(selected_model, selected_priming, scenario = 1) # works for scenario 1.... 
 
 
 # Scenario 3
@@ -730,10 +725,8 @@ def update_prospect_plot2(selected_model, selected_priming):
         [Input("prospect-scenario3-radio1", "value"), # model
         Input("prospect-scenario3-radio2", "value")] # priming
 )  
-def update_prospect_plot3(selected_model, selected_priming):
-        print("Selected Model:", selected_model)
-        print("Selected Priming:", selected_priming)       
-        return plot_results(3, selected_model, selected_priming)
+def update_prospect_plot3(selected_model, selected_priming):    
+        return plot_results(selected_model, selected_priming, scenario = 3)
     
 # Scenario 4
 @app.callback(
@@ -742,8 +735,7 @@ def update_prospect_plot3(selected_model, selected_priming):
         Input("prospect-scenario4-radio2", "value")] #  priming
 )
 def update_prospect_plot4(selected_model, selected_priming):
-        scenario = 4,    
-        return plot_results(scenario, selected_model, selected_priming)
+        return plot_results(selected_model, selected_priming, scenario = 4)
 
 # Callback for decoy page
 @app.callback(
