@@ -382,34 +382,90 @@ decoy_page = [
 
 # Prospect Page
 prospect_page = [
-     html.H1("Prospect Theory Experiment", className="page-heading"),
-     dcc.Dropdown( 
-          id = "prospect-plot-dropdown",
-          options = [
+     html.H1("Prospect Theory and Mental Accounting Experiment", className="page-heading"),
+     html.Br(),
+     html.P(["""According to Prospect Theory and Mental Accounting, financial gains and losses are booked into different fictitious accounts. On top of that, \
+            relative to a reference point, losses weigh more heavily than gains and the perceived sum of two individual gains/losses will, in absolute terms, be larger than \
+            one single gain/loss of the same amount. In the context of Marketing, four main rules can be derived by this theory:""",
+            html.Br(),
+            html.Br(),
+            "1) Segregation of gains",
+            html.Br(),
+            "2) Integration of losses",
+            html.Br(), 
+            "3) Cancellation of losses against larger gains",
+            html.Br(),
+            "4) Segregation of silver linings",
+            html.Br(),
+            html.Br(),
+            """The practical implications each of these rules hold will become more obvious when looking at the experimens conducted below. The original results are taken
+               from Thaler, Richard (1985), “Mental Accounting and Consumer Choice,” Marketing Science, 4 (3), 199–214 and the prompts we query the Language Models with are
+               constructed so that we can stay as close to the original phrasing as possible, while still instructing the models sufficiently well to produce meaningful results."""]),
+    # Scenario 1: Segregation of gains
+    html.Div(id = 'scenario-1', children = [
+        html.H2("Scenario 1: Segregation of gains"),
+        dcc.Dropdown(
+            id = "prospect-scenario1-dropdown",
+            options = [
                 {'label': 'Experiment 1.1', 'value': 'PT_probs_1_1'},
-                {'label': 'Experiment 1.2', 'value': 'PT_probs_1_2'},
-                {'label': 'Experiment 1.3', 'value': 'PT_probs_1_3'},
-                {'label': 'Experiment 1.4', 'value': 'PT_probs_1_4'},
                 {'label': 'Experiment 1.5', 'value': 'PT_probs_1_5'},
-                {'label': 'Experiment 1.6', 'value': 'PT_probs_1_6'},
-                {'label': 'Experiment 1.7', 'value': 'PT_probs_1_7'},
-                {'label': 'Experiment 1.8', 'value': 'PT_probs_1_8'},
                 {'label': 'Experiment 2.1', 'value': 'PT_probs_2_1'},
-                {'label': 'Experiment 2.2', 'value': 'PT_probs_2_2'},
-                {'label': 'Experiment 2.3', 'value': 'PT_probs_2_3'},
-                {'label': 'Experiment 2.4', 'value': 'PT_probs_2_4'},
                 {'label': 'Experiment 2.5', 'value': 'PT_probs_2_5'},
+            ],
+            value = 'PT_probs_1_1',
+            style = {'width': '50%'}),
+            dcc.Graph(id = "prospect-plot1"),   
+    ]),  
+
+    # Scenario 2: Integration of losses
+    html.Div(id = 'scenario-2', children = [
+        html.H2("Scenario 2: Integration of losses"),
+        dcc.Dropdown(
+            id = "prospect-scenario2-dropdown",
+            options = [
+                {'label': 'Experiment 1.2', 'value': 'PT_probs_1_2'},
+                {'label': 'Experiment 1.6', 'value': 'PT_probs_1_6'},
+                {'label': 'Experiment 2.2', 'value': 'PT_probs_2_2'},
                 {'label': 'Experiment 2.6', 'value': 'PT_probs_2_6'},
+            ],
+            value = 'PT_probs_1_2',
+            style = {'width': '50%'}),
+            dcc.Graph(id = "prospect-plot2"),        
+    ]),
+
+    # Scenario 3: Cancellation of losses against larger gains
+    html.Div(id = 'scenario-3', children =[
+        html.H2("Scenario 3: Cancellation of losses against larger gains"),
+        dcc.Dropdown(
+            id = "prospect-scenario3-dropdown",
+            options = [
+                {'label': 'Experiment 1.3', 'value': 'PT_probs_1_3'},
+                {'label': 'Experiment 1.7', 'value': 'PT_probs_1_7'},
+                {'label': 'Experiment 2.3', 'value': 'PT_probs_2_3'},
                 {'label': 'Experiment 2.7', 'value': 'PT_probs_2_7'},
-                {'label': 'Experiment 2.8', 'value': 'PT_probs_2_8'},
-          ],
-          value = 'PT_probs_1_1',
-            style = {'width': '50%'}
-        ),
-        dcc.Graph(id="prospect-plot-output"),
-        html.P("""Prospect theory is a theory of decision making under risk. It is based on the idea that people evaluate their options relative to a reference point, 
-               and that losses and gains are valued differently. This experiment is a replication of the experiment conducted by Tversky and Kahneman (1981)."""),
+            ],
+            value = 'PT_probs_1_3',
+            style = {'width': '50%'}),
+            dcc.Graph(id = "prospect-plot3"),
+    ]),
+
+    # Scenario 4: Segregation of silver linings
+    html.Div(id = 'scenario-4', children = [
+        html.H2("Scenario 4: Segregation of silver linings"),
+        dcc.Dropdown(
+            id = "prospect-scenario4-dropdown",
+            options = [
+                {'label': 'Experiment 1.4', 'value': 'PT_probs_1_4'},
+                {'label': 'Experiment 1.8', 'value': 'PT_probs_1_8'},
+                {'label': 'Experiment 2.4', 'value': 'PT_probs_2_4'},
+                {'label': 'Experiment 2.8', 'value': 'PT_probs_2_8'},   
+            ],
+            value = 'PT_probs_1_4',
+            style = {'width': '50%'}),
+            dcc.Graph(id = "prospect-plot4"),
+    ]),
 ]
+
 
 # Sunk Cost Fallacy Page
 sunk_cost_page = [
@@ -575,16 +631,61 @@ loss_aversion_page = [
 ]
 
 
-# Callback for prospect page
+### Callback for prospect page
+
+# Scenario 1
 @app.callback(
-    Output("prospect-plot-output", "figure"),
-    [Input("prospect-plot-dropdown", "value")]
+     Output("prospect-plot1", "figure"),
+     Input("prospect-scenario1-dropdown", "value"),
+
 )
-def update_prospect_plot(selected_plot):
+def update_prospect_plot(selected_scenario1):
     # Check if the selected plot exists in the dfs dictionary
-    if selected_plot in prospect_dfs:
-        # Call the plot_results function with the selected dataframe
-        return plot_results(prospect_dfs[selected_plot])
+    if selected_scenario1 in prospect_dfs:
+        # Call the plot_results function to apply to  the selected dataframe
+        return plot_results(prospect_dfs[selected_scenario1])
+    else:
+        # Return an empty figure
+        return []
+
+# Scenario 2
+@app.callback(
+        Output("prospect-plot2", "figure"),
+        Input("prospect-scenario2-dropdown", "value"),
+)
+def update_prospect_plot(selected_scenario2):
+    # Check if the selected plot exists in the dfs dictionary
+    if selected_scenario2 in prospect_dfs:
+        # Call the plot_results function to apply to  the selected dataframe
+        return plot_results(prospect_dfs[selected_scenario2])
+    else:
+        # Return an empty figure
+        return []
+
+# Scenario 3
+@app.callback(
+        Output("prospect-plot3", "figure"),
+        Input("prospect-scenario3-dropdown", "value"),
+)  
+def update_prospect_plot(selected_scenario3):
+    # Check if the selected plot exists in the dfs dictionary
+    if selected_scenario3 in prospect_dfs:
+        # Call the plot_results function to apply to  the selected dataframe
+        return plot_results(prospect_dfs[selected_scenario3])
+    else:
+        # Return an empty figure
+        return []
+    
+# Scenario 4
+@app.callback(
+        Output("prospect-plot4", "figure"),
+        Input("prospect-scenario4-dropdown", "value"),
+)
+def update_prospect_plot(selected_scenario4):
+    # Check if the selected plot exists in the dfs dictionary
+    if selected_scenario4 in prospect_dfs:
+        # Call the plot_results function to apply to  the selected dataframe
+        return plot_results(prospect_dfs[selected_scenario4])
     else:
         # Return an empty figure
         return []
