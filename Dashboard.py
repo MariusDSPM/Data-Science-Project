@@ -73,12 +73,13 @@ for file in os.listdir("Output/DE_probs_dfs"):
         df = pd.read_csv(f"Output/DE_probs_dfs/{file}", index_col = 0) # Set first column as index column 
         decoy_dfs[file_name] = df
 
-# Prospect Theory
-prospect_dfs = {}
-for file in os.listdir("Output/PT_probs_dfs"):
-    file_name = file.split(".")[0]
-    df = pd.read_csv(f"Output/PT_probs_dfs/{file}", index_col = 0) # Set first column as index column
-    prospect_dfs[file_name] = df
+# Function for getting data of Prospect Theory Experiment
+def get_prospect_data(scenario, model, priming):
+    df = pd.read_csv("Output/PT_probs.csv", index_col=0)
+    df = df[(df['Scenario'] == scenario) & # only return rows with scenario as specified
+            (df['Model'] == model) & # only return rows with model as specified (selected via RadioButtons)
+            (df['Priming'] == priming)] # only return rows with priming as specified (selected via RadioButtons)
+    return df
     
 
 # Function for getting data of Sunk Cost Experiment 1
@@ -111,14 +112,14 @@ def get_loss_aversion_data(selected_temperature):
 #########################################  Data Plotting Functions  #########################################
 
 # Function for plotting results of decoy effect/prospect theory experiments
-def plot_results(df):
-
-    # Get experiment id and model name for plot title from dictionaries
-    experiment_id = df.iloc[0, 1]
-    model = model_dict[experiment_id]
+def plot_results(scenario, model, priming):
+    # Get dataframe as specified by user
+    df = get_prospect_data(scenario, model, priming) # long format for variable selection 
+    df = df.transpose()
+    # Get number of observations per temperature value
     n_observations = df.loc["Obs."]
     
-    # Set
+    # Get temperature values
     temperature = df.loc["Temp"]
 
     fig = go.Figure(data=[
@@ -147,14 +148,28 @@ def plot_results(df):
     ])
 
     fig.update_layout(
-        barmode='group',
-        xaxis=dict(tickmode='array', tickvals=np.arange(len(temperature)), ticktext=temperature),
-        xaxis_title="Temperature",
-        yaxis_title="Probability (%)",
-        title=f"Distribution of answers per temperature value for experiment {experiment_id} using {model}",
-        legend=dict(title=dict(text="Probabilities")),
-        bargap=0.3  # Gap between temperature values
-    )
+    barmode = 'group',
+    xaxis = dict(
+        tickmode = 'array',
+        tickvals = np.arange(len(temperature)),
+        ticktext = temperature,
+        title = "Temperature",  
+        title_font=dict(size=18),  
+    ),
+    yaxis = dict(
+        title="Probability (%)",  
+        title_font=dict(size=18), 
+    ),
+    title = dict(
+        text="Distribution of answers per temperature value",
+        x = 0.5,  # Center alignment
+        font=dict(size=22),  
+    ),
+    legend = dict(
+        title = dict(text="Probabilities"),
+    ),
+    bargap = 0.3  # Gap between temperature values
+)
 
     return fig 
 
@@ -401,68 +416,117 @@ prospect_page = [
             """The practical implications each of these rules hold will become more obvious when looking at the experimens conducted below. The original results are taken
                from Thaler, Richard (1985), “Mental Accounting and Consumer Choice,” Marketing Science, 4 (3), 199–214 and the prompts we query the Language Models with are
                constructed so that we can stay as close to the original phrasing as possible, while still instructing the models sufficiently well to produce meaningful results."""]),
+
     # Scenario 1: Segregation of gains
-    html.Div(id = 'scenario-1', children = [
+    html.Div(
+        children = [
         html.H2("Scenario 1: Segregation of gains"),
-        dcc.Dropdown(
-            id = "prospect-scenario1-dropdown",
+        dcc.RadioItems(
+            id = "prospect-scenario1-radio1",
             options = [
-                {'label': 'Experiment 1.1', 'value': 'PT_probs_1_1'},
-                {'label': 'Experiment 1.5', 'value': 'PT_probs_1_5'},
-                {'label': 'Experiment 2.1', 'value': 'PT_probs_2_1'},
-                {'label': 'Experiment 2.5', 'value': 'PT_probs_2_5'},
+                {'label': 'Unprimed', 'value': 0},
+                {'label': 'Primed', 'value': 1},
             ],
-            value = 'PT_probs_1_1',
+            value = 0, 
+            inputStyle={'margin-right': '10px'},
+            labelStyle={'display': 'inline-block', 'margin-right': '20px'},
             style = {'width': '50%'}),
-            dcc.Graph(id = "prospect-plot1"),   
+        dcc.RadioItems(
+            id = "prospect-scenario1-radio2",
+            options = [
+                {'label': 'GPT-3.5-Turbo', 'value': 'GPT-3.5-Turbo'},
+                {'label': 'GPT-4-1106-Preview', 'value': 'GPT-4-1106-Preview'},
+            ],
+            value = 'GPT-3.5-Turbo',
+            inputStyle={'margin-right': '10px'},
+            labelStyle={'display': 'inline-block', 'margin-right': '20px'},
+            style = {'width': '50%'}
+        ),
+        dcc.Graph(id = "prospect-plot1"),   
     ]),  
 
     # Scenario 2: Integration of losses
-    html.Div(id = 'scenario-2', children = [
+    html.Div(
+        children = [
         html.H2("Scenario 2: Integration of losses"),
-        dcc.Dropdown(
-            id = "prospect-scenario2-dropdown",
+        dcc.RadioItems(
+            id = "prospect-scenario2-radio1",
             options = [
-                {'label': 'Experiment 1.2', 'value': 'PT_probs_1_2'},
-                {'label': 'Experiment 1.6', 'value': 'PT_probs_1_6'},
-                {'label': 'Experiment 2.2', 'value': 'PT_probs_2_2'},
-                {'label': 'Experiment 2.6', 'value': 'PT_probs_2_6'},
+                {'label': 'Unprimed', 'value': 0},
+                {'label': 'Primed', 'value': 1},
             ],
-            value = 'PT_probs_1_2',
+            value = 0,
+            inputStyle={'margin-right': '10px'},
+            labelStyle={'display': 'inline-block', 'margin-right': '20px'},
             style = {'width': '50%'}),
-            dcc.Graph(id = "prospect-plot2"),        
+        dcc.RadioItems(
+            id = "prospect-scenario2-radio2",
+            options = [
+                {'label': 'GPT-3.5-Turbo', 'value': 'GPT-3.5-Turbo'},
+                {'label': 'GPT-4-1106-Preview', 'value': 'GPT-4-1106-Preview'},
+            ],
+            value = 'GPT-3.5-Turbo',
+            inputStyle={'margin-right': '10px'},
+            labelStyle={'display': 'inline-block', 'margin-right': '20px'},
+            style = {'width': '50%'}
+        ),
+        dcc.Graph(id = "prospect-plot2"),        
     ]),
 
     # Scenario 3: Cancellation of losses against larger gains
-    html.Div(id = 'scenario-3', children =[
+    html.Div(
+        children =[
         html.H2("Scenario 3: Cancellation of losses against larger gains"),
-        dcc.Dropdown(
-            id = "prospect-scenario3-dropdown",
+        dcc.RadioItems(
+            id = "prospect-scenario3-radio1",
             options = [
-                {'label': 'Experiment 1.3', 'value': 'PT_probs_1_3'},
-                {'label': 'Experiment 1.7', 'value': 'PT_probs_1_7'},
-                {'label': 'Experiment 2.3', 'value': 'PT_probs_2_3'},
-                {'label': 'Experiment 2.7', 'value': 'PT_probs_2_7'},
+                {'label': 'Unprimed', 'value': 0},
+                {'label': 'Primed', 'value': 1},
             ],
-            value = 'PT_probs_1_3',
+            value = 0,
+            inputStyle={'margin-right': '10px'},
+            labelStyle={'display': 'inline-block', 'margin-right': '20px'},
             style = {'width': '50%'}),
-            dcc.Graph(id = "prospect-plot3"),
+        dcc.RadioItems(
+            id = "prospect-scenario3-radio2",
+            options = [
+                {'label': 'GPT-3.5-Turbo', 'value': 'GPT-3.5-Turbo'},
+                {'label': 'GPT-4-1106-Preview', 'value': 'GPT-4-1106-Preview'},
+            ],
+            value = 'GPT-3.5-Turbo',
+            inputStyle={'margin-right': '10px'},
+            labelStyle={'display': 'inline-block', 'margin-right': '20px'},
+            style = {'width': '50%'}
+        ),
+        dcc.Graph(id = "prospect-plot3"),
     ]),
 
     # Scenario 4: Segregation of silver linings
-    html.Div(id = 'scenario-4', children = [
+    html.Div(
+        children = [
         html.H2("Scenario 4: Segregation of silver linings"),
-        dcc.Dropdown(
-            id = "prospect-scenario4-dropdown",
+        dcc.RadioItems(
+            id = "prospect-scenario4-radio1",
             options = [
-                {'label': 'Experiment 1.4', 'value': 'PT_probs_1_4'},
-                {'label': 'Experiment 1.8', 'value': 'PT_probs_1_8'},
-                {'label': 'Experiment 2.4', 'value': 'PT_probs_2_4'},
-                {'label': 'Experiment 2.8', 'value': 'PT_probs_2_8'},   
+                {'label': 'Unprimed', 'value': 0},
+                {'label': 'Primed', 'value': 1},
             ],
-            value = 'PT_probs_1_4',
+            value = 0,
+            inputStyle={'margin-right': '10px'},
+            labelStyle={'display': 'inline-block', 'margin-right': '20px'},
             style = {'width': '50%'}),
-            dcc.Graph(id = "prospect-plot4"),
+        dcc.RadioItems(
+            id = "prospect-scenario4-radio2",
+            options = [
+                {'label': 'GPT-3.5-Turbo', 'value': 'GPT-3.5-Turbo'},
+                {'label': 'GPT-4-1106-Preview', 'value': 'GPT-4-1106-Preview'},
+            ],
+            value = 'GPT-3.5-Turbo',
+            inputStyle={'margin-right': '10px'},
+            labelStyle={'display': 'inline-block', 'margin-right': '20px'},
+            style = {'width': '50%'}
+    ),
+        dcc.Graph(id = "prospect-plot4"),
     ]),
 ]
 
@@ -630,66 +694,56 @@ loss_aversion_page = [
     )
 ]
 
+################################################## Callbacks ##################################################
+
 
 ### Callback for prospect page
 
 # Scenario 1
 @app.callback(
      Output("prospect-plot1", "figure"),
-     Input("prospect-scenario1-dropdown", "value"),
+     [Input("prospect-scenario1-radio1", "value"), # model 
+        Input("prospect-scenario1-radio2", "value")] # priming
 
 )
-def update_prospect_plot(selected_scenario1):
-    # Check if the selected plot exists in the dfs dictionary
-    if selected_scenario1 in prospect_dfs:
-        # Call the plot_results function to apply to  the selected dataframe
-        return plot_results(prospect_dfs[selected_scenario1])
-    else:
-        # Return an empty figure
-        return []
+def update_prospect_plot1(selected_model, selected_priming):
+        print("Selected Model:", selected_model)
+        print("Selected Priming:", selected_priming)
+        return plot_results(1, selected_model, selected_priming) # set scenario to 1 in function call 
 
 # Scenario 2
 @app.callback(
         Output("prospect-plot2", "figure"),
-        Input("prospect-scenario2-dropdown", "value"),
+        [Input("prospect-scenario2-radio1", "value"), # model
+        Input("prospect-scenario2-radio2", "value")] #  priming
+
 )
-def update_prospect_plot(selected_scenario2):
-    # Check if the selected plot exists in the dfs dictionary
-    if selected_scenario2 in prospect_dfs:
-        # Call the plot_results function to apply to  the selected dataframe
-        return plot_results(prospect_dfs[selected_scenario2])
-    else:
-        # Return an empty figure
-        return []
+def update_prospect_plot2(selected_model, selected_priming):
+        print("Selected Model:", selected_model)
+        print("Selected Priming:", selected_priming)
+        return plot_results(2, selected_model, selected_priming)
+
 
 # Scenario 3
 @app.callback(
         Output("prospect-plot3", "figure"),
-        Input("prospect-scenario3-dropdown", "value"),
+        [Input("prospect-scenario3-radio1", "value"), # model
+        Input("prospect-scenario3-radio2", "value")] # priming
 )  
-def update_prospect_plot(selected_scenario3):
-    # Check if the selected plot exists in the dfs dictionary
-    if selected_scenario3 in prospect_dfs:
-        # Call the plot_results function to apply to  the selected dataframe
-        return plot_results(prospect_dfs[selected_scenario3])
-    else:
-        # Return an empty figure
-        return []
+def update_prospect_plot3(selected_model, selected_priming):
+        print("Selected Model:", selected_model)
+        print("Selected Priming:", selected_priming)       
+        return plot_results(3, selected_model, selected_priming)
     
 # Scenario 4
 @app.callback(
         Output("prospect-plot4", "figure"),
-        Input("prospect-scenario4-dropdown", "value"),
+        [Input("prospect-scenario4-radio1", "value"), #  model
+        Input("prospect-scenario4-radio2", "value")] #  priming
 )
-def update_prospect_plot(selected_scenario4):
-    # Check if the selected plot exists in the dfs dictionary
-    if selected_scenario4 in prospect_dfs:
-        # Call the plot_results function to apply to  the selected dataframe
-        return plot_results(prospect_dfs[selected_scenario4])
-    else:
-        # Return an empty figure
-        return []
-
+def update_prospect_plot4(selected_model, selected_priming):
+        scenario = 4,    
+        return plot_results(scenario, selected_model, selected_priming)
 
 # Callback for decoy page
 @app.callback(
@@ -716,7 +770,7 @@ def update_sunk_cost_plot_1(selected_temperature, selected_sunk_cost):
     return plot_sunk_cost_1(selected_temperature, selected_sunk_cost)
     
     
-# Callback for Sunk Cost Fallacy Experiment 1
+# Callback for Sunk Cost Fallacy Experiment 2
 @app.callback(
     Output("sunk-cost-plot-2-output", "figure"),
     [Input("Temperature_2", "value"),
