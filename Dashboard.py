@@ -73,14 +73,9 @@ for file in os.listdir("Output/DE_probs_dfs"):
         df = pd.read_csv(f"Output/DE_probs_dfs/{file}", index_col = 0) # Set first column as index column 
         decoy_dfs[file_name] = df
 
-# Function for getting data of Prospect Theory Experiment
-def get_prospect_data(scenario, model, priming):
-    df = pd.read_csv("Output/PT_probs.csv", index_col=0)
-    df = df[(df['Scenario'] == scenario) & # only return rows with scenario as specified
-            (df['Model'] == model) & # only return rows with model as specified (selected via RadioButtons)
-            (df['Priming'] == priming)] # only return rows with priming as specified (selected via RadioButtons)
-    return df
-    
+# Load in Prospect Theory results
+PT_probs = pd.read_csv("Output/PT_probs.csv", index_col = 0)
+ 
 
 # Function for getting data of Sunk Cost Experiment 1
 def get_sunk_cost_data_1(selected_temperature, selected_sunk_cost):
@@ -112,10 +107,13 @@ def get_loss_aversion_data(selected_temperature):
 #########################################  Data Plotting Functions  #########################################
 
 # Function for plotting results of decoy effect/prospect theory experiments
-def plot_results(model, priming, scenario):
-    # Get dataframe as specified by user
-    df = get_prospect_data(model, priming, scenario) # long format for variable selection 
+def plot_results(model, priming, df, scenario):
+    
+    # Get dataframe as specified by user (subset of df)
+    df = df[(df['Model'] == model) & (df['Priming'] == priming) & (df['Scenario'] == scenario)]
+    # Transpose for plotting
     df = df.transpose()
+    
     # Get number of observations per temperature value
     n_observations = df.loc["Obs."]
     
@@ -125,25 +123,25 @@ def plot_results(model, priming, scenario):
     fig = go.Figure(data=[
         go.Bar(
             name="p(A)", 
-            x = temperature, 
-            y = df.loc["p(A)"].str.rstrip('%').astype('float'),
+            x=temperature, 
+            y=df.loc["p(A)"],
             customdata = n_observations,
-            hovertemplate = "Temperature: %{x}<br>Probability: %{y:.2f}%<br>Observations: %{customdata}<extra></extra>",
+            hovertemplate="Temperature: %{x}<br>Probability: %{y:.2f}%<br>Observations: %{customdata}<extra></extra>",
         ),
         go.Bar(
-            name = "p(B)", 
-            x = temperature, 
-            y = df.loc["p(B)"].str.rstrip('%').astype('float'),
+            name="p(B)", 
+            x=temperature, 
+            y=df.loc["p(B)"],
             customdata = n_observations,
-            hovertemplate = "Temperature: %{x}<br>Probability: %{y:.2f}%<br> Observations: %{customdata}<extra></extra>",
+            hovertemplate="Temperature: %{x}<br>Probability: %{y:.2f}%<br> Observations: %{customdata}<extra></extra>",
             
         ),
         go.Bar(
-            name = "p(C)", 
-            x = temperature, 
-            y = df.loc["p(C)"].str.rstrip('%').astype('float'),
+            name="p(C)", 
+            x=temperature, 
+            y=df.loc["p(C)"],
             customdata = n_observations,
-            hovertemplate = "Temperature: %{x}<br>Probability: %{y:.2f}%<br> Observations: %{customdata}<extra></extra>",
+            hovertemplate="Temperature: %{x}<br>Probability: %{y:.2f}%<br> Observations: %{customdata}<extra></extra>",
         )
     ])
 
@@ -170,8 +168,7 @@ def plot_results(model, priming, scenario):
     ),
     bargap = 0.3  # Gap between temperature values
 )
-    return fig 
-
+    return fig
 
 # Function for plotting Sunk Cost Experiment 1
 def plot_sunk_cost_1(selected_temperature, selected_sunk_cost):
@@ -706,7 +703,9 @@ loss_aversion_page = [
 
 )
 def update_prospect_plot1(selected_model, selected_priming):
-        return plot_results(selected_model, selected_priming, scenario = 1) # set scenario to 1 in function call 
+        print("Selected Model:", selected_model)
+        print("Selected Priming:", selected_priming)
+        return plot_results(model = selected_priming, priming = selected_model, df = PT_probs, scenario = 1) # order is mixed up -> WHY?!?!?!
 
 # Scenario 2
 @app.callback(
@@ -716,7 +715,7 @@ def update_prospect_plot1(selected_model, selected_priming):
 
 )
 def update_prospect_plot2(selected_model, selected_priming):
-        return plot_results(selected_model, selected_priming, scenario = 1) # works for scenario 1.... 
+        return plot_results(model = selected_model, priming = selected_priming, df = PT_probs, scenario = 2) # works for scenario 1.... 
 
 
 # Scenario 3
@@ -726,7 +725,7 @@ def update_prospect_plot2(selected_model, selected_priming):
         Input("prospect-scenario3-radio2", "value")] # priming
 )  
 def update_prospect_plot3(selected_model, selected_priming):    
-        return plot_results(selected_model, selected_priming, scenario = 3)
+        return plot_results(model = selected_model, priming = selected_priming, df = PT_probs, scenario = 3)
     
 # Scenario 4
 @app.callback(
@@ -735,7 +734,9 @@ def update_prospect_plot3(selected_model, selected_priming):
         Input("prospect-scenario4-radio2", "value")] #  priming
 )
 def update_prospect_plot4(selected_model, selected_priming):
-        return plot_results(selected_model, selected_priming, scenario = 4)
+        return plot_results(model = selected_model, priming = selected_priming, df = PT_probs, scenario = 4)
+
+
 
 # Callback for decoy page
 @app.callback(
@@ -817,4 +818,4 @@ def render_page_content(pathname):
 
 
 if __name__ == "__main__":
-    app.run_server(port=8888)
+    app.run_server(port=8888, debug = True)
