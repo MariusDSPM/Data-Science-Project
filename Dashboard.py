@@ -698,42 +698,42 @@ loss_aversion_page = [
 # Scenario 1
 @app.callback(
      Output("prospect-plot1", "figure"),
-     [Input("prospect-scenario1-radio1", "value"), # model 
-        Input("prospect-scenario1-radio2", "value")] # priming
+     [Input("prospect-scenario1-radio1", "value"), # priming
+        Input("prospect-scenario1-radio2", "value")] # model
 
 )
-def update_prospect_plot1(selected_model, selected_priming):
-        print("Selected Model:", selected_model)
+def update_prospect_plot1(selected_priming, selected_model):
         print("Selected Priming:", selected_priming)
-        return plot_results(model = selected_priming, priming = selected_model, df = PT_probs, scenario = 1) # order is mixed up -> WHY?!?!?!
+        print("Selected Model:", selected_model)
+        return plot_results(model = selected_model, priming = selected_priming, df = PT_probs, scenario = 1) # order is mixed up -> WHY?!?!?!
 
 # Scenario 2
 @app.callback(
         Output("prospect-plot2", "figure"),
-        [Input("prospect-scenario2-radio1", "value"), # model
-        Input("prospect-scenario2-radio2", "value")] #  priming
+        [Input("prospect-scenario2-radio1", "value"), # priming
+        Input("prospect-scenario2-radio2", "value")] #  model
 
 )
-def update_prospect_plot2(selected_model, selected_priming):
+def update_prospect_plot2(selected_priming, selected_model):
         return plot_results(model = selected_model, priming = selected_priming, df = PT_probs, scenario = 2) # works for scenario 1.... 
 
 
 # Scenario 3
 @app.callback(
         Output("prospect-plot3", "figure"),
-        [Input("prospect-scenario3-radio1", "value"), # model
-        Input("prospect-scenario3-radio2", "value")] # priming
+        [Input("prospect-scenario3-radio1", "value"), # priming
+        Input("prospect-scenario3-radio2", "value")] # model
 )  
-def update_prospect_plot3(selected_model, selected_priming):    
+def update_prospect_plot3(selected_priming, selected_model):    
         return plot_results(model = selected_model, priming = selected_priming, df = PT_probs, scenario = 3)
     
 # Scenario 4
 @app.callback(
         Output("prospect-plot4", "figure"),
-        [Input("prospect-scenario4-radio1", "value"), #  model
-        Input("prospect-scenario4-radio2", "value")] #  priming
+        [Input("prospect-scenario4-radio1", "value"), #  priming
+        Input("prospect-scenario4-radio2", "value")] #  model
 )
-def update_prospect_plot4(selected_model, selected_priming):
+def update_prospect_plot4(selected_priming, selected_model):
         return plot_results(model = selected_model, priming = selected_priming, df = PT_probs, scenario = 4)
 
 
