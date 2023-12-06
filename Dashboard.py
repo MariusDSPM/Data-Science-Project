@@ -83,7 +83,7 @@ PT_og_scenario4 = Image.open("Output/PT_og_scenario4.png")
 
 # Function for getting data of Sunk Cost Experiment 1
 def get_sunk_cost_data_1(selected_temperature, selected_sunk_cost):
-    sunk_cost_1 = pd.read_csv('Output/Sunk_cost_experiment_1.csv', index_col=0)
+    sunk_cost_1 = pd.read_csv('Output/Sunk_cost_experiment_1_with_llama.csv', index_col=0)
     df = sunk_cost_1[(sunk_cost_1['Temperature'] == selected_temperature) & 
                      (sunk_cost_1['Sunk Cost ($)'] == selected_sunk_cost)]
     
@@ -91,7 +91,7 @@ def get_sunk_cost_data_1(selected_temperature, selected_sunk_cost):
 
 # Function for getting data of Sunk Cost Experiment 2
 def get_sunk_cost_data_2(selected_temperature, selected_model):
-    df = pd.read_csv('Output/Sunk_cost_experiment_2.csv', index_col=0)
+    df = pd.read_csv('Output/Sunk_cost_experiment_2_with_llama.csv', index_col=0)
     df = df[(df['Temperature'] == selected_temperature) & 
             (df['Model'] == selected_model) |
             (df['Model'] == 'Real Experiment')]
@@ -177,6 +177,7 @@ def plot_results(model, priming, df, scenario):
 )
     return fig
 
+
 # Function for plotting Sunk Cost Experiment 1
 def plot_sunk_cost_1(selected_temperature, selected_sunk_cost):
     df_sunk_cost = get_sunk_cost_data_1(selected_temperature, selected_sunk_cost)
@@ -212,6 +213,9 @@ def plot_sunk_cost_1(selected_temperature, selected_sunk_cost):
 def plot_sunk_cost_2(selected_temperature, selected_model):
     df = get_sunk_cost_data_2(selected_temperature, selected_model)
     
+    cols_to_select = df.columns.tolist().index('$0')
+    end_col = df.columns.tolist().index('-$55')
+
     # Get unique models and prompts
     models = df['Model'].unique()
     prompts = df['Prompt'].unique()
@@ -229,31 +233,31 @@ def plot_sunk_cost_2(selected_temperature, selected_model):
 
                 if not subset.empty:
                     fig.add_trace(go.Bar(
-                        x=np.arange(len(df.columns[3:])) + (i * bar_width),
-                        y=subset.iloc[0, 3:].values,
+                        x=np.arange(len(df.columns[cols_to_select:end_col+1])) + (i * bar_width),
+                        y=subset.iloc[0, cols_to_select:end_col+1].values,
                         width=bar_width,
                         name=f'Answer Option Order {i + 1}',
                         marker=dict(color=f'rgba({i * 50}, 0, 255, 0.6)'),
                         hovertemplate="%{y:.2f}",
                     ))
         elif model == 'Real Experiment':
-            fig.add_trace(go.Bar(
-                        x=np.arange(len(df.columns[3:])) + ((len(prompts)-1) * bar_width),
-                        y=df.iloc[-1, 3:].values,
-                        width=bar_width,
-                        name='Real Results',
-                        marker=dict(color='rgba(0, 0, 0, 0.3)'),
-                        hovertemplate="%{y:.2f}",
-                    ))
+                fig.add_trace(go.Bar(
+                            x=np.arange(len(df.columns[cols_to_select:end_col+1])) + ((len(prompts)-1) * bar_width),
+                            y=df.iloc[-1, cols_to_select:end_col+1].values,
+                            width=bar_width,
+                            name='Real Results',
+                            marker=dict(color='rgba(0, 0, 0, 0.3)'),
+                            hovertemplate="%{y:.2f}",
+                        ))
 
 
     fig.update_layout(
         barmode='group',
-        xaxis=dict(tickvals=np.arange(len(df.columns[3:])) + ((len(prompts) - 1) / 2 * bar_width),
+        xaxis=dict(tickvals=np.arange(len(df.columns[cols_to_select:end_col+1])) + ((len(prompts) - 1) / 2 * bar_width),
                 ticktext=['$0', '$20', '$20 plus interest', '$75', '-$55']),
         yaxis=dict(title='Share', range=[0, 1.1]),
         title=f'Shares for Answer Options (Model: {selected_model}, Temperature: {selected_temperature})',
-        legend=dict(title=dict(text="Categories")),
+        legend=dict(),
         bargap=0.3  # Gap between bars
     )
 
@@ -681,7 +685,8 @@ sunk_cost_page = [
                         id="Model",
                         options=[
                             {'label': 'gpt-3.5-turbo-1106', 'value': 'gpt-3.5-turbo-1106'},
-                            {'label': 'gpt-4-1106-preview	', 'value': 'gpt-4-1106-preview'},
+                            {'label': 'gpt-4-1106-preview', 'value': 'gpt-4-1106-preview'},
+                            {'label': 'llama-2-70b', 'value': 'llama-2-70b'},
                         ],
                         value='gpt-3.5-turbo-1106',
                         style={'width': '100%'}  
