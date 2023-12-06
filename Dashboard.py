@@ -21,6 +21,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 import os
+from PIL import Image
 
 # Dictionary to look up which model to use for a given experiment id (used in function call). key: experiment id, value: model name
 model_dict = {
@@ -73,9 +74,12 @@ for file in os.listdir("Output/DE_probs_dfs"):
         df = pd.read_csv(f"Output/DE_probs_dfs/{file}", index_col = 0) # Set first column as index column 
         decoy_dfs[file_name] = df
 
-# Load in Prospect Theory results
+# Load in Prospect Theory results and plots of og results
 PT_probs = pd.read_csv("Output/PT_probs.csv", index_col = 0)
- 
+PT_og_scenario1 = Image.open("Output/PT_og_scenario1.png")
+PT_og_scenario2 = Image.open("Output/PT_og_scenario2.png")
+PT_og_scenario3 = Image.open("Output/PT_og_scenario3.png")
+PT_og_scenario4 = Image.open("Output/PT_og_scenario4.png")
 
 # Function for getting data of Sunk Cost Experiment 1
 def get_sunk_cost_data_1(selected_temperature, selected_sunk_cost):
@@ -127,6 +131,7 @@ def plot_results(model, priming, df, scenario):
             y=df.loc["p(A)"],
             customdata = n_observations,
             hovertemplate="Temperature: %{x}<br>Probability: %{y:.2f}%<br>Observations: %{customdata}<extra></extra>",
+            marker=dict(color="#e9724d"),
         ),
         go.Bar(
             name="p(B)", 
@@ -134,6 +139,7 @@ def plot_results(model, priming, df, scenario):
             y=df.loc["p(B)"],
             customdata = n_observations,
             hovertemplate="Temperature: %{x}<br>Probability: %{y:.2f}%<br> Observations: %{customdata}<extra></extra>",
+            marker=dict(color="#868686"),
             
         ),
         go.Bar(
@@ -142,6 +148,7 @@ def plot_results(model, priming, df, scenario):
             y=df.loc["p(C)"],
             customdata = n_observations,
             hovertemplate="Temperature: %{x}<br>Probability: %{y:.2f}%<br> Observations: %{customdata}<extra></extra>",
+            marker=dict(color="#92cad1"),
         )
     ])
 
@@ -398,8 +405,8 @@ decoy_page = [
 prospect_page = [
      html.H1("Prospect Theory and Mental Accounting Experiment", className="page-heading"),
      html.Br(),
-     html.P(["""According to Prospect Theory and Mental Accounting, financial gains and losses are booked into different fictitious accounts. On top of that, \
-            relative to a reference point, losses weigh more heavily than gains and the perceived sum of two individual gains/losses will, in absolute terms, be larger than \
+     html.P(["""According to Prospect Theory and Mental Accounting, financial gains and losses are booked into different fictitious accounts. On top of that, 
+            relative to a reference point, losses weigh more heavily than gains and the perceived sum of two individual gains/losses will, in absolute terms, be larger than 
             one single gain/loss of the same amount. In the context of Marketing, four main rules can be derived by this theory:""",
             html.Br(),
             html.Br(),
@@ -412,37 +419,88 @@ prospect_page = [
             "4) Segregation of silver linings",
             html.Br(),
             html.Br(),
-            """The practical implications each of these rules hold will become more obvious when looking at the experimens conducted below. The original results are taken
-               from Thaler, Richard (1985), “Mental Accounting and Consumer Choice,” Marketing Science, 4 (3), 199–214 and the prompts we query the Language Models with are
-               constructed so that we can stay as close to the original phrasing as possible, while still instructing the models sufficiently well to produce meaningful results."""]),
+            """One possible practical implication each of these rules hold, is each reflected in the different scenarios we examine below.""",
+            html.Br(),
+            """In order to research how Large Language models react to this kind of experiment, we queried multiple models over different temperature values and used either primed 
+            or unprimed prompts. The results of our experiments are visualized below. The original results are taken
+            from Thaler, Richard (1985), “Mental Accounting and Consumer Choice,” Marketing Science, 4 (3), 199–214 and the prompts we query the Language Models with are
+            constructed so that we can stay as close to the original phrasing as possible, while still instructing the models sufficiently well to produce meaningful results.
+            For every scenario, the participants could decide on either Mister A, Mister B or a No-difference option.
+            In the case of primed experiments, we simply told the model that it is a market researcher, that knows about Prospect Theory and Mental Accounting.""",
+            html.Br(),
+            html.Br(),
+            ]),
 
     # Scenario 1: Segregation of gains
-    html.Div(
-        children = [
-        html.H2("Scenario 1: Segregation of gains"),
-        dcc.RadioItems(
-            id = "prospect-scenario1-radio1",
-            options = [
-                {'label': 'Unprimed', 'value': 0},
-                {'label': 'Primed', 'value': 1},
+html.Div(
+    children=[
+        html.H3("Scenario 1: Segregation of gains"),
+        html.Div(
+            children=[
+                html.P(
+                    [   html.Br(),
+                        html.Br(),
+                        "The original phrasing, used in the experiment by Thaler, is as follows:",
+                        html.Br(),
+                        "Mr. A was given tickets to lotteries involving the World Series. He won $50 in one lottery and $25 in the other.",
+                        html.Br(),
+                        "Mr. B was given a ticket to a single, larger World Series lottery. He won $75. Who was happier?",
+                        html.Br(),
+                        html.Br(),
+                        "A: Mister A",
+                        html.Br(),
+                        "B: Mister B",
+                        html.Br(),
+                        "C: No difference",
+                    ]
+                ),
+                html.Img(src=PT_og_scenario1, style={'max-width': '100%', 'max-height': '300px', 'margin-left': '55px'}),
+
+
             ],
-            value = 0, 
-            inputStyle={'margin-right': '10px'},
-            labelStyle={'display': 'inline-block', 'margin-right': '20px'},
-            style = {'width': '50%'}),
-        dcc.RadioItems(
-            id = "prospect-scenario1-radio2",
-            options = [
-                {'label': 'GPT-3.5-Turbo', 'value': 'GPT-3.5-Turbo'},
-                {'label': 'GPT-4-1106-Preview', 'value': 'GPT-4-1106-Preview'},
-            ],
-            value = 'GPT-3.5-Turbo',
-            inputStyle={'margin-right': '10px'},
-            labelStyle={'display': 'inline-block', 'margin-right': '20px'},
-            style = {'width': '50%'}
+            style={'display': 'flex', 'flexDirection': 'row'},
         ),
-        dcc.Graph(id = "prospect-plot1"),   
-    ]),  
+html.Div(
+    children=[
+        html.Div(
+            children=[
+                dcc.RadioItems(
+                    id="prospect-scenario1-radio1",
+                    options=[
+                        {"label": "Unprimed", "value": 0},
+                        {"label": "Primed", "value": 1},
+                    ],
+                    value=0,
+                    inputStyle={"margin-right": "10px"},
+                    labelStyle={
+                        "display": "inline-block",
+                        "margin-right": "20px",
+                    },
+                ),
+                dcc.RadioItems(
+                    id="prospect-scenario1-radio2",
+                    options=[
+                        {"label": "GPT-3.5-Turbo", "value": "GPT-3.5-Turbo"},
+                        {"label": "GPT-4-1106-Preview", "value": "GPT-4-1106-Preview"},
+                    ],
+                    value="GPT-3.5-Turbo",
+                    inputStyle={"margin-right": "10px"},
+                    labelStyle={
+                        "display": "inline-block",
+                        "margin-right": "20px",
+                    },
+                ),
+            ],
+            style={'display': 'flex', 'flexDirection': 'column', 'align-items': 'center', 'width': '50%', 'align-self': 'center'},
+        ),
+        dcc.Graph(id="prospect-plot1", style={'width': '70%', 'height': '60vh'}),
+    ],
+    style={'display': 'flex', 'flexDirection': 'row'},
+)]
+
+    
+),
+
 
     # Scenario 2: Integration of losses
     html.Div(
@@ -707,9 +765,8 @@ loss_aversion_page = [
 
 )
 def update_prospect_plot1(selected_priming, selected_model):
-        print("Selected Priming:", selected_priming)
-        print("Selected Model:", selected_model)
-        return plot_results(model = selected_model, priming = selected_priming, df = PT_probs, scenario = 1) # order is mixed up -> WHY?!?!?!
+        print(os.getcwd())
+        return plot_results(model = selected_model, priming = selected_priming, df = PT_probs, scenario = 1) 
 
 # Scenario 2
 @app.callback(
@@ -719,7 +776,7 @@ def update_prospect_plot1(selected_priming, selected_model):
 
 )
 def update_prospect_plot2(selected_priming, selected_model):
-        return plot_results(model = selected_model, priming = selected_priming, df = PT_probs, scenario = 2) # works for scenario 1.... 
+        return plot_results(model = selected_model, priming = selected_priming, df = PT_probs, scenario = 2) 
 
 
 # Scenario 3
@@ -822,4 +879,4 @@ def render_page_content(pathname):
 
 
 if __name__ == "__main__":
-    app.run_server(port=8888, debug = True)
+    app.run_server(port=8888, debug = False)
