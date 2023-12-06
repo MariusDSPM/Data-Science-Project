@@ -83,7 +83,7 @@ PT_og_scenario4 = Image.open("Output/PT_og_scenario4.png")
 
 # Function for getting data of Sunk Cost Experiment 1
 def get_sunk_cost_data_1(selected_temperature, selected_sunk_cost):
-    sunk_cost_1 = pd.read_csv('Output/Sunk_cost_experiment_1.csv', index_col=0)
+    sunk_cost_1 = pd.read_csv('Output/Sunk_cost_experiment_1_with_llama.csv', index_col=0)
     df = sunk_cost_1[(sunk_cost_1['Temperature'] == selected_temperature) & 
                      (sunk_cost_1['Sunk Cost ($)'] == selected_sunk_cost)]
     
@@ -176,6 +176,7 @@ def plot_results(model, priming, df, scenario):
     bargap = 0.3  # Gap between temperature values
 )
     return fig
+
 
 # Function for plotting Sunk Cost Experiment 1
 def plot_sunk_cost_1(selected_temperature, selected_sunk_cost):
