@@ -100,7 +100,7 @@ def get_sunk_cost_data_2(selected_temperature, selected_model):
 
 # Function for getting data of Loss Aversion Experiment
 def get_loss_aversion_data(selected_temperature):
-    df = pd.read_csv('Output/Loss_aversion_experiment.csv', index_col=0)
+    df = pd.read_csv('Output/Loss_aversion_experiment_with_llama.csv', index_col=0)
     df = df[(df['Temperature'] == selected_temperature)|
             (df['Model'] == 'Real Experiment')] 
     
@@ -283,7 +283,7 @@ def plot_loss_aversion(selected_temperature):
             y=values_B,
             name=scenario_label,
             offsetgroup=i,
-            hovertemplate="%{y:.2f}"
+            hovertemplate="%{y:.2f}",
         ))
 
     # Update layout
@@ -292,6 +292,7 @@ def plot_loss_aversion(selected_temperature):
         xaxis=dict(tickmode='array', tickvals=list(range(len(models))), ticktext=models),
         yaxis=dict(title='Shares for "B"'),
         title='Shares for "B" (risk-seeking option) by Model and Scenario',
+        bargap=0.6  # Gap between bars
     )
     
     return fig
@@ -716,7 +717,7 @@ loss_aversion_page = [
                     html.Br(),  # Line break
                     "B: A 50% chance to gain $200 and a 50% chance to lose $0."
             ]),
-        ], style={'width': '30%', 'display': 'inline-block', 'margin-bottom': '60px'}),
+        ], style={'width': '40%', 'display': 'inline-block', 'margin-bottom': '60px'}),
 
         html.Div([
             html.H6("Scenario with losses:"),
@@ -727,7 +728,7 @@ loss_aversion_page = [
                     html.Br(),  # Line break
                     "B: A 50% chance to lose $200 and a 50% chance to lose $0."
             ]),
-        ], style={'width': '30%', 'display': 'inline-block', 'margin-bottom': '60px'})
+        ], style={'width': '40%', 'display': 'inline-block', 'margin-bottom': '60px'})
     ]),
 
     html.Div(
