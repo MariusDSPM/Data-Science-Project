@@ -156,7 +156,7 @@ def plot_results(model, priming, df, scenario):
     barmode = 'group',
     xaxis = dict(
         tickmode = 'array',
-        tickvals = np.arange(len(temperature)),
+        tickvals = temperature,
         ticktext = temperature,
         title = "Temperature",  
         title_font=dict(size=18),  
@@ -167,7 +167,8 @@ def plot_results(model, priming, df, scenario):
     ),
     title = dict(
         text="Distribution of answers per temperature value",
-        x = 0.5,  # Center alignment
+        x = 0.5, # Center alignment horizontally
+        y = 0.87,  # Vertical alignment
         font=dict(size=22),  
     ),
     legend = dict(
@@ -406,7 +407,7 @@ decoy_page = [
 # Prospect Page
 prospect_page = [
      html.H1("Prospect Theory and Mental Accounting Experiment", className="page-heading"),
-     html.Br(),
+     html.Hr(),
      html.P(["""According to Prospect Theory and Mental Accounting, financial gains and losses are booked into different fictitious accounts. On top of that, 
             relative to a reference point, losses weigh more heavily than gains and the perceived sum of two individual gains/losses will, in absolute terms, be larger than 
             one single gain/loss of the same amount. In the context of Marketing, four main rules can be derived by this theory:""",
@@ -433,10 +434,13 @@ prospect_page = [
             html.Br(),
             ]),
 
-    # Scenario 1: Segregation of gains
+html.H2("Experiment 1: Recreating the original study"),
+html.Br(),
+# Scenario 1: Segregation of gains
 html.Div(
     children=[
         html.H3("Scenario 1: Segregation of gains"),
+        html.Hr(),
         html.Div(
             children=[
                 html.P(
@@ -456,7 +460,7 @@ html.Div(
                         "C: No difference",
                     ]
                 ),
-                html.Img(src=PT_og_scenario1, style={'max-width': '100%', 'max-height': '300px', 'margin-left': '55px'}),
+                html.Img(src=PT_og_scenario1, style={'max-width': '100%', 'max-height': '300px', 'margin-left': '60px', 'margin-top': '20px'}),
 
 
             ],
@@ -466,6 +470,7 @@ html.Div(
     children=[
         html.Div(
             children=[
+                html.H5("Select experiment design:"),
                 dcc.RadioItems(
                     id="prospect-scenario1-radio1",
                     options=[
@@ -482,10 +487,11 @@ html.Div(
                 dcc.RadioItems(
                     id="prospect-scenario1-radio2",
                     options=[
-                        {"label": "GPT-3.5-Turbo", "value": "GPT-3.5-Turbo"},
-                        {"label": "GPT-4-1106-Preview", "value": "GPT-4-1106-Preview"},
+                        {"label": "GPT-3.5-Turbo", "value": "gpt-3.5-turbo"},
+                        {"label": "GPT-4-1106-Preview", "value": "gpt-4-1106-preview"},
+                        {"label": "LLama-2-70b", "value": "llama-2-70b"},
                     ],
-                    value="GPT-3.5-Turbo",
+                    value="gpt-3.5-turbo",
                     inputStyle={"margin-right": "10px"},
                     labelStyle={
                         "display": "inline-block",
@@ -498,95 +504,228 @@ html.Div(
         dcc.Graph(id="prospect-plot1", style={'width': '70%', 'height': '60vh'}),
     ],
     style={'display': 'flex', 'flexDirection': 'row'},
-)]
+)]),
 
     
-),
+# Scenario 2: Integration of losses
+html.Div(
+    children=[
+        html.H3("Scenario 2: Integration of losses"),
+        html.Hr(),
+        html.Div(
+            children=[
+                html.P(
+                    [   html.Br(),
+                        html.Br(),
+                        "The original phrasing, used in the experiment by Thaler, is as follows:",
+                        html.Br(),
+                        """Mr. A received a letter from the IRS saying that he made a minor arithmetical mistake on his
+                        tax return and owed $100. He received a similar letter the same day from his state income tax
+                        authority saying he owed $50. There were no other repercussions from either mistake.""",
+                        html.Br(),
+                        """Mr. B received a letter from the IRS saying that he made a minor arithmetical mistake on his tax
+                        return and owed $150. There were no other repercussions from his mistake. Who was more upset?""",
+                        html.Br(),
+                        html.Br(),
+                        "A: Mister A",
+                        html.Br(),
+                        "B: Mister B",
+                        html.Br(),
+                        "C: No difference",
+                    ]
+                ),
+                html.Img(src=PT_og_scenario2, style={'max-width': '100%', 'max-height': '300px', 'margin-left': '60px', 'margin-top': '20px'}),
 
 
-    # Scenario 2: Integration of losses
-    html.Div(
-        children = [
-        html.H2("Scenario 2: Integration of losses"),
-        dcc.RadioItems(
-            id = "prospect-scenario2-radio1",
-            options = [
-                {'label': 'Unprimed', 'value': 0},
-                {'label': 'Primed', 'value': 1},
             ],
-            value = 0,
-            inputStyle={'margin-right': '10px'},
-            labelStyle={'display': 'inline-block', 'margin-right': '20px'},
-            style = {'width': '50%'}),
-        dcc.RadioItems(
-            id = "prospect-scenario2-radio2",
-            options = [
-                {'label': 'GPT-3.5-Turbo', 'value': 'GPT-3.5-Turbo'},
-                {'label': 'GPT-4-1106-Preview', 'value': 'GPT-4-1106-Preview'},
-            ],
-            value = 'GPT-3.5-Turbo',
-            inputStyle={'margin-right': '10px'},
-            labelStyle={'display': 'inline-block', 'margin-right': '20px'},
-            style = {'width': '50%'}
+            style={'display': 'flex', 'flexDirection': 'row'},
         ),
-        dcc.Graph(id = "prospect-plot2"),        
-    ]),
-
-    # Scenario 3: Cancellation of losses against larger gains
-    html.Div(
-        children =[
-        html.H2("Scenario 3: Cancellation of losses against larger gains"),
-        dcc.RadioItems(
-            id = "prospect-scenario3-radio1",
-            options = [
-                {'label': 'Unprimed', 'value': 0},
-                {'label': 'Primed', 'value': 1},
+html.Div(
+    children=[
+        html.Div(
+            children=[
+                html.H5("Select experiment design:"),
+                dcc.RadioItems(
+                    id="prospect-scenario2-radio1",
+                    options=[
+                        {"label": "Unprimed", "value": 0},
+                        {"label": "Primed", "value": 1},
+                    ],
+                    value=0,
+                    inputStyle={"margin-right": "10px"},
+                    labelStyle={
+                        "display": "inline-block",
+                        "margin-right": "20px",
+                    },
+                ),
+                dcc.RadioItems(
+                    id="prospect-scenario2-radio2",
+                    options=[
+                        {"label": "GPT-3.5-Turbo", "value": "gpt-3.5-turbo"},
+                        {"label": "GPT-4-1106-Preview", "value": "gpt-4-1106-preview"},
+                        {"label": "LLama-2-70b", "value": "llama-2-70b"},
+                    ],
+                    value="gpt-3.5-turbo",
+                    inputStyle={"margin-right": "10px"},
+                    labelStyle={
+                        "display": "inline-block",
+                        "margin-right": "20px",
+                    },
+                ),
             ],
-            value = 0,
-            inputStyle={'margin-right': '10px'},
-            labelStyle={'display': 'inline-block', 'margin-right': '20px'},
-            style = {'width': '50%'}),
-        dcc.RadioItems(
-            id = "prospect-scenario3-radio2",
-            options = [
-                {'label': 'GPT-3.5-Turbo', 'value': 'GPT-3.5-Turbo'},
-                {'label': 'GPT-4-1106-Preview', 'value': 'GPT-4-1106-Preview'},
-            ],
-            value = 'GPT-3.5-Turbo',
-            inputStyle={'margin-right': '10px'},
-            labelStyle={'display': 'inline-block', 'margin-right': '20px'},
-            style = {'width': '50%'}
+            style={'display': 'flex', 'flexDirection': 'column', 'align-items': 'center', 'width': '50%', 'align-self': 'center'},
         ),
-        dcc.Graph(id = "prospect-plot3"),
-    ]),
+        dcc.Graph(id="prospect-plot2", style={'width': '70%', 'height': '60vh'}),
+    ],
+    style={'display': 'flex', 'flexDirection': 'row'},
+)]),
 
-    # Scenario 4: Segregation of silver linings
-    html.Div(
-        children = [
-        html.H2("Scenario 4: Segregation of silver linings"),
-        dcc.RadioItems(
-            id = "prospect-scenario4-radio1",
-            options = [
-                {'label': 'Unprimed', 'value': 0},
-                {'label': 'Primed', 'value': 1},
+    
+# Scenario 3: Cancellation of losses against larger gains
+html.Div(
+    children=[
+        html.H3("Scenario 3: Cancellation of losses against larger gains"),
+        html.Hr(),
+        html.Div(
+            children=[
+                html.P(
+                    [   html.Br(),
+                        html.Br(),
+                        "The original phrasing, used in the experiment by Thaler, is as follows:",
+                        html.Br(),
+                        """Mr. A bought his first New York State lottery ticket and won $100. Also, in a freak accident,
+                        he damaged the rug in his apartment and had to pay the landlord $80.""",
+                        html.Br(),
+                        "Mr. B bought his first New York State lottery ticket and won $20. Who was happier",
+                        html.Br(),
+                        html.Br(),
+                        "A: Mister A",
+                        html.Br(),
+                        "B: Mister B",
+                        html.Br(),
+                        "C: No difference",
+                    ]
+                ),
+                html.Img(src=PT_og_scenario3, style={'max-width': '100%', 'max-height': '300px', 'margin-left': '60px', 'margin-top': '20px'}),
+
+
             ],
-            value = 0,
-            inputStyle={'margin-right': '10px'},
-            labelStyle={'display': 'inline-block', 'margin-right': '20px'},
-            style = {'width': '50%'}),
-        dcc.RadioItems(
-            id = "prospect-scenario4-radio2",
-            options = [
-                {'label': 'GPT-3.5-Turbo', 'value': 'GPT-3.5-Turbo'},
-                {'label': 'GPT-4-1106-Preview', 'value': 'GPT-4-1106-Preview'},
+            style={'display': 'flex', 'flexDirection': 'row'},
+        ),
+html.Div(
+    children=[
+        html.Div(
+            children=[
+                html.H5("Select experiment design:"),
+                dcc.RadioItems(
+                    id="prospect-scenario3-radio1",
+                    options=[
+                        {"label": "Unprimed", "value": 0},
+                        {"label": "Primed", "value": 1},
+                    ],
+                    value=0,
+                    inputStyle={"margin-right": "10px"},
+                    labelStyle={
+                        "display": "inline-block",
+                        "margin-right": "20px",
+                    },
+                ),
+                dcc.RadioItems(
+                    id="prospect-scenario3-radio2",
+                    options=[
+                        {"label": "GPT-3.5-Turbo", "value": "gpt-3.5-turbo"},
+                        {"label": "GPT-4-1106-Preview", "value": "gpt-4-1106-preview"},
+                        {"label": "LLama-2-70b", "value": "llama-2-70b"},
+                    ],
+                    value="gpt-3.5-turbo",
+                    inputStyle={"margin-right": "10px"},
+                    labelStyle={
+                        "display": "inline-block",
+                        "margin-right": "20px",
+                    },
+                ),
             ],
-            value = 'GPT-3.5-Turbo',
-            inputStyle={'margin-right': '10px'},
-            labelStyle={'display': 'inline-block', 'margin-right': '20px'},
-            style = {'width': '50%'}
-    ),
-        dcc.Graph(id = "prospect-plot4"),
-    ]),
+            style={'display': 'flex', 'flexDirection': 'column', 'align-items': 'center', 'width': '50%', 'align-self': 'center'},
+        ),
+        dcc.Graph(id="prospect-plot3", style={'width': '70%', 'height': '60vh'}),
+    ],
+    style={'display': 'flex', 'flexDirection': 'row'},
+)]),
+
+    
+# Scenario 4: Segregation of silver linings
+html.Div(
+    children=[
+        html.H3("Scenario 4: Segregation of silver linings"),
+        html.Hr(),
+        html.Div(
+            children=[
+                html.P(
+                    [   html.Br(),
+                        html.Br(),
+                        "The original phrasing, used in the experiment by Thaler, is as follows:",
+                        html.Br(),
+                        """Mr. A's car was damaged in a parking lot. He had to spend $200 to repair the damage. 
+                        The same day the car was damaged, he won $25 in the office football pool.""",
+                        html.Br(),
+                        "Mr. B's car was damaged in a parking lot. He had to spend $175 to repairthe damage. Who was more upset?",
+                        html.Br(),
+                        html.Br(),
+                        "A: Mister A",
+                        html.Br(),
+                        "B: Mister B",
+                        html.Br(),
+                        "C: No difference",
+                    ]
+                ),
+                html.Img(src=PT_og_scenario4, style={'max-width': '100%', 'max-height': '300px', 'margin-left': '60px', 'margin-top': '20px'}),
+
+
+            ],
+            style={'display': 'flex', 'flexDirection': 'row'},
+        ),
+html.Div(
+    children=[
+        html.Div(
+            children=[
+                html.H5("Select experiment design:"),
+                dcc.RadioItems(
+                    id="prospect-scenario4-radio1",
+                    options=[
+                        {"label": "Unprimed", "value": 0},
+                        {"label": "Primed", "value": 1},
+                    ],
+                    value=0,
+                    inputStyle={"margin-right": "10px"},
+                    labelStyle={
+                        "display": "inline-block",
+                        "margin-right": "20px",
+                    },
+                ),
+                dcc.RadioItems(
+                    id="prospect-scenario4-radio2",
+                    options=[
+                        {"label": "GPT-3.5-Turbo", "value": "gpt-3.5-turbo"},
+                        {"label": "GPT-4-1106-Preview", "value": "gpt-4-1106-preview"},
+                        {"label": "LLama-2-70b", "value": "llama-2-70b"},
+                    ],
+                    value="gpt-3.5-turbo",
+                    inputStyle={"margin-right": "10px"},
+                    labelStyle={
+                        "display": "inline-block",
+                        "margin-right": "20px",
+                    },
+                ),
+            ],
+            style={'display': 'flex', 'flexDirection': 'column', 'align-items': 'center', 'width': '50%', 'align-self': 'center'},
+        ),
+        dcc.Graph(id="prospect-plot4", style={'width': '70%', 'height': '60vh'}),
+    ],
+    style={'display': 'flex', 'flexDirection': 'row'},
+)]),
+html.Br(),
+html.Hr(),
+html.H2("Experiment 2: Odd numbers and unfair scenarios")
 ]
 
 
@@ -767,7 +906,6 @@ loss_aversion_page = [
 
 )
 def update_prospect_plot1(selected_priming, selected_model):
-        print(os.getcwd())
         return plot_results(model = selected_model, priming = selected_priming, df = PT_probs, scenario = 1) 
 
 # Scenario 2
