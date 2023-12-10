@@ -663,7 +663,6 @@ html.Div(
     style={'display': 'flex', 'flexDirection': 'row'},
 )]),
 
-    
 # Scenario 4: Segregation of silver linings
 html.Div(
     children=[
@@ -736,8 +735,82 @@ html.Div(
 )]),
 html.Br(),
 html.Hr(),
-html.H2("Experiment 2: Odd numbers and unfair scenarios")
-]
+
+
+## Experiment 2
+html.H2("Experiment 2: Odd numbers and unfair scenarios"),
+html.Hr(),
+html.P(["""The Prospect Theory value function explains why individuals tend to assess the perceived value of e.g. a sum of multiple gains as larger, 
+        than one individual sum of the same amount. Since Large Language Models are trained on human data, including for example customer reviews on sales platforms,
+        they might reflect these patterns.""",
+        html.Br(), 
+        """But how do LLMs react, if in the given scenarios, one individual is financially clearly better off than the other? And what if we did not deal with small,
+        even numbers, but rather large and odd ones?""",
+        html.Br(),
+        "Another ", html.B("key concept of prospect theory is decreasing sensitivity"),":", 
+        " A loss of 50$ subtracted from a total amount of 1000$ will not hurt as much, as if we initially only had 100$, hence losing 50% of our total possession.", 
+        html.Br(),
+        html.Br(),
+        "In order to research these 2 aspects, we created 6 configurations for every scenario (1-4):",
+        html.Br(),
+        html.Br(),
+        "- Configuration 1: Original numbers scaled by factor Pi * 100",
+        html.Br(),
+        "- Configuration 2: Original numbers scaled by factor Pi * 42",
+        html.Br(),
+        "- Configuration 3: A is better off by 25$",
+        html.Br(),
+        "- Configuration 4: A is better off by 50$",
+        html.Br(),
+        "- Configuration 5: B is better off by 25$",
+        html.Br(),
+        "- Configuration 6: B is better off by 50$",
+        html.Br()]),
+    html.Div(
+        children = [
+            html.Div(
+                children = [
+                    html.H5("Select experiment design:", style = {'margin-left': '-75px'}),
+                    dcc.Dropdown(
+                        id = "prospect2-scenario-dropdown",
+                        options = [
+                            {"label": "Scenario 1: Segregation of gains", "value": 1},
+                            {"label": "Scenario 2: Integration of losses", "value": 2},
+                            {"label": "Scenario 3: Cancellation of losses against larger gains", "value": 3},
+                            {"label": "Scenario 4: Segregation of silver linings", "value": 4},
+                        ],
+                        value = 1,
+                        style = {'width': '75%'},
+                    ),
+                    dcc.Dropdown(
+                         id = "prospect2-configuration-dropdown",
+                            options = [
+                                {"label": "Configuration 1: Odd numbers 1", "value": 1},
+                                {"label": "Configuration 2: Odd numbers 2", "value": 2},
+                                {"label": "Configuration 3: A is better off by 25$", "value": 3},
+                                {"label": "Configuration 4: A is better off by 50$", "value": 4},
+                                {"label": "Configuration 5: B is better off by 25$", "value": 5},
+                                {"label": "Configuration 6: B is better off by 50$", "value": 6},
+                                ],
+                                value = 1,
+                                style = {'width': '75%'},
+                    ),
+                    dcc.Dropdown(
+                         id = "prospect2-model-dropdown",
+                         options = [
+                              {"label": "GPT-3.5-Turbo", "value": "gpt-3.5-turbo"},
+                                {"label": "GPT-4-1106-Preview", "value": "gpt-4-1106-preview"},
+                                {"label": "LLama-2-70b", "value": "llama-2-70b"},
+                            ],
+                            value = "gpt-3.5-turbo",
+                            style = {'width': '75%'},
+                    )],                 
+    
+                style = {'display': 'flex', 'flexDirection': 'column', 'align-items': 'center', 'width': '50%', 'align-self': 'center'},
+            ),
+            dcc.Graph(id = "prospect2-plot", style={'width': '70%', 'height': '60vh'}),
+        ],
+        style={'display': 'flex', 'flexDirection': 'row'})]
 
 
 # Sunk Cost Fallacy Page
@@ -909,6 +982,7 @@ loss_aversion_page = [
 
 ### Callback for prospect page
 
+## Experiment 1
 # Scenario 1
 @app.callback(
      Output("prospect-plot1", "figure"),
@@ -948,6 +1022,16 @@ def update_prospect_plot3(selected_priming, selected_model):
 def update_prospect_plot4(selected_priming, selected_model):
         return plot_results(model = selected_model, priming = selected_priming, df = PT_probs, scenario = 4)
 
+## Experiment 2
+@app.callback(
+     Output("prospect2-plot", "figure"),
+     [Input("prospect2-scenario-dropdown", "value"),
+      Input("prospect2-configuration-dropdown", "value"),
+      Input("prospect2-model-dropdown", "value")]
+)
+def update_prospect2_plot(selected_scenario, selected_configuration, selected_model):
+    df = PT2_probs[PT2_probs["Configuration"] == selected_configuration]
+    return plot_results(model = selected_model, df = df, scenario = selected_scenario, priming = 0) # all experiments are unprimed
 
 
 # Callback for decoy page
@@ -1029,4 +1113,4 @@ def render_page_content(pathname):
 
 
 if __name__ == "__main__":
-    app.run_server(port=8888, debug = True)
+    app.run_server(port=8888, debug = False)
