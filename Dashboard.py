@@ -884,11 +884,11 @@ sunk_cost_page = [
 
         html.Div([
             html.H6('Answer Option Order 2', style={'margin-top': '15px'}),
-            html.P(["A: $75 ...",
+            html.P(["A: $75",
                     html.Br(),  # Line break
-                    "B: -$55 ...",
+                    "B: -$55",
                     html.Br(),  # Line break
-                    "C: $0 ...",
+                    "C: $0",
                     html.Br(),  # Line break
                     "D: $20",
                     html.Br(),  # Line break
@@ -897,15 +897,15 @@ sunk_cost_page = [
 
         html.Div([
             html.H6('Answer Option Order 3', style={'margin-top': '15px'}),
-            html.P(["A: -$55 ...",
+            html.P(["A: -$55",
                     html.Br(),  # Line break
-                    "B: $75 ...",
+                    "B: $75",
                     html.Br(),  # Line break
                     "C: $20 plus interest",
                     html.Br(),  # Line break
                     "D: $0",
                     html.Br(),  # Line break
-                    "E: $20 ..."]),
+                    "E: $20"]),
         ], style={'width': '20%', 'display': 'inline-block', 'margin-bottom': '60px', 'vertical-align': 'top'}),
     ]),
         
