@@ -23,63 +23,24 @@ import plotly.graph_objects as go
 import os
 from PIL import Image
 
-# Dictionary to look up which model to use for a given experiment id (used in function call). key: experiment id, value: model name
-model_dict = {
-    "1_1": "gpt-3.5-turbo",
-    "1_2": "gpt-3.5-turbo",
-    "1_3": "gpt-3.5-turbo",
-    "1_4": "gpt-3.5-turbo",
-    "1_5": "gpt-3.5-turbo",
-    "1_6": "gpt-3.5-turbo",
-    "1_7": "gpt-3.5-turbo",
-    "1_8": "gpt-3.5-turbo",
-    "2_1": "gpt-4-1106-preview",
-    "2_2": "gpt-4-1106-preview",
-    "2_3": "gpt-4-1106-preview",
-    "2_4": "gpt-4-1106-preview",
-    "2_5": "gpt-4-1106-preview",
-    "2_6": "gpt-4-1106-preview",
-    "2_7": "gpt-4-1106-preview",
-    "2_8": "gpt-4-1106-preview",
-    }
-
-# Dictionary to look up, what the study design of each experiment was. key: experiment id, value: experiment design 
-experiment_dict = {
-    "1_1": f"Experiment 1_1 uses {model_dict['1_1']}, deals with the segregation of gains and is unprimed.",
-    "1_2": f"Experiment 1_2 uses {model_dict['1_2']}, deals with the integration of losses and is unprimed.",
-    "1_3": f"Experiment 1_3 uses {model_dict['1_3']}, deals with the cancellation of losses against larger gains and is unprimed.",
-    "1_4": f"Experiment 1_4 uses {model_dict['1_4']}, deals with the segrgation of *silver linings* and is unprimed.",
-    "1_5": f"Experiment 1_5 uses {model_dict['1_5']}, deals with the segregation of gains and is primed.",
-    "1_6": f"Experiment 1_6 uses {model_dict['1_6']}, deals with the integration of losses and is primed.",
-    "1_7": f"Experiment 1_7 uses {model_dict['1_7']}, deals with the cancellation of losses against larger gains and is primed.",
-    "1_8": f"Experiment 1_8 uses {model_dict['1_8']}, deals with the segregation of *silver linings*, and is primed.",
-    "2_1": f"Experiment 1_1 uses {model_dict['2_1']}, deals with the segregation of gains and is unprimed.",
-    "2_2": f"Experiment 1_2 uses {model_dict['2_2']}, deals with the integration of losses and is unprimed.",
-    "2_3": f"Experiment 1_3 uses {model_dict['2_3']}, deals with the cancellation of losses against larger gains and is unprimed.",
-    "2_4": f"Experiment 1_4 uses {model_dict['2_4']}, deals with the segrgation of *silver linings* and is unprimed.",
-    "2_5": f"Experiment 1_5 uses {model_dict['2_5']}, deals with the segregation of gains and is primed.",
-    "2_6": f"Experiment 1_6 uses {model_dict['2_6']}, deals with the integration of losses and is primed.",
-    "2_7": f"Experiment 1_7 uses {model_dict['2_7']}, deals with the cancellation of losses against larger gains and is primed.",
-    "2_8": f"Experiment 1_8 uses {model_dict['2_8']}, deals with the segregation of *silver linings*, and is primed.",
-}
 
 
 #########################################  Data Import Functions  #########################################
 
-# Read in experimental data as dictionary
-# Decoy Effect
-decoy_dfs = {}
-for file in os.listdir("Output/DE_probs_dfs"):
-        file_name = file.split(".")[0]
-        df = pd.read_csv(f"Output/DE_probs_dfs/{file}", index_col = 0) # Set first column as index column 
-        decoy_dfs[file_name] = df
 
-# Load in Prospect Theory results and plots of og results
+
+# Load in results of Decoy Effect experiments
+DE_probs = pd.read_csv("Output/DE_probs.csv", index_col = 0)
+
+# Load in results and graphs of Prospect Theory experiments
 PT_probs = pd.read_csv("Output/PT_probs.csv", index_col = 0)
 PT_og_scenario1 = Image.open("Output/PT_og_scenario1.png")
 PT_og_scenario2 = Image.open("Output/PT_og_scenario2.png")
 PT_og_scenario3 = Image.open("Output/PT_og_scenario3.png")
 PT_og_scenario4 = Image.open("Output/PT_og_scenario4.png")
+
+# Second Prospect Theory experiment
+PT2_probs = pd.read_csv("Output/PT2_probs.csv", index_col = 0)
 
 # Function for getting data of Sunk Cost Experiment 1
 def get_sunk_cost_data_1(selected_temperature, selected_sunk_cost):
@@ -376,36 +337,86 @@ start_page = [
 
 # Decoy Page
 decoy_page = [
-    html.H1("Decoy Effect Experiment", className="page-heading"),
-    dcc.Dropdown(
-        id="decoy-plot-dropdown",
-        options=[
-            {'label': 'Experiment 1.1', 'value': 'DE_probs_1_1'},
-            {'label': 'Experiment 1.2', 'value': 'DE_probs_1_2'},
-            {'label': 'Experiment 1.3', 'value': 'DE_probs_1_3'},
-            {'label': 'Experiment 1.4', 'value': 'DE_probs_1_4'},
-            {'label': 'Experiment 1.5', 'value': 'DE_probs_1_5'},
-            {'label': 'Experiment 1.6', 'value': 'DE_probs_1_6'},
-            {'label': 'Experiment 1.7', 'value': 'DE_probs_1_7'},
-            {'label': 'Experiment 1.8', 'value': 'DE_probs_1_8'},
-            {'label': 'Experiment 2.1', 'value': 'DE_probs_2_1'},
-            {'label': 'Experiment 2.2', 'value': 'DE_probs_2_2'},
-            {'label': 'Experiment 2.3', 'value': 'DE_probs_2_3'},
-            {'label': 'Experiment 2.4', 'value': 'DE_probs_2_4'},
-            {'label': 'Experiment 2.5', 'value': 'DE_probs_2_5'},
-            {'label': 'Experiment 2.6', 'value': 'DE_probs_2_6'},
-            {'label': 'Experiment 2.7', 'value': 'DE_probs_2_7'},
-            {'label': 'Experiment 2.8', 'value': 'DE_probs_2_8'},
+    html.H1("Decoy Effect Experiment", className="page-heading"), 
+    html.Hr(),
+    html.P(["""The decoy effect describes a phenomenon, in which  consumers preferences between two products change, once a third option is added. This third option is designed 
+            to be asymmetrically dominated, meaning that it is entirely inferior to one of the previous options, but only partially inferior to the other. Once this asymetrically 
+            dominated option, the Decoy, is present, more people will now tend to choose the dominating option than before. A decoy product can therefore be used to influence consumer's
+            decision making and increase saless of a specific product merely through the presence of an additional alternative.""",
+            html.Br(),
+            html.Br(),
+            """Our experiment aims to recreate the findings of Ariely in his 2008 book *Predictably Irrational*. There, he asked 100 students from MIT's Sloan School of Management 
+            to choose between the following options:""",
+            html.Br(),
+            html.Br(),
+            "A: One-year subscription to Economist.com. Includes online access to all articles from The Economist since 1997, priced at 59$.",
+            html.Br(),
+            "B: One-year subscription to the print edition of The Economist, priced at 125$.",
+            html.Br(),
+            "C: One-year subscription to the print edition of The Economist and online access to all articles from The Economist since 1997, priced at 125$.",
+            html.Br(),
+            html.Br(),
+            "In this example, option B serves as the decoy option.",
+            html.Br(), 
+            "When presented with ", html.B("all three options"), " Ariely found, that ", html.B("84%"), " of the participants chose option ", html.B("C"), " while only ", html.B("16%"), " chose option ", html.B("A"),".",
+            html.Br(),
+            "However, once ", html.B("option B was removed"), " and the choice had to be made only between A and C, ", html.B("68%"), " of the participants chose option ", html.B("A"), " while only ", html.B("32%"), "chose option ", html.B("C"),".",
+            html.Br(),
+            html.Br(),
+            """In the experiments below, we examine how various Large Language Models react to this kind of experiment. We therefore queried 3 different models over a range of possible 
+            temperature values using either primed or unprimed prompts. On top of that, we investigated to what extent the models' responses change, when we rename and reorder the 
+            answer options. In the case of primed prompts, we instructed the model to be a market researcher, who knows about the Decoy Effect in product pricing."""]),
+            html.Br(),
+            html.Br(),
+    html.Div(
+        children=[
+            html.Div(
+                children=[
+                    dcc.Dropdown(
+                         id = "decoy-scenario-dropdown",
+                         options = [
+                              {"label": "Scenario 1: All options present", "value": 1},
+                              {"label": "Scenario 2: Decoy option removed", "value": 2},
+                         ],
+                         value = 1,
+                         style={'width': '75%'},
+                    ),
+                    dcc.Dropdown(
+                         id = "decoy-priming-dropdown",
+                         options = [
+                              {"label": "Unprimed prompt", "value": 0},
+                              {"label": "Primed prompt", "value": 1},
+                            ],
+                            value = 0,
+                            style={'width': '75%'},
+                    ),
+                    dcc.Dropdown(
+                         id = "decoy-reordering-dropdown",
+                         options = [
+                              {"label": "Original order", "value": 0},
+                              {"label": "Answer options reordered", "value": 1},
+                            ],
+                            value = 0,
+                            style={'width': '75%'},
+                    ),
+                    dcc.Dropdown(
+                         id = "decoy-model-dropdown",
+                         options = [
+                              {"label": "GPT-3.5-Turbo", "value": "gpt-3.5-turbo"},
+                              {"label": "GPT-4-1106-Preview", "value": "gpt-4-1106-preview"},
+                              {"label": "LLama-2-70b", "value": "llama-2-70b"},
+                            ],
+                            value = "gpt-3.5-turbo",
+                            style={'width': '75%'},
+                    ),
+                         ],
+            style={'display': 'flex', 'flexDirection': 'column', 'align-items': 'center', 'width': '50%', 'align-self': 'center'},
+            ),
+            dcc.Graph(id="decoy-plot-output", style={'width': '70%', 'height': '60vh'}),
         ],
-        value='DE_probs_1_1',  
-        style={'width': '50%'}
-    ),
-    dcc.Graph(id="decoy-plot-output"), 
-    html.P("""The decoy effect is a phenomenon in which consumers change their preference between two options when presented with a third option that is asymmetrically dominated. 
-           An example of this would be a choice between two ice cream cones, one large and one small. If the large one is chosen most often, a third option (the decoy) is added, 
-           which is the same as the large one, but more expensive. This should make the large one more attractive, as it is now the middle option. 
-           This experiment is a replication of the experiment conducted by Huber et al. (1982)."""),
-]
+        
+        style={'display': 'flex', 'flexDirection': 'row'})]
+   
 
 # Prospect Page
 prospect_page = [
@@ -432,7 +443,7 @@ prospect_page = [
             from Thaler, Richard (1985), “Mental Accounting and Consumer Choice,” Marketing Science, 4 (3), 199–214 and the prompts we query the Language Models with are
             constructed so that we can stay as close to the original phrasing as possible, while still instructing the models sufficiently well to produce meaningful results.
             For every scenario, the participants could decide on either Mister A, Mister B or a No-difference option.
-            In the case of primed experiments, we simply told the model that it is a market researcher, that knows about Prospect Theory and Mental Accounting.""",
+            In the case of primed experiments, we instructed the model to be a market researcher, that knows about Prospect Theory and Mental Accounting.""",
             html.Br(),
             html.Br(),
             ]),
@@ -655,7 +666,6 @@ html.Div(
     style={'display': 'flex', 'flexDirection': 'row'},
 )]),
 
-    
 # Scenario 4: Segregation of silver linings
 html.Div(
     children=[
@@ -728,8 +738,82 @@ html.Div(
 )]),
 html.Br(),
 html.Hr(),
-html.H2("Experiment 2: Odd numbers and unfair scenarios")
-]
+
+
+## Experiment 2
+html.H2("Experiment 2: Odd numbers and unfair scenarios"),
+html.Hr(),
+html.P(["""The Prospect Theory value function explains why individuals tend to assess the perceived value of e.g. a sum of multiple gains as larger, 
+        than one individual sum of the same amount. Since Large Language Models are trained on human data, including for example customer reviews on sales platforms,
+        they might reflect these patterns.""",
+        html.Br(), 
+        """But how do LLMs react, if in the given scenarios, one individual is financially clearly better off than the other? And what if we did not deal with small,
+        even numbers, but rather large and odd ones?""",
+        html.Br(),
+        "Another ", html.B("key concept of prospect theory is decreasing sensitivity"),":", 
+        " A loss of 50$ subtracted from a total amount of 1000$ will not hurt as much, as if we initially only had 100$, hence losing 50% of our total possession.", 
+        html.Br(),
+        html.Br(),
+        "In order to research these 2 aspects, we created 6 configurations for every scenario (1-4):",
+        html.Br(),
+        html.Br(),
+        "- Configuration 1: Original numbers scaled by factor Pi * 100",
+        html.Br(),
+        "- Configuration 2: Original numbers scaled by factor Pi * 42",
+        html.Br(),
+        "- Configuration 3: A is better off by 25$",
+        html.Br(),
+        "- Configuration 4: A is better off by 50$",
+        html.Br(),
+        "- Configuration 5: B is better off by 25$",
+        html.Br(),
+        "- Configuration 6: B is better off by 50$",
+        html.Br()]),
+    html.Div(
+        children = [
+            html.Div(
+                children = [
+                    html.H5("Select experiment design:", style = {'margin-left': '-75px'}),
+                    dcc.Dropdown(
+                        id = "prospect2-scenario-dropdown",
+                        options = [
+                            {"label": "Scenario 1: Segregation of gains", "value": 1},
+                            {"label": "Scenario 2: Integration of losses", "value": 2},
+                            {"label": "Scenario 3: Cancellation of losses against larger gains", "value": 3},
+                            {"label": "Scenario 4: Segregation of silver linings", "value": 4},
+                        ],
+                        value = 1,
+                        style = {'width': '75%'},
+                    ),
+                    dcc.Dropdown(
+                         id = "prospect2-configuration-dropdown",
+                            options = [
+                                {"label": "Configuration 1: Odd numbers 1", "value": 1},
+                                {"label": "Configuration 2: Odd numbers 2", "value": 2},
+                                {"label": "Configuration 3: A is better off by 25$", "value": 3},
+                                {"label": "Configuration 4: A is better off by 50$", "value": 4},
+                                {"label": "Configuration 5: B is better off by 25$", "value": 5},
+                                {"label": "Configuration 6: B is better off by 50$", "value": 6},
+                                ],
+                                value = 1,
+                                style = {'width': '75%'},
+                    ),
+                    dcc.Dropdown(
+                         id = "prospect2-model-dropdown",
+                         options = [
+                              {"label": "GPT-3.5-Turbo", "value": "gpt-3.5-turbo"},
+                                {"label": "GPT-4-1106-Preview", "value": "gpt-4-1106-preview"},
+                                {"label": "LLama-2-70b", "value": "llama-2-70b"},
+                            ],
+                            value = "gpt-3.5-turbo",
+                            style = {'width': '75%'},
+                    )],                 
+    
+                style = {'display': 'flex', 'flexDirection': 'column', 'align-items': 'center', 'width': '50%', 'align-self': 'center'},
+            ),
+            dcc.Graph(id = "prospect2-plot", style={'width': '70%', 'height': '60vh'}),
+        ],
+        style={'display': 'flex', 'flexDirection': 'row'})]
 
 
 # Sunk Cost Fallacy Page
@@ -920,6 +1004,7 @@ loss_aversion_page = [
 
 ### Callback for prospect page
 
+## Experiment 1
 # Scenario 1
 @app.callback(
      Output("prospect-plot1", "figure"),
@@ -959,21 +1044,30 @@ def update_prospect_plot3(selected_priming, selected_model):
 def update_prospect_plot4(selected_priming, selected_model):
         return plot_results(model = selected_model, priming = selected_priming, df = PT_probs, scenario = 4)
 
+## Experiment 2
+@app.callback(
+     Output("prospect2-plot", "figure"),
+     [Input("prospect2-scenario-dropdown", "value"),
+      Input("prospect2-configuration-dropdown", "value"),
+      Input("prospect2-model-dropdown", "value")]
+)
+def update_prospect2_plot(selected_scenario, selected_configuration, selected_model):
+    df = PT2_probs[PT2_probs["Configuration"] == selected_configuration]
+    return plot_results(model = selected_model, df = df, scenario = selected_scenario, priming = 0) # all experiments are unprimed
 
 
 # Callback for decoy page
 @app.callback(
     Output("decoy-plot-output", "figure"),
-    [Input("decoy-plot-dropdown", "value")]
+    [Input("decoy-scenario-dropdown", "value"),
+     Input("decoy-priming-dropdown", "value"),
+     Input("decoy-reordering-dropdown", "value"),
+     Input("decoy-model-dropdown", "value")]
 )
-def update_decoy_plot(selected_plot):
-    # Check if the selected plot exists in the dfs dictionary
-    if selected_plot in decoy_dfs:
-        # Call the plot_results function with the selected dataframe
-        return plot_results(decoy_dfs[selected_plot])
-    else:
-        # Return an empty figure
-        return []
+def update_decoy_plot(selected_scenario, selected_priming, selected_reordering, selected_model):
+    # Pre-select dataframe with desired answer design 
+    df = DE_probs[DE_probs["Reorder"] == selected_reordering]
+    return plot_results(scenario = selected_scenario, priming = selected_priming, model = selected_model, df = df)
     
     
 # Callback for Sunk Cost Fallacy Experiment 1
