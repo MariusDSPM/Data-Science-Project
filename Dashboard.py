@@ -202,7 +202,8 @@ def plot_sunk_cost_1(selected_temperature, selected_sunk_cost):
         barmode='group',
         xaxis=dict(title='Model'),
         yaxis=dict(title='Share', range=[0, 1.1]),
-        title=f"Shares for Answer Options (Sunk Cost: ${selected_sunk_cost}, Temperature: {selected_temperature})",
+        title=dict(text=f"Shares for Answer Options (Sunk Cost: ${selected_sunk_cost}, Temperature: {selected_temperature})",
+                   x=0.45),
         legend=dict(),
         bargap=0.3  # Gap between models
     )
@@ -257,7 +258,8 @@ def plot_sunk_cost_2(selected_temperature, selected_model):
         xaxis=dict(tickvals=np.arange(len(df.columns[cols_to_select:end_col+1])) + ((len(prompts) - 1) / 2 * bar_width),
                 ticktext=['$0', '$20', '$20 plus interest', '$75', '-$55']),
         yaxis=dict(title='Share', range=[0, 1.1]),
-        title=f'Shares for Answer Options (Model: {selected_model}, Temperature: {selected_temperature})',
+        title=dict(text=f'Shares for Answer Options (Model: {selected_model}, Temperature: {selected_temperature})',
+                   x=0.45),
         legend=dict(),
         bargap=0.3  # Gap between bars
     )
@@ -292,7 +294,8 @@ def plot_loss_aversion(selected_temperature):
         barmode='group',
         xaxis=dict(tickmode='array', tickvals=list(range(len(models))), ticktext=models),
         yaxis=dict(title='Shares for "B"'),
-        title='Shares for "B" (risk-seeking option) by Model and Scenario',
+        title=dict(text='Shares for "B" (risk-seeking option) by Model and Scenario',
+                   x=0.45),
         bargap=0.6  # Gap between bars
     )
     
@@ -736,19 +739,7 @@ sunk_cost_page = [
     
     # Experiment 1
     html.H3("Experiment 1"),
-    html.P(["""Assume that you have spent $90/$250/$10,000 for a ticket to a theater performance. \
-            Several weeks later you buy a $30 ticket to a rock concert. You think you will \
-                enjoy the rock concert more than the theater performance. As you are putting your \
-                    just-purchased rock concert ticket in your wallet, you notice that both events \
-                            are scheduled for the same evening. The tickets are non-transferable, nor \
-                                can they be exchanged. You can use only one of the tickets and not the other. \
-                                    Which ticket will you use? """,
-                                    html.Br(),  # Line break
-                                    html.Br(),  # Line break
-                                    "A: Theater performance.",
-                                    html.Br(),  # Line break
-                                    "B: Rock concert."
-    ]),
+    html.P(id='experiment-1-prompt'),
 
     html.Div(
         style={'display': 'flex', 'justify-content': 'space-between', 'align-items': 'center'},
@@ -789,10 +780,13 @@ sunk_cost_page = [
     html.P(["""Suppose you bought a case of good Bordeaux in the futures \
             market for $20 a bottle. The wine now sells at auction for about $75. \
                 You have decided to drink a bottle. Which of the following best captures \
-                    your feeling of the cost to you of drinking the bottle?""",
-                    html.Br(),  # Line break
-                    html.Br(),  # Line break
-                    "A: $0. I alreadey paid for it.",
+                    your feeling of the cost to you of drinking the bottle?"""
+    ]),
+    html.P('(Same answer options, but in different order):'),
+    html.Div([
+        html.Div([
+            html.H6('Answer Option Order 1', style={'margin-top': '15px'}),
+            html.P(["A: $0. I already paid for it.",
                     html.Br(),  # Line break
                     "B: $20, what I paid for.",
                     html.Br(),  # Line break
@@ -801,8 +795,36 @@ sunk_cost_page = [
                     "D: $75, what I could get if I sold the bottle.",
                     html.Br(),  # Line break
                     "E: -$55, I get to drink a bottle that is worth $75 that I only paid \
-                        $20 for so I save money by drinking the bottle."
+                        $20 for so I save money by drinking the bottle."]),
+        ], style={'width': '40%', 'display': 'inline-block', 'margin-bottom': '60px', 'vertical-align': 'top'}),
+
+        html.Div([
+            html.H6('Answer Option Order 2', style={'margin-top': '15px'}),
+            html.P(["A: $75 ...",
+                    html.Br(),  # Line break
+                    "B: -$55 ...",
+                    html.Br(),  # Line break
+                    "C: $0 ...",
+                    html.Br(),  # Line break
+                    "D: $20",
+                    html.Br(),  # Line break
+                    "E: $20, plus interest"]),
+        ], style={'width': '20%', 'display': 'inline-block', 'margin-bottom': '60px', 'vertical-align': 'top'}),
+
+        html.Div([
+            html.H6('Answer Option Order 3', style={'margin-top': '15px'}),
+            html.P(["A: -$55 ...",
+                    html.Br(),  # Line break
+                    "B: $75 ...",
+                    html.Br(),  # Line break
+                    "C: $20 plus interest",
+                    html.Br(),  # Line break
+                    "D: $0",
+                    html.Br(),  # Line break
+                    "E: $20 ..."]),
+        ], style={'width': '20%', 'display': 'inline-block', 'margin-bottom': '60px', 'vertical-align': 'top'}),
     ]),
+        
 
     html.Div(
         style={'display': 'flex', 'justify-content': 'space-between', 'align-items': 'center'},
@@ -956,13 +978,31 @@ def update_decoy_plot(selected_plot):
     
 # Callback for Sunk Cost Fallacy Experiment 1
 @app.callback(
-    Output("sunk-cost-plot-1-output", "figure"),
+    [Output("sunk-cost-plot-1-output", "figure"),
+     Output("experiment-1-prompt", "children")],
     [Input("Temperature_1", "value"),
      Input("Sunk-Cost", "value")]
 )
 def update_sunk_cost_plot_1(selected_temperature, selected_sunk_cost):
-    return plot_sunk_cost_1(selected_temperature, selected_sunk_cost)
+    figure = plot_sunk_cost_1(selected_temperature, selected_sunk_cost)
     
+    # Update the description of Experiment 1
+    experiment_description = [
+        f"""Assume that you have spent ${selected_sunk_cost} for a ticket to a theater performance. \
+        Several weeks later you buy a $30 ticket to a rock concert. You think you will \
+        enjoy the rock concert more than the theater performance. As you are putting your \
+        just-purchased rock concert ticket in your wallet, you notice that both events \
+        are scheduled for the same evening. The tickets are non-transferable, nor \
+        can they be exchanged. You can use only one of the tickets and not the other. \
+        Which ticket will you use? """,
+        html.Br(),  # Line break
+        html.Br(),  # Line break
+        "A: Theater performance.",
+        html.Br(),  # Line break
+        "B: Rock concert."
+    ]
+
+    return figure, experiment_description
     
 # Callback for Sunk Cost Fallacy Experiment 2
 @app.callback(
