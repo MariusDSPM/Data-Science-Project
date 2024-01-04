@@ -15,6 +15,17 @@ import pandas as pd
 from tqdm import tqdm
 import replicate
 
+
+##### To-Do #####
+# Adapt plotting functions to new data format (PT, DE, more?)
+# Output prompt in live experiments
+# Output/visualize original results in live experiments
+# Return dataframe in live experiments
+# Right now, live experiment (PT) returns new window with graph
+# Hoverinfo for static graphs (?) in live experiments
+# stuff I could not think of in less than 2 minutes
+
+
 # Manage installation of not yet installed packages for the user
 
 ########################################
@@ -1562,7 +1573,7 @@ def update_decoy_plot(n_clicks, selected_scenario, selected_priming, selected_re
     if n_clicks is not None:
     # Pre-select dataframe with desired answer design 
         df = DE_probs[DE_probs["Reorder"] == selected_reordering]
-        n_clicks == None
+        n_clicks == None # not neccesary I believe
     return plot_results(scenario = selected_scenario, priming = selected_priming, model = selected_model, df = df)
     
     
@@ -1681,7 +1692,7 @@ def update_prospect_live_plot(n_clicks, selected_scenario, selected_model, selec
             results, probs = PT_run_experiment_llama_dashboard(experiment_id, selected_iterations, selected_temperature)
         else:
             results, probs = PT_run_experiment_dashboard(experiment_id, selected_iterations, selected_temperature)
-
+        n_clicks == None
         return PT_plot_results(probs)
 
 
