@@ -1,21 +1,7 @@
-"""
-This app creates a simple sidebar layout using inline style arguments and the
-dbc.Nav component.
-
-dcc.Location is used to track the current location, and a callback uses the
-current location to render the appropriate page content. The active prop of
-each NavLink is set automatically according to the current pathname. To use
-this feature you must install dash-bootstrap-components >= 0.11.0.
-
-For more details on building multi-page Dash applications, check out the Dash
-documentation: https://dash.plot.ly/urls
-"""
-
-
 # Import required libraries 
 import dash
 import dash_bootstrap_components as dbc
-from dash import Input, Output, dcc, html
+from dash import Input, Output, dcc, html, State
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -409,6 +395,8 @@ decoy_page = [
                             value = "gpt-3.5-turbo",
                             style={'width': '75%'},
                     ),
+                    # Add a button to trigger calback
+                    html.Button('Update Plot', id = 'update-button', n_clicks = 0),
                          ],
             style={'display': 'flex', 'flexDirection': 'column', 'align-items': 'center', 'width': '50%', 'align-self': 'center'},
             ),
@@ -1059,14 +1047,18 @@ def update_prospect2_plot(selected_scenario, selected_configuration, selected_mo
 # Callback for decoy page
 @app.callback(
     Output("decoy-plot-output", "figure"),
-    [Input("decoy-scenario-dropdown", "value"),
-     Input("decoy-priming-dropdown", "value"),
-     Input("decoy-reordering-dropdown", "value"),
-     Input("decoy-model-dropdown", "value")]
-)
-def update_decoy_plot(selected_scenario, selected_priming, selected_reordering, selected_model):
+    Input("update-button", "n_clicks"),
+    [State("decoy-scenario-dropdown", "value"),
+     State("decoy-priming-dropdown", "value"),
+     State("decoy-reordering-dropdown", "value"),
+     State("decoy-model-dropdown", "value")]
+     )
+def update_decoy_plot(n_clicks, selected_scenario, selected_priming, selected_reordering, selected_model):
+    # Check if the button was clicked
+    if n_clicks is not None:
     # Pre-select dataframe with desired answer design 
-    df = DE_probs[DE_probs["Reorder"] == selected_reordering]
+        df = DE_probs[DE_probs["Reorder"] == selected_reordering]
+        n_clicks == None
     return plot_results(scenario = selected_scenario, priming = selected_priming, model = selected_model, df = df)
     
     
@@ -1119,7 +1111,8 @@ def update_loss_averion_plot(selected_temperature):
         
 
 # Callback for navigation bar
-@app.callback(Output("page-content", "children"), [Input("url", "pathname")])
+@app.callback(Output("page-content", "children"),
+             [Input("url", "pathname")])
 def render_page_content(pathname):
     if pathname == "/":
         return html.P(start_page)
@@ -1150,6 +1143,7 @@ def render_page_content(pathname):
         ],
         className="p-3 bg-light rounded-3",
     )
+
 
 
 if __name__ == "__main__":
