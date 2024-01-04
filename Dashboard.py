@@ -2,16 +2,34 @@
 import dash
 import dash_bootstrap_components as dbc
 from dash import Input, Output, dcc, html, State
-import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 import os
 from PIL import Image
+from openai import OpenAI
+import openai
+import matplotlib.pyplot as plt
+import os 
+import numpy as np
+import pandas as pd
+from tqdm import tqdm
+import replicate
+
+# Manage installation of not yet installed packages for the user
+
+########################################
+# Right now, this helps us to test the live experiment. Later we want the user to enter its API key
+
+# Get openAI API key (previously saved as environmental variable)
+openai.api_key = os.environ["OPENAI_API_KEY"]
+
+# Set client
+client = OpenAI()
+########################################
 
 
 
-#########################################  Data Import Functions  #########################################
+########################################  Data Import Functions  ########################################
 
 
 
@@ -55,7 +73,7 @@ def get_loss_aversion_data(selected_temperature):
         
         
 
-#########################################  Data Plotting Functions  #########################################
+########################################  Data Plotting Functions  ########################################
 
 # Function for plotting results of decoy effect/prospect theory experiments
 def plot_results(model, priming, df, scenario):
@@ -248,10 +266,402 @@ def plot_loss_aversion(selected_temperature):
     
     return fig
 
+########################################  Prompts  ########################################
+PT_prompt_1 = """Mr. A was given tickets involving the World Series. He won 50$ in one lottery and $25 in the other. 
+          Mr. B was given a ticket to a single, larger World Series lottery. He won $75. Based solely on this information, Who is happier? 
+          A: Mister A
+          B: Mister B
+          C: No difference.         
+          Which option would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
+PT_prompt_2 = """Mr. A received a letter from the IRS saying that he made a minor arithmetical mistake on his tax return and owed $100. 
+         He received a similar letter the same day from his state income tax authority saying he owed $50. There were no other repercussions from either mistake. 
+         Mr. B received a letter from the IRS saying that he made a minor arithmetical mistake on his tax return and owed $150. There were no other repercussions from his mistake. 
+         Based solely on this information, who was more upset? 
+         A: Mister A
+         B: Mister B
+         C: No difference.
+         Which option would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
+PT_prompt_3 = """Mr. A bought his first New York State lottery ticket and won $100. Also, in a freak accident, he damaged the rug in his apartment and had to pay the landlord $80.
+         Mr. B bought his first New York State lottery ticket and won $20. Based solely on this information, who is happier? 
+         A: Mister A
+         B: Mister B
+         C: No difference.
+         Which option would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
+PT_prompt_4 = """Mr. A's car was damaged in a parking lot. He had to spend $200 to repair the damage. The same day the car was damaged, he won $25 in the office football pool.
+         Mr. B's car was damaged in a parking lot. He had to spend $175 to repair the damage. Based solely on this information, who is more upset?
+         A: Mister A
+         B: Mister B
+         C: No difference.
+         Which option would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
+PT_prompt_5 = """You are a market researcher and focus on Prospect Theory and Mental Accounting. In a survey you are presented the following situation: 
+          Mr. A was given tickets involving the World Series. He won 50$ in one lottery and 25$ in the other. 
+          Mr. B was given a ticket to a single, larger World Series lottery. He won 75$. Based solely on this information, who is happier?
+          A: Mister A
+          B: Mister B
+          C: No difference.
+          Which option would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
+PT_prompt_6 = """You are a market researcher and focus on Prospect Theory and Mental Accounting. In a survey you are presented the following situation:
+         Mr. A received a letter from the IRS saying that he made a minor arithmetical mistake on his tax return and owed $100. 
+         He received a similar letter the same day from his state income tax authority saying he owed $50. There were no other repercussions from either mistake. 
+         Mr. B received a letter from the IRS saying that he made a minor arithmetical mistake on his tax return and owed $150. There were no other repercussions from his mistake. 
+         Based solely on this information, who was more upset? 
+         A: Mister A
+         B: Mister B
+         C: No difference.
+         Which option would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
+PT_prompt_7 = """You are a market researcher and focus on Prospect Theory and Mental Accounting. In a survey you are presented the following situation:
+         Mr. A bought his first New York State lottery ticket and won $100. Also, in a freak accident, he damaged the rug in his apartment and had to pay the landlord $80.
+         Mr. B bought his first New York State lottery ticket and won $20? Based solely on this information, who is happier?
+         A: Mister A
+         B: Mister B
+         C: No difference.
+         Which option would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
+PT_prompt_8 = """You are a market researcher and focus on Prospect Theory and Mental Accounting. In a survey you are presented the following situation:
+         Mr. A's car was damaged in a parking lot. He had to spend $200 to repair the damage. The same day the car was damaged, he won $25 in the office football pool.
+         Mr. B's car was damaged in a parking lot. He had to spend $175 to repair the damage. Based solely on this information, who is more upset?
+         A: Mister A
+         B: Mister B
+         C: No difference.
+         Which option would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
+
+######################################## Dictionaries  ########################################
+# To make our results comparable to the original study, we compute original answer probabilities
+PT_p_scenario1 = [f"p(A): {round((56/(56+16+15)*100), 2)}%", f"p(B): {round((16/(56+16+15)*100), 2)}%", f"p(C): {round((15/(56+16+15)*100), 2)}%"]
+PT_p_scenario2 = [f"p(A): {round((66/(66+14+7)*100), 2)}%", f"p(B): {round((14/(66+14+7)*100), 2)}%", f"p(C): {round((7/(66+14+7)*100), 2)}%"]
+PT_p_scenario3 = [f"p(A): {round((22/(22+61+4)*100), 2)}%", f"p(B): {round((61/(22+61+4)*100), 2)}%", f"p(C): {round((4/(22+61+4)*100), 2)}%"]
+PT_p_scenario4 = [f"p(A): {round((19/(19+63+5)*100), 2)}%", f"p(B): {round((63/(19+63+5)*100), 2)}%", f"p(C): {round((5/(19+63+5)*100), 2)}%"]
+
+# Dictionary that returns the literal prompt for a given experiment id (used in function call). key: experiment_id, value: prompt
+PT_experiment_prompts_dict = {
+    "PT_1_1": PT_prompt_1,
+    "PT_1_2": PT_prompt_2,
+    "PT_1_3": PT_prompt_3,
+    "PT_1_4": PT_prompt_4,
+    "PT_1_5": PT_prompt_5,
+    "PT_1_6": PT_prompt_6,
+    "PT_1_7": PT_prompt_7,
+    "PT_1_8": PT_prompt_8,
+    "PT_2_1": PT_prompt_1,
+    "PT_2_2": PT_prompt_2,
+    "PT_2_3": PT_prompt_3,
+    "PT_2_4": PT_prompt_4,
+    "PT_2_5": PT_prompt_5,
+    "PT_2_6": PT_prompt_6,
+    "PT_2_7": PT_prompt_7,
+    "PT_2_8": PT_prompt_8,
+    "PT_3_1": PT_prompt_1,
+    "PT_3_2": PT_prompt_2,
+    "PT_3_3": PT_prompt_3,
+    "PT_3_4": PT_prompt_4,
+    "PT_3_5": PT_prompt_5,
+    "PT_3_6": PT_prompt_6,
+    "PT_3_7": PT_prompt_7,
+    "PT_3_8": PT_prompt_8,
+}
+
+# The following dictionary is only used for a check in the function calls.
+# It returns the variable name of the prompt that was used in the experiment. key: experiment_id, value: prompt_name
+PT_prompt_ids_dict = {
+    "PT_1_1": "PT_prompt_1",
+    "PT_1_2": "PT_prompt_2",
+    "PT_1_3": "PT_prompt_3",
+    "PT_1_4": "PT_prompt_4",
+    "PT_1_5": "PT_prompt_5",
+    "PT_1_6": "PT_prompt_6",
+    "PT_1_7": "PT_prompt_7",
+    "PT_1_8": "PT_prompt_8",
+    "PT_2_1": "PT_prompt_1",
+    "PT_2_2": "PT_prompt_2",
+    "PT_2_3": "PT_prompt_3",
+    "PT_2_4": "PT_prompt_4",
+    "PT_2_5": "PT_prompt_5",
+    "PT_2_6": "PT_prompt_6",
+    "PT_2_7": "PT_prompt_7",
+    "PT_2_8": "PT_prompt_8",
+    "PT_3_1": "PT_prompt_1",
+    "PT_3_2": "PT_prompt_2",
+    "PT_3_3": "PT_prompt_3",
+    "PT_3_4": "PT_prompt_4",
+    "PT_3_5": "PT_prompt_5",
+    "PT_3_6": "PT_prompt_6",
+    "PT_3_7": "PT_prompt_7",
+    "PT_3_8": "PT_prompt_8",
+}
+
+# Dictionary to look up which model to use for a given experiment id (used in function call). key: experiment id, value: model name
+PT_model_dict = {
+    "PT_1_1": "gpt-3.5-turbo",
+    "PT_1_2": "gpt-3.5-turbo",
+    "PT_1_3": "gpt-3.5-turbo",
+    "PT_1_4": "gpt-3.5-turbo",
+    "PT_1_5": "gpt-3.5-turbo",
+    "PT_1_6": "gpt-3.5-turbo",
+    "PT_1_7": "gpt-3.5-turbo",
+    "PT_1_8": "gpt-3.5-turbo",
+    "PT_2_1": "gpt-4-1106-preview",
+    "PT_2_2": "gpt-4-1106-preview",
+    "PT_2_3": "gpt-4-1106-preview",
+    "PT_2_4": "gpt-4-1106-preview",
+    "PT_2_5": "gpt-4-1106-preview",
+    "PT_2_6": "gpt-4-1106-preview",
+    "PT_2_7": "gpt-4-1106-preview",
+    "PT_2_8": "gpt-4-1106-preview",
+    "PT_3_1": 'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3',
+    "PT_3_2": 'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3',
+    "PT_3_3": 'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3',
+    "PT_3_4": 'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3',
+    "PT_3_5": 'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3',
+    "PT_3_6": 'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3',
+    "PT_3_7": 'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3',
+    "PT_3_8": 'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3',
+    }
+
+# Dictionary to look up, what the study design of each experiment was. key: experiment id, value: experiment design 
+PT_experiment_dict = {
+    "PT_1_1": f"Experiment PT_1_1 uses {PT_model_dict['PT_1_1']}, deals with the segregation of gains and is unprimed.",
+    "PT_1_2": f"Experiment PT_1_2 uses {PT_model_dict['PT_1_2']}, deals with the integration of losses and is unprimed.",
+    "PT_1_3": f"Experiment PT_1_3 uses {PT_model_dict['PT_1_3']}, deals with the cancellation of losses against larger gains and is unprimed.",
+    "PT_1_4": f"Experiment PT_1_4 uses {PT_model_dict['PT_1_4']}, deals with the segrgation of *silver linings* and is unprimed.",
+    "PT_1_5": f"Experiment PT_1_5 uses {PT_model_dict['PT_1_5']}, deals with the segregation of gains and is primed.",
+    "PT_1_6": f"Experiment PT_1_6 uses {PT_model_dict['PT_1_6']}, deals with the integration of losses and is primed.",
+    "PT_1_7": f"Experiment PT_1_7 uses {PT_model_dict['PT_1_7']}, deals with the cancellation of losses against larger gains and is primed.",
+    "PT_1_8": f"Experiment PT_1_8 uses {PT_model_dict['PT_1_8']}, deals with the segregation of *silver linings*, and is primed.",
+    "PT_2_1": f"Experiment PT_1_1 uses {PT_model_dict['PT_2_1']}, deals with the segregation of gains and is unprimed.",
+    "PT_2_2": f"Experiment PT_1_2 uses {PT_model_dict['PT_2_2']}, deals with the integration of losses and is unprimed.",
+    "PT_2_3": f"Experiment PT_1_3 uses {PT_model_dict['PT_2_3']}, deals with the cancellation of losses against larger gains and is unprimed.",
+    "PT_2_4": f"Experiment PT_1_4 uses {PT_model_dict['PT_2_4']}, deals with the segrgation of *silver linings* and is unprimed.",
+    "PT_2_5": f"Experiment PT_1_5 uses {PT_model_dict['PT_2_5']}, deals with the segregation of gains and is primed.",
+    "PT_2_6": f"Experiment PT_1_6 uses {PT_model_dict['PT_2_6']}, deals with the integration of losses and is primed.",
+    "PT_2_7": f"Experiment PT_1_7 uses {PT_model_dict['PT_2_7']}, deals with the cancellation of losses against larger gains and is primed.",
+    "PT_2_8": f"Experiment PT_1_8 uses {PT_model_dict['PT_2_8']}, deals with the segregation of *silver linings*, and is primed.",
+    "PT_3_1": f"Experiment PT_1_1 uses {PT_model_dict['PT_3_1']}, deals with the segregation of gains and is unprimed.",
+    "PT_3_2": f"Experiment PT_1_2 uses {PT_model_dict['PT_3_2']}, deals with the integration of losses and is unprimed.",
+    "PT_3_3": f"Experiment PT_1_3 uses {PT_model_dict['PT_3_3']}, deals with the cancellation of losses against larger gains and is unprimed.",
+    "PT_3_4": f"Experiment PT_1_4 uses {PT_model_dict['PT_3_4']}, deals with the segrgation of *silver linings* and is unprimed.",
+    "PT_3_5": f"Experiment PT_1_5 uses {PT_model_dict['PT_3_5']}, deals with the segregation of gains and is primed.",
+    "PT_3_6": f"Experiment PT_1_6 uses {PT_model_dict['PT_3_6']}, deals with the integration of losses and is primed.",
+    "PT_3_7": f"Experiment PT_1_7 uses {PT_model_dict['PT_3_7']}, deals with the cancellation of losses against larger gains and is primed.",
+    "PT_3_8": f"Experiment PT_1_8 uses {PT_model_dict['PT_3_8']}, deals with the segregation of *silver linings*, and is primed.",
+}
+
+# Dictionary to look up the original results of the experiments. key: experiment id, value: original result
+PT_results_dict = {
+    "PT_1_1": PT_p_scenario1,
+    "PT_1_2": PT_p_scenario2,
+    "PT_1_3": PT_p_scenario3,
+    "PT_1_4": PT_p_scenario4,
+    "PT_1_5": PT_p_scenario1,
+    "PT_1_6": PT_p_scenario2,
+    "PT_1_7": PT_p_scenario3,
+    "PT_1_8": PT_p_scenario4,
+    "PT_2_1": PT_p_scenario1,
+    "PT_2_2": PT_p_scenario2,
+    "PT_2_3": PT_p_scenario3,
+    "PT_2_4": PT_p_scenario4,
+    "PT_2_5": PT_p_scenario1,
+    "PT_2_6": PT_p_scenario2,
+    "PT_2_7": PT_p_scenario3,
+    "PT_2_8": PT_p_scenario4,
+    "PT_3_1": PT_p_scenario1,
+    "PT_3_2": PT_p_scenario2,
+    "PT_3_3": PT_p_scenario3,
+    "PT_3_4": PT_p_scenario4,
+    "PT_3_5": PT_p_scenario1,
+    "PT_3_6": PT_p_scenario2,
+    "PT_3_7": PT_p_scenario3,
+    "PT_3_8": PT_p_scenario4,
+}
+
+# Dictionary to look up the scenario number of a given experiment ID. key: experiment id, value: scenario number
+PT_scenario_dict = {
+    "PT_1_1": 1,
+    "PT_1_2": 2,
+    "PT_1_3": 3,
+    "PT_1_4": 4,
+    "PT_1_5": 1,
+    "PT_1_6": 2,
+    "PT_1_7": 3,
+    "PT_1_8": 4,
+    "PT_2_1": 1,
+    "PT_2_2": 2,
+    "PT_2_3": 3,
+    "PT_2_4": 4,
+    "PT_2_5": 1,
+    "PT_2_6": 2,
+    "PT_2_7": 3,
+    "PT_2_8": 4,
+    "PT_3_1": 1,
+    "PT_3_2": 2,
+    "PT_3_3": 3,
+    "PT_3_4": 4,
+    "PT_3_5": 1,
+    "PT_3_6": 2,
+    "PT_3_7": 3,
+    "PT_3_8": 4,
+}   
+
+# Dictionary to look up, whether an experiment used a primed or unprimed prompt. key: experiment id, value: 1 if primed, 0 if unprimed
+PT_priming_dict = {
+    "PT_1_1": 0,
+    "PT_1_2": 0,
+    "PT_1_3": 0,
+    "PT_1_4": 0,
+    "PT_1_5": 1,
+    "PT_1_6": 1,
+    "PT_1_7": 1,
+    "PT_1_8": 1,
+    "PT_2_1": 0,
+    "PT_2_2": 0,
+    "PT_2_3": 0,
+    "PT_2_4": 0,
+    "PT_2_5": 1,
+    "PT_2_6": 1,
+    "PT_2_7": 1,
+    "PT_2_8": 1,
+    "PT_3_1": 0,
+    "PT_3_2": 0,
+    "PT_3_3": 0,
+    "PT_3_4": 0,
+    "PT_3_5": 1,
+    "PT_3_6": 1,
+    "PT_3_7": 1,
+    "PT_3_8": 1,
+}
 
 
+######################################## Experiment functions  ########################################
+# Prospect Theory experiment for openAI models
+# progress bar deleted for now 
+def PT_run_experiment_dashboard(experiment_id, n, temperature):
 
+    """
+    Function to query ChatGPT multiple times with a survey having answers designed as: A, B, C.
+    
+    Args:
+        experiment_id (str): ID of the experiment to be run. Contains info about prompt and model
+        n (int): Number of queries to be made
+        temperature (int): Degree of randomness with range 0 (deterministic) to 2 (random)
+        max_tokens (int): Maximum number of tokens in response object
+        
+    Returns:
+        results (list): List containing count of answers for each option, also containing experiment_id, temperature and number of observations
+        probs (list): List containing probability of each option being chosen, also containing experiment_id, temeperature and number of observations
+    """
+    
+    answers = []
+    for _ in range(n): 
+        response = client.chat.completions.create(
+            model = PT_model_dict[experiment_id], 
+            max_tokens = 1,
+            temperature = temperature, # range is 0 to 2
+            messages = [
+            {"role": "system", "content": "Only answer with the letter of the alternative you would choose without any reasoning."},        
+            {"role": "user", "content": PT_experiment_prompts_dict[experiment_id]},
+                   ])
 
+        # Store the answer in the list
+        answer = response.choices[0].message.content
+        answers.append(answer.strip())
+        # Update progress bar (given from either temperature loop, or set locally)
+        #progress_bar.update(1)
+
+    # Counting results
+    A = answers.count("A")
+    B = answers.count("B")
+    C = answers.count("C")
+
+    # Count of "correct" answers, sums over indicator function thack checks if answer is either A, B or C
+    len_correct = sum(1 for ans in answers if ans in ["A", "B", "C"])
+
+    # Collecting results in a list
+    results = pd.DataFrame([experiment_id, temperature, A, B, C, len_correct, PT_model_dict[experiment_id], PT_scenario_dict[experiment_id], PT_priming_dict[experiment_id]])
+    results = results.set_index(pd.Index(["Experiment", "Temp", "p(A)", "p(B)", "p(C)", "Obs.", "Model", "Scenario", "Priming"]))
+
+    # Getting percentage each answer
+    p_a = f"{(A / len_correct) * 100:.2f}%"
+    p_b = f"{(B / len_correct) * 100:.2f}%"
+    p_c = f"{(C / len_correct) * 100:.2f}%"
+
+    # Collect probabilities in a dataframe
+    probs = pd.DataFrame([experiment_id, temperature, p_a, p_b, p_c, len_correct, PT_model_dict[experiment_id], PT_scenario_dict[experiment_id], PT_priming_dict[experiment_id]])
+    probs = probs.set_index(pd.Index(["Experiment", "Temp", "p(A)", "p(B)", "p(C)", "Obs.", "Model", "Scenario", "Priming"]))
+    
+    # Give out results
+    return results, probs
+
+# Prospect Theory experiment for Meta's LLama model
+def PT_run_experiment_llama_dashboard(experiment_id, n, temperature):
+    answers = []
+    for _ in range(n):
+        response = replicate.run(
+            PT_model_dict[experiment_id],
+            input = {
+                "system_prompt": "Only answer with the letter of the alternative you would choose without any reasoning.",
+                "temperature": temperature,
+                "max_new_tokens": 2, 
+                "prompt": PT_experiment_prompts_dict[experiment_id]
+            }
+        )
+        # Grab answer and append to list
+        answer = "" # Set to empty string, otherwise it would append the previous answer to the new one
+        for item in response:
+            answer = answer + item
+        answers.append(answer.strip())
+
+        # Update progress bar
+        #progress_bar.update(1)
+
+    # Counting results
+    A = answers.count("A") # set to Q
+    B = answers.count("B") # set to X
+    C = answers.count("C") # set to Y
+
+    # Count of "correct" answers, sums over indicator function thack checks if answer is either A, B or C
+    len_correct = sum(1 for ans in answers if ans in ["A", "B", "C"])
+
+    # Collecting results in a list
+    results = pd.DataFrame([experiment_id, temperature, A, B, C, len_correct, PT_model_dict[experiment_id], PT_scenario_dict[experiment_id], PT_priming_dict[experiment_id]])
+    results = results.set_index(pd.Index(["Experiment", "Temp", "p(A)", "p(B)", "p(C)", "Obs.", "Model", "Scenario", "Priming"]))
+
+    # Getting percentage each answer
+    p_a = f"{(A / len_correct) * 100:.2f}%"
+    p_b = f"{(B / len_correct) * 100:.2f}%"
+    p_c = f"{(C / len_correct) * 100:.2f}%"
+
+    # Collect probabilities in a dataframe
+    probs = pd.DataFrame([experiment_id, temperature, p_a, p_b, p_c, len_correct, PT_model_dict[experiment_id], PT_scenario_dict[experiment_id], PT_priming_dict[experiment_id]])
+    probs = probs.set_index(pd.Index(["Experiment", "Temp", "p(A)", "p(B)", "p(C)", "Obs.", "Model", "Scenario", "Priming"]))
+    
+    # Give out results
+    return results, probs
+
+# Function to plot results of Prospect Theory experiment
+def PT_plot_results(df):
+    
+    # Get experiment id and model name for plot title from dictionaries
+    experiment_id = df.iloc[0, 0]
+    model = PT_model_dict[experiment_id]
+    
+    X = df.loc["Temp"]
+    p_a = df.loc["p(A)"].str.rstrip('%').astype('float')  # Convert percentages to float
+    p_b = df.loc["p(B)"].str.rstrip('%').astype('float')
+    p_c = df.loc["p(C)"].str.rstrip('%').astype('float')
+
+    X_axis = np.arange(len(X)) 
+
+    plt.figure(figsize = (10, 5))
+    ax = plt.gca()
+    ax.bar(X_axis- 0.25, p_a, 0.25, label = 'p(A)', color = "#8C1515") 
+    ax.bar(X_axis, p_b, 0.25,  label = 'p(B)', color = "#507FAB") 
+    ax.bar(X_axis+ 0.25 , p_c,  0.25, label = 'p(C)', color = '#D9A84A')
+
+    ax.set_xticks(X_axis, X)
+    ax.set_xlabel("Temperature")
+    ax.set_ylabel("Probability (%)")
+    ax.set_ylim(0, 110)
+    ax.set_title(f"Distribution of answers per temperature value for experiment {experiment_id} using {model}")
+    ax.legend()  
+    plt.show()
 
 # Initialize the app
 app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -288,16 +698,28 @@ sidebar = html.Div(
                 dbc.DropdownMenu(
             [
                 dbc.DropdownMenuItem("Overview", href = "/experiments/overview"),
-                dbc.DropdownMenuItem("Decoy Effect", href="/experiments/decoy"),
-                dbc.DropdownMenuItem("Prospect Theory", href="/experiments/prospect"),
+                dbc.DropdownMenuItem("Decoy Effect", href="/experiments/decoy-effect"),
+                dbc.DropdownMenuItem("Prospect Theory", href="/experiments/prospect-theory"),
                 dbc.DropdownMenuItem("Sunk Cost Fallacy", href="/experiments/sunk-cost"),
                 dbc.DropdownMenuItem("Ultimatum Game", href="/experiments/ultimatum"),
                 dbc.DropdownMenuItem("Loss Aversion", href="/experiments/loss-aversion"),
             ],
-            label="Experiments",
-            nav=True,
+            label = "Experiments",
+            nav = True,
         ),
-                dbc.NavLink("Live Experiment", href="/page-2", active="exact"),
+                dbc.DropdownMenu(
+            [
+                dbc.DropdownMenuItem("Overview", href = "/live-experiment/overview"),
+                dbc.DropdownMenuItem("Prospect Theory", href = "/live-experiment/prospect-theory"),
+                dbc.DropdownMenuItem("Decoy Effect", href = "/live-experiment/decoy-effect"),
+                dbc.DropdownMenuItem("Sunk Cost Fallacy", href = "live-experiment/sunk-cost"),
+                dbc.DropdownMenuItem("Ultimatum Game", href = "/live-experiment/ultimatum"),
+                dbc.DropdownMenuItem("Loss Aversion", href = "/live-experiment/loss-aversion"),
+                dbc.DropdownMenuItem("Individual Experiment", href = "/live-experiment/individual"),
+            ],       
+            label = "Live Experiment",
+            nav = True,
+        ),
                 dbc.NavLink("Chatbot", href="/page-3", active="exact"),
             ],
             vertical=True,
@@ -346,7 +768,7 @@ decoy_page = [
             html.Br(), 
             "When presented with ", html.B("all three options"), " Ariely found, that ", html.B("84%"), " of the participants chose option ", html.B("C"), " while only ", html.B("16%"), " chose option ", html.B("A"),".",
             html.Br(),
-            "However, once ", html.B("option B was removed"), " and the choice had to be made only between A and C, ", html.B("68%"), " of the participants chose option ", html.B("A"), " while only ", html.B("32%"), "chose option ", html.B("C"),".",
+            "However, once ", html.B("option B was removed"), " and the choice had to be made only between A and C, ", html.B("68%"), " of the participants chose option ", html.B("A"), " while only ", html.B("32%"), " chose option ", html.B("C"),".",
             html.Br(),
             html.Br(),
             """In the experiments below, we examine how various Large Language Models react to this kind of experiment. We therefore queried 3 different models over a range of possible 
@@ -987,8 +1409,90 @@ loss_aversion_page = [
     )
 ]
 
-################################################## Callbacks ##################################################
 
+# Individual Prospect Theory Page
+# Decoy Page
+individual_prospect_page = [
+    html.H1("Prospect Theory Live Experiment", className="page-heading"), 
+    html.Hr(),
+    html.P("""Choose an experiment configuration from the options below and run the experiment yourself. You can choose 4 different scenarios, 3 different models and 
+           primed vs. unprimed prompts."""),
+    html.Br(),
+    html.Div(
+        children=[
+            html.Div(
+                children=[
+                    dcc.Dropdown(
+                         id = "prospect-live-scenario-dropdown",
+                         options = [
+                              {"label": "Scenario 1: Segregation of gains", "value": 1},
+                              {"label": "Scenario 2: Integration of losses", "value": 2},
+                              {"label": "Scenario 3: Cancellation of losses against larger gains", "value": 3},
+                              {"label": "Scenario 4: Segregation of silver linings", "value": 4},
+                         ],
+                         value = 1,
+                         style={'width': '75%'},
+                    ),
+                    dcc.Dropdown(
+                         id = "prospect-live-model-dropdown",
+                         options = [
+                              {"label": "GPT-3.5-Turbo", "value": "gpt-3.5-turbo"},
+                              {"label": "GPT-4-1106-Preview", "value": "gpt-4-1106-preview"},
+                              {"label": "LLama-2-70b", "value": "llama-2-70b"},
+                            ],
+                            value = "gpt-3.5-turbo",
+                            style={'width': '75%'},
+                    ),
+                    dcc.Dropdown(
+                         id = "prospect-live-priming-dropdown",
+                         options = [
+                              {"label": "Unprimed", "value": 0},
+                              {"label": "Primed", "value": 1},
+                            ],
+                            value = 0,
+                            style={'width': '75%'},
+                    ),
+                    html.Div(
+                        [    
+                            dbc.Label("Select number of iterations"),                
+                            dbc.Input(
+                            id = "prospect-live-iterations", 
+                            type = "number",
+                            value = 0, 
+                            min = 0, 
+                            max = 1000, 
+                            step = 1
+                            ),
+                        ]
+                    ),
+
+                    html.Div(
+                        [
+                            dbc.Label("Select Temperature value"),             
+                            dcc.Slider(
+                                id="prospect-live-temperature",
+                                min=0.01,
+                                max=2,
+                                step=0.1,
+                                marks={0.01: '0.01', 0.5: '0.5', 1: '1', 1.5: '1.5', 2: '2'},
+                                value=0.01,
+                            ),
+                        ]
+                    ),
+
+                    # Add a button to trigger calback
+                    html.Button('Update Plot', id = 'update-button', n_clicks = 0),
+                         ],
+            style={'display': 'flex', 'flexDirection': 'column', 'align-items': 'center', 'width': '50%', 'align-self': 'center'},
+            ),
+        dcc.Graph(id="prospect-live-output", style={'width': '70%', 'height': '60vh'}),
+        ],
+        
+    style={'display': 'flex', 'flexDirection': 'row'})]
+
+
+
+################################################## Callbacks ##################################################
 
 ### Callback for prospect page
 
@@ -1108,7 +1612,78 @@ def update_sunk_cost_plot_2(selected_temperature, selected_model):
 def update_loss_averion_plot(selected_temperature):
     return plot_loss_aversion(selected_temperature)
 
+#  Callback for Individual Prospect Theory Experiment
+@app.callback(
+    Output("prospect-live-output", "figure"),
+    [Input("update-button", "n_clicks")],
+    [State("prospect-live-scenario-dropdown", "value"),
+     State("prospect-live-model-dropdown", "value"),
+     State("prospect-live-priming-dropdown", "value"),
+     State("prospect-live-iterations", "value"),
+     State("prospect-live-temperature", "value")]
+     )
+def update_prospect_live_plot(n_clicks, selected_scenario, selected_model, selected_priming, selected_iterations, selected_temperature):
+    # Check if the button was clicked
+    if n_clicks is not None:
+        if selected_scenario == 1 and selected_model == "gpt-3.5-turbo" and selected_priming == 0:
+            experiment_id = "PT_1_1"
+        elif selected_scenario == 2 and selected_model == "gpt-3.5-turbo" and selected_priming == 0:
+            experiment_id = "PT_1_2"
+        elif selected_scenario == 3 and selected_model == "gpt-3.5-turbo" and selected_priming == 0:
+            experiment_id = "PT_1_3"
+        elif selected_scenario == 4 and selected_model == "gpt-3.5-turbo" and selected_priming == 0:
+            experiment_id = "PT_1_4"
+        elif selected_scenario == 1 and selected_model == "gpt-3.5-turbo" and selected_priming == 1:
+            experiment_id = "PT_1_5"
+        elif selected_scenario == 2 and selected_model == "gpt-3.5-turbo" and selected_priming == 1:
+            experiment_id = "PT_1_6"
+        elif selected_scenario == 3 and selected_model == "gpt-3.5-turbo" and selected_priming == 1:
+            experiment_id = "PT_1_7"
+        elif selected_scenario == 4 and selected_model == "gpt-3.5-turbo" and selected_priming == 1:
+            experiment_id = "PT_1_8"
+        elif selected_scenario == 1 and selected_model == "gpt-4-1106-preview" and selected_priming == 0:
+            experiment_id = "PT_2_1"
+        elif selected_scenario == 2 and selected_model == "gpt-4-1106-preview" and selected_priming == 0:
+            experiment_id = "PT_2_2"
+        elif selected_scenario == 3 and selected_model == "gpt-4-1106-preview" and selected_priming == 0:
+             experiment_id = "PT_2_3"
+        elif selected_scenario == 4 and selected_model == "gpt-4-1106-preview" and selected_priming == 0:
+            experiment_id = "PT_2_4"
+        elif selected_scenario == 1 and selected_model == "gpt-4-1106-preview" and selected_priming == 1:
+            experiment_id = "PT_2_5"
+        elif selected_scenario == 2 and selected_model == "gpt-4-1106-preview" and selected_priming == 1:
+            experiment_id = "PT_2_6"
+        elif selected_scenario == 3 and selected_model == "gpt-4-1106-preview" and selected_priming == 1:
+            experiment_id = "PT_2_7"
+        elif selected_scenario == 4 and selected_model == "gpt-4-1106-preview" and selected_priming == 1:
+            experiment_id = "PT_2_8"
+        elif selected_scenario == 1 and selected_model == "llama-2-70b" and selected_priming == 0:
+            experiment_id = "PT_3_1"
+        elif selected_scenario == 2 and selected_model == "llama-2-70b" and selected_priming == 0:
+            experiment_id = "PT_3_2"
+        elif selected_scenario == 3 and selected_model == "llama-2-70b" and selected_priming == 0:
+            experiment_id = "PT_3_3"
+        elif selected_scenario == 4 and selected_model == "llama-2-70b" and selected_priming == 0:
+            experiment_id = "PT_3_4"
+        elif selected_scenario == 1 and selected_model == "llama-2-70b" and selected_priming == 1:
+            experiment_id = "PT_3_5"
+        elif selected_scenario == 2 and selected_model == "llama-2-70b" and selected_priming == 1:
+            experiment_id = "PT_3_6"
+        elif selected_scenario == 3 and selected_model == "llama-2-70b" and selected_priming == 1:
+            experiment_id = "PT_3_7"
+        elif selected_scenario == 4 and selected_model == "llama-2-70b" and selected_priming == 1:
+            experiment_id = "PT_3_8"
+        else:
+            experiment_id = None
         
+        # Run Experiment for selected parameters
+        if selected_model == "llama-2-70b":
+            results, probs = PT_run_experiment_llama_dashboard(experiment_id, selected_iterations, selected_temperature)
+        else:
+            results, probs = PT_run_experiment_dashboard(experiment_id, selected_iterations, selected_temperature)
+
+        return PT_plot_results(probs)
+
 
 # Callback for navigation bar
 @app.callback(Output("page-content", "children"),
@@ -1120,9 +1695,9 @@ def render_page_content(pathname):
         return html.P("Experiments are not yet implemented. Sorry!")
     elif pathname == "/experiments/overview":
         return html.P("Overview of experiments is not yet implemented. Sorry!")
-    elif pathname == "/experiments/decoy":
+    elif pathname == "/experiments/decoy-effect":
         return html.P(decoy_page)
-    elif pathname == "/experiments/prospect":
+    elif pathname == "/experiments/prospect-theory":
         return html.P(prospect_page)
     elif pathname == "/experiments/sunk-cost":
         return html.P(sunk_cost_page)
@@ -1130,8 +1705,20 @@ def render_page_content(pathname):
         return html.P("Ultimatum experiment is not yet implemented. Sorry!")
     elif pathname == "/experiments/loss-aversion":
         return html.P(loss_aversion_page)
-    elif pathname == "/page-2":
-        return html.P("Live experiment is not yet implemented. Sorry!")
+    elif pathname == "/live-experiment/overview":
+        return html.P("Overview of live experiments is not yet implemented. Sorry!")
+    elif pathname == "/live-experiment/prospect-theory":
+         return html.P(individual_prospect_page)
+    elif pathname == "/live-experiment/decoy-effect":
+         return html.P("Decoy Effect live experiment not yet implemented. Sorry!")
+    elif pathname == "/live-experiment/sunk-cost":
+            return html.P("Sunk cost live experiment not yet implemented. Sorry!")
+    elif pathname == "/live-experiment/ultimatum":
+         return html.P("Individual ultimatum experiment is not yet implemented. Sorry!")
+    elif pathname == "/live-experiment/loss-aversion":
+         return html.P("Loss aversion live experiment not yet implemented. Sorry!")
+    elif pathname == "/live-experiment/individual":
+            return html.P("Individual live experiment not yet implemented. Sorry!")
     elif pathname == "/page-3":
         return html.P("This chatbot is not yet implemented. Sorry!")
     # If the user tries to reach a different page, return a 404 message
