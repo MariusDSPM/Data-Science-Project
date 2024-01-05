@@ -14,17 +14,18 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 import replicate
+import pickle 
 
 
 ##### To-Do #####
+# Actual Live Experiment !!! 
 # Adapt plotting functions to new data format (PT, DE, more?)
 # Output prompt in live experiments
 # Output/visualize original results in live experiments
 # Return dataframe in live experiments
-# Right now, live experiment (PT) returns new window with graph
-# Hoverinfo for static graphs (?) in live experiments
-# stuff I could not think of in less than 2 minutes
 
+
+# LLAma is suddenly very slow
 
 # Manage installation of not yet installed packages for the user
 
@@ -154,6 +155,76 @@ def plot_results(model, priming, df, scenario):
 )
     return fig
 
+# Function to plot individual experiment terults of PT & DE
+def plot_results_individual(df):
+    
+    # Get number of observations per temperature value
+    n_observations = df.loc["Obs."]
+    
+    # Get temperature values
+    temperature = df.loc["Temp"]
+
+    # Get model
+    model = df.loc["Model"][0]
+    if model == "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3":
+        model = "llama-2-70b-chat"
+
+    # Get experiment id
+    experiment_id = df.loc["Experiment"][0]
+
+    fig = go.Figure(data=[
+        go.Bar(
+            name="p(A)", 
+            x=temperature, 
+            y=df.loc["p(A)"],
+            customdata = n_observations,
+            hovertemplate="Temperature: %{x}<br>Probability: %{y:.2f}%<br>Total Observations: %{customdata}<extra></extra>",
+            marker=dict(color="#e9724d"),
+        ),
+        go.Bar(
+            name="p(B)", 
+            x=temperature, 
+            y=df.loc["p(B)"],
+            customdata = n_observations,
+            hovertemplate="Temperature: %{x}<br>Probability: %{y:.2f}%<br>Total Observations: %{customdata}<extra></extra>",
+            marker=dict(color="#868686"),
+            
+        ),
+        go.Bar(
+            name="p(C)", 
+            x=temperature, 
+            y=df.loc["p(C)"],
+            customdata = n_observations,
+            hovertemplate="Temperature: %{x}<br>Probability: %{y:.2f}%<br>Total Observations: %{customdata}<extra></extra>",
+            marker=dict(color="#92cad1"),
+        )
+    ])
+
+    fig.update_layout(
+    barmode = 'group',
+    xaxis = dict(
+        tickmode = 'array',
+        tickvals = temperature,
+        ticktext = temperature,
+        title = "Temperature",  
+        title_font=dict(size=18),  
+    ),
+    yaxis = dict(
+        title="Probability (%)",  
+        title_font=dict(size=18), 
+    ),
+    title = dict(
+        text= f"Distribution of answers for experiment {experiment_id} using model {model}",
+        x = 0.5, # Center alignment horizontally
+        y = 0.87,  # Vertical alignment
+        font=dict(size=22),  
+    ),
+    legend = dict(
+        title = dict(text="Probabilities"),
+    ),
+    bargap = 0.3  # Gap between temperature values
+)
+    return fig
 
 # Function for plotting Sunk Cost Experiment 1
 def plot_sunk_cost_1(selected_temperature, selected_sunk_cost):
@@ -185,7 +256,6 @@ def plot_sunk_cost_1(selected_temperature, selected_sunk_cost):
     )
 
     return fig_sunk_cost
-
 
 # Function for plotting Sunk Cost Experiment 2
 def plot_sunk_cost_2(selected_temperature, selected_model):
@@ -242,7 +312,6 @@ def plot_sunk_cost_2(selected_temperature, selected_model):
 
     return fig
 
-
 # Function for plotting Loss Aversion Experiment
 def plot_loss_aversion(selected_temperature):
     df = get_loss_aversion_data(selected_temperature)
@@ -278,6 +347,8 @@ def plot_loss_aversion(selected_temperature):
     return fig
 
 ########################################  Prompts  ########################################
+
+### Prospect Theory ###
 PT_prompt_1 = """Mr. A was given tickets involving the World Series. He won 50$ in one lottery and $25 in the other. 
           Mr. B was given a ticket to a single, larger World Series lottery. He won $75. Based solely on this information, Who is happier? 
           A: Mister A
@@ -335,8 +406,26 @@ PT_prompt_8 = """You are a market researcher and focus on Prospect Theory and Me
          C: No difference.
          Which option would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
 
+### Prospect Theory 2.0 ###
+# Scenario 1
+with open("PT2_prompts_1.pkl", "rb") as file:
+    PT2_prompts_1 = pickle.load(file)
+# Scenario 2
+with open("PT2_prompts_2.pkl", "rb") as file:
+    PT2_prompts_2 = pickle.load(file)
+
+# Scenario 3
+with open("PT2_prompts_3.pkl", "rb") as file:
+    PT2_prompts_3 = pickle.load(file)
+
+# Scenario 4
+with open("PT2_prompts_4.pkl", "rb") as file:
+    PT2_prompts_4 = pickle.load(file)
+
 ######################################## Dictionaries  ########################################
-# To make our results comparable to the original study, we compute original answer probabilities
+    
+### Prospect Theory ###
+# Original results for Prospect Theory Experiments
 PT_p_scenario1 = [f"p(A): {round((56/(56+16+15)*100), 2)}%", f"p(B): {round((16/(56+16+15)*100), 2)}%", f"p(C): {round((15/(56+16+15)*100), 2)}%"]
 PT_p_scenario2 = [f"p(A): {round((66/(66+14+7)*100), 2)}%", f"p(B): {round((14/(66+14+7)*100), 2)}%", f"p(C): {round((7/(66+14+7)*100), 2)}%"]
 PT_p_scenario3 = [f"p(A): {round((22/(22+61+4)*100), 2)}%", f"p(B): {round((61/(22+61+4)*100), 2)}%", f"p(C): {round((4/(22+61+4)*100), 2)}%"]
@@ -427,34 +516,6 @@ PT_model_dict = {
     "PT_3_8": 'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3',
     }
 
-# Dictionary to look up, what the study design of each experiment was. key: experiment id, value: experiment design 
-PT_experiment_dict = {
-    "PT_1_1": f"Experiment PT_1_1 uses {PT_model_dict['PT_1_1']}, deals with the segregation of gains and is unprimed.",
-    "PT_1_2": f"Experiment PT_1_2 uses {PT_model_dict['PT_1_2']}, deals with the integration of losses and is unprimed.",
-    "PT_1_3": f"Experiment PT_1_3 uses {PT_model_dict['PT_1_3']}, deals with the cancellation of losses against larger gains and is unprimed.",
-    "PT_1_4": f"Experiment PT_1_4 uses {PT_model_dict['PT_1_4']}, deals with the segrgation of *silver linings* and is unprimed.",
-    "PT_1_5": f"Experiment PT_1_5 uses {PT_model_dict['PT_1_5']}, deals with the segregation of gains and is primed.",
-    "PT_1_6": f"Experiment PT_1_6 uses {PT_model_dict['PT_1_6']}, deals with the integration of losses and is primed.",
-    "PT_1_7": f"Experiment PT_1_7 uses {PT_model_dict['PT_1_7']}, deals with the cancellation of losses against larger gains and is primed.",
-    "PT_1_8": f"Experiment PT_1_8 uses {PT_model_dict['PT_1_8']}, deals with the segregation of *silver linings*, and is primed.",
-    "PT_2_1": f"Experiment PT_1_1 uses {PT_model_dict['PT_2_1']}, deals with the segregation of gains and is unprimed.",
-    "PT_2_2": f"Experiment PT_1_2 uses {PT_model_dict['PT_2_2']}, deals with the integration of losses and is unprimed.",
-    "PT_2_3": f"Experiment PT_1_3 uses {PT_model_dict['PT_2_3']}, deals with the cancellation of losses against larger gains and is unprimed.",
-    "PT_2_4": f"Experiment PT_1_4 uses {PT_model_dict['PT_2_4']}, deals with the segrgation of *silver linings* and is unprimed.",
-    "PT_2_5": f"Experiment PT_1_5 uses {PT_model_dict['PT_2_5']}, deals with the segregation of gains and is primed.",
-    "PT_2_6": f"Experiment PT_1_6 uses {PT_model_dict['PT_2_6']}, deals with the integration of losses and is primed.",
-    "PT_2_7": f"Experiment PT_1_7 uses {PT_model_dict['PT_2_7']}, deals with the cancellation of losses against larger gains and is primed.",
-    "PT_2_8": f"Experiment PT_1_8 uses {PT_model_dict['PT_2_8']}, deals with the segregation of *silver linings*, and is primed.",
-    "PT_3_1": f"Experiment PT_1_1 uses {PT_model_dict['PT_3_1']}, deals with the segregation of gains and is unprimed.",
-    "PT_3_2": f"Experiment PT_1_2 uses {PT_model_dict['PT_3_2']}, deals with the integration of losses and is unprimed.",
-    "PT_3_3": f"Experiment PT_1_3 uses {PT_model_dict['PT_3_3']}, deals with the cancellation of losses against larger gains and is unprimed.",
-    "PT_3_4": f"Experiment PT_1_4 uses {PT_model_dict['PT_3_4']}, deals with the segrgation of *silver linings* and is unprimed.",
-    "PT_3_5": f"Experiment PT_1_5 uses {PT_model_dict['PT_3_5']}, deals with the segregation of gains and is primed.",
-    "PT_3_6": f"Experiment PT_1_6 uses {PT_model_dict['PT_3_6']}, deals with the integration of losses and is primed.",
-    "PT_3_7": f"Experiment PT_1_7 uses {PT_model_dict['PT_3_7']}, deals with the cancellation of losses against larger gains and is primed.",
-    "PT_3_8": f"Experiment PT_1_8 uses {PT_model_dict['PT_3_8']}, deals with the segregation of *silver linings*, and is primed.",
-}
-
 # Dictionary to look up the original results of the experiments. key: experiment id, value: original result
 PT_results_dict = {
     "PT_1_1": PT_p_scenario1,
@@ -539,10 +600,420 @@ PT_priming_dict = {
     "PT_3_8": 1,
 }
 
+# Dictionary to look up original results of the Prospect Theory experiments. Key: experiment id, value: original results
+PT_results_dict = {
+    "PT_1_1": PT_p_scenario1,
+    "PT_1_2": PT_p_scenario2,
+    "PT_1_3": PT_p_scenario3,
+    "PT_1_4": PT_p_scenario4,
+    "PT_1_5": PT_p_scenario1,
+    "PT_1_6": PT_p_scenario2,
+    "PT_1_7": PT_p_scenario3,
+    "PT_1_8": PT_p_scenario4,
+    "PT_2_1": PT_p_scenario1,
+    "PT_2_2": PT_p_scenario2,
+    "PT_2_3": PT_p_scenario3,
+    "PT_2_4": PT_p_scenario4,
+    "PT_2_5": PT_p_scenario1,
+    "PT_2_6": PT_p_scenario2,
+    "PT_2_7": PT_p_scenario3,
+    "PT_2_8": PT_p_scenario4,
+    "PT_3_1": PT_p_scenario1,
+    "PT_3_2": PT_p_scenario2,
+    "PT_3_3": PT_p_scenario3,
+    "PT_3_4": PT_p_scenario4,
+    "PT_3_5": PT_p_scenario1,
+    "PT_3_6": PT_p_scenario2,
+    "PT_3_7": PT_p_scenario3,
+    "PT_3_8": PT_p_scenario4,
+    }
+
+### Prospect Theory 2.0 ###
+# Dictionary to look up prompt for a given experiment id. key: experiment id, value: prompt
+PT2_experiment_prompts_dict = {
+    "PT2_1_1_1": PT2_prompts_1[0],
+    "PT2_1_1_2": PT2_prompts_1[1],
+    "PT2_1_1_3": PT2_prompts_1[2],
+    "PT2_1_1_4": PT2_prompts_1[3],
+    "PT2_1_1_5": PT2_prompts_1[4],
+    "PT2_1_1_6": PT2_prompts_1[5],
+    "PT2_2_1_1": PT2_prompts_2[0],
+    "PT2_2_1_2": PT2_prompts_2[1],
+    "PT2_2_1_3": PT2_prompts_2[2],
+    "PT2_2_1_4": PT2_prompts_2[3],
+    "PT2_2_1_5": PT2_prompts_2[4],
+    "PT2_2_1_6": PT2_prompts_2[5],
+    "PT2_3_1_1": PT2_prompts_3[0],
+    "PT2_3_1_2": PT2_prompts_3[1],
+    "PT2_3_1_3": PT2_prompts_3[2],
+    "PT2_3_1_4": PT2_prompts_3[3],
+    "PT2_3_1_5": PT2_prompts_3[4],
+    "PT2_3_1_6": PT2_prompts_3[5],
+    "PT2_4_1_1": PT2_prompts_4[0],
+    "PT2_4_1_2": PT2_prompts_4[1],
+    "PT2_4_1_3": PT2_prompts_4[2],
+    "PT2_4_1_4": PT2_prompts_4[3],
+    "PT2_4_1_5": PT2_prompts_4[4],
+    "PT2_4_1_6": PT2_prompts_4[5],
+    "PT2_1_2_1": PT2_prompts_1[0],
+    "PT2_1_2_2": PT2_prompts_1[1],
+    "PT2_1_2_3": PT2_prompts_1[2],
+    "PT2_1_2_4": PT2_prompts_1[3],
+    "PT2_1_2_5": PT2_prompts_1[4],
+    "PT2_1_2_6": PT2_prompts_1[5],
+    "PT2_2_2_1": PT2_prompts_2[0],
+    "PT2_2_2_2": PT2_prompts_2[1],
+    "PT2_2_2_3": PT2_prompts_2[2],
+    "PT2_2_2_4": PT2_prompts_2[3],
+    "PT2_2_2_5": PT2_prompts_2[4],
+    "PT2_2_2_6": PT2_prompts_2[5],
+    "PT2_3_2_1": PT2_prompts_3[0],
+    "PT2_3_2_2": PT2_prompts_3[1],
+    "PT2_3_2_3": PT2_prompts_3[2],
+    "PT2_3_2_4": PT2_prompts_3[3],
+    "PT2_3_2_5": PT2_prompts_3[4],
+    "PT2_3_2_6": PT2_prompts_3[5],
+    "PT2_4_2_1": PT2_prompts_4[0],
+    "PT2_4_2_2": PT2_prompts_4[1],
+    "PT2_4_2_3": PT2_prompts_4[2],
+    "PT2_4_2_4": PT2_prompts_4[3],
+    "PT2_4_2_5": PT2_prompts_4[4],
+    "PT2_4_2_6": PT2_prompts_4[5],
+    "PT2_1_3_1": PT2_prompts_1[0],
+    "PT2_1_3_2": PT2_prompts_1[1],
+    "PT2_1_3_3": PT2_prompts_1[2],
+    "PT2_1_3_4": PT2_prompts_1[3],
+    "PT2_1_3_5": PT2_prompts_1[4],
+    "PT2_1_3_6": PT2_prompts_1[5],
+    "PT2_2_3_1": PT2_prompts_2[0],
+    "PT2_2_3_2": PT2_prompts_2[1],
+    "PT2_2_3_3": PT2_prompts_2[2],
+    "PT2_2_3_4": PT2_prompts_2[3],
+    "PT2_2_3_5": PT2_prompts_2[4],
+    "PT2_2_3_6": PT2_prompts_2[5],
+    "PT2_3_3_1": PT2_prompts_3[0],
+    "PT2_3_3_2": PT2_prompts_3[1],
+    "PT2_3_3_3": PT2_prompts_3[2],
+    "PT2_3_3_4": PT2_prompts_3[3],
+    "PT2_3_3_5": PT2_prompts_3[4],
+    "PT2_3_3_6": PT2_prompts_3[5],
+    "PT2_4_3_1": PT2_prompts_4[0],
+    "PT2_4_3_2": PT2_prompts_4[1],
+    "PT2_4_3_3": PT2_prompts_4[2],
+    "PT2_4_3_4": PT2_prompts_4[3],
+    "PT2_4_3_5": PT2_prompts_4[4],
+    "PT2_4_3_6": PT2_prompts_4[5],
+}
+
+# Dictionary to look up the original results for a given experiment id. key: experiment id, value: original answer probabilities
+PT2_results_dict = {
+    "PT2_1_1_1": PT_p_scenario1,
+    "PT2_1_1_2": PT_p_scenario1,
+    "PT2_1_1_3": PT_p_scenario1,
+    "PT2_1_1_4": PT_p_scenario1,
+    "PT2_1_1_5": PT_p_scenario1,
+    "PT2_1_1_6": PT_p_scenario1,
+    "PT2_2_1_1": PT_p_scenario2,
+    "PT2_2_1_2": PT_p_scenario2,
+    "PT2_2_1_3": PT_p_scenario2,
+    "PT2_2_1_4": PT_p_scenario2,
+    "PT2_2_1_5": PT_p_scenario2,
+    "PT2_2_1_6": PT_p_scenario2,
+    "PT2_3_1_1": PT_p_scenario3,
+    "PT2_3_1_2": PT_p_scenario3,
+    "PT2_3_1_3": PT_p_scenario3,
+    "PT2_3_1_4": PT_p_scenario3,
+    "PT2_3_1_5": PT_p_scenario3,
+    "PT2_3_1_6": PT_p_scenario3,
+    "PT2_4_1_1": PT_p_scenario4,
+    "PT2_4_1_2": PT_p_scenario4,
+    "PT2_4_1_3": PT_p_scenario4,
+    "PT2_4_1_4": PT_p_scenario4,
+    "PT2_4_1_5": PT_p_scenario4,
+    "PT2_4_1_6": PT_p_scenario4,
+    "PT2_1_2_1": PT_p_scenario1,
+    "PT2_1_2_2": PT_p_scenario1,
+    "PT2_1_2_3": PT_p_scenario1,
+    "PT2_1_2_4": PT_p_scenario1,
+    "PT2_1_2_5": PT_p_scenario1,
+    "PT2_1_2_6": PT_p_scenario1,
+    "PT2_2_2_1": PT_p_scenario2,
+    "PT2_2_2_2": PT_p_scenario2,
+    "PT2_2_2_3": PT_p_scenario2,
+    "PT2_2_2_4": PT_p_scenario2,
+    "PT2_2_2_5": PT_p_scenario2,
+    "PT2_2_2_6": PT_p_scenario2,
+    "PT2_3_2_1": PT_p_scenario3,
+    "PT2_3_2_2": PT_p_scenario3,
+    "PT2_3_2_3": PT_p_scenario3,
+    "PT2_3_2_4": PT_p_scenario3,
+    "PT2_3_2_5": PT_p_scenario3,
+    "PT2_3_2_6": PT_p_scenario3,
+    "PT2_4_2_1": PT_p_scenario4,
+    "PT2_4_2_2": PT_p_scenario4,
+    "PT2_4_2_3": PT_p_scenario4,
+    "PT2_4_2_4": PT_p_scenario4,
+    "PT2_4_2_5": PT_p_scenario4,
+    "PT2_4_2_6": PT_p_scenario4,
+    "PT2_1_3_1": PT_p_scenario1,
+    "PT2_1_3_2": PT_p_scenario1,
+    "PT2_1_3_3": PT_p_scenario1,
+    "PT2_1_3_4": PT_p_scenario1,   
+    "PT2_1_3_5": PT_p_scenario1,
+    "PT2_1_3_6": PT_p_scenario1,
+    "PT2_2_3_1": PT_p_scenario2,
+    "PT2_2_3_2": PT_p_scenario2,
+    "PT2_2_3_3": PT_p_scenario2,
+    "PT2_2_3_4": PT_p_scenario2,
+    "PT2_2_3_5": PT_p_scenario2,
+    "PT2_2_3_6": PT_p_scenario2,
+    "PT2_3_3_1": PT_p_scenario3,
+    "PT2_3_3_2": PT_p_scenario3,
+    "PT2_3_3_3": PT_p_scenario3,
+    "PT2_3_3_4": PT_p_scenario3,
+    "PT2_3_3_5": PT_p_scenario3,
+    "PT2_3_3_6": PT_p_scenario3,
+    "PT2_4_3_1": PT_p_scenario4,
+    "PT2_4_3_2": PT_p_scenario4,
+    "PT2_4_3_3": PT_p_scenario4,
+    "PT2_4_3_4": PT_p_scenario4,
+    "PT2_4_3_5": PT_p_scenario4,
+    "PT2_4_3_6": PT_p_scenario4,
+}
+
+# Dictionary to look up which model to use for a given experiment id. key: experiment id, value: model name
+PT2_model_dict = {
+    "PT2_1_1_1": "gpt-3.5-turbo",  
+    "PT2_1_1_2": "gpt-3.5-turbo",
+    "PT2_1_1_3": "gpt-3.5-turbo",
+    "PT2_1_1_4": "gpt-3.5-turbo",
+    "PT2_1_1_5": "gpt-3.5-turbo",
+    "PT2_1_1_6": "gpt-3.5-turbo",
+    "PT2_2_1_1": "gpt-3.5-turbo",
+    "PT2_2_1_2": "gpt-3.5-turbo",
+    "PT2_2_1_3": "gpt-3.5-turbo",
+    "PT2_2_1_4": "gpt-3.5-turbo",
+    "PT2_2_1_5": "gpt-3.5-turbo",
+    "PT2_2_1_6": "gpt-3.5-turbo",
+    "PT2_3_1_1": "gpt-3.5-turbo",
+    "PT2_3_1_2": "gpt-3.5-turbo",
+    "PT2_3_1_3": "gpt-3.5-turbo",
+    "PT2_3_1_4": "gpt-3.5-turbo",
+    "PT2_3_1_5": "gpt-3.5-turbo",
+    "PT2_3_1_6": "gpt-3.5-turbo",
+    "PT2_4_1_1": "gpt-3.5-turbo",
+    "PT2_4_1_2": "gpt-3.5-turbo",
+    "PT2_4_1_3": "gpt-3.5-turbo",
+    "PT2_4_1_4": "gpt-3.5-turbo",
+    "PT2_4_1_5": "gpt-3.5-turbo",
+    "PT2_4_1_6": "gpt-3.5-turbo",
+    "PT2_1_2_1": "gpt-4-1106-preview",
+    "PT2_1_2_2": "gpt-4-1106-preview",
+    "PT2_1_2_3": "gpt-4-1106-preview",
+    "PT2_1_2_4": "gpt-4-1106-preview",
+    "PT2_1_2_5": "gpt-4-1106-preview",
+    "PT2_1_2_6": "gpt-4-1106-preview",
+    "PT2_2_2_1": "gpt-4-1106-preview",
+    "PT2_2_2_2": "gpt-4-1106-preview",
+    "PT2_2_2_3": "gpt-4-1106-preview",
+    "PT2_2_2_4": "gpt-4-1106-preview",
+    "PT2_2_2_5": "gpt-4-1106-preview",
+    "PT2_2_2_6": "gpt-4-1106-preview",
+    "PT2_3_2_1": "gpt-4-1106-preview",
+    "PT2_3_2_2": "gpt-4-1106-preview",
+    "PT2_3_2_3": "gpt-4-1106-preview",
+    "PT2_3_2_4": "gpt-4-1106-preview",
+    "PT2_3_2_5": "gpt-4-1106-preview",
+    "PT2_3_2_6": "gpt-4-1106-preview",
+    "PT2_4_2_1": "gpt-4-1106-preview",
+    "PT2_4_2_2": "gpt-4-1106-preview",
+    "PT2_4_2_3": "gpt-4-1106-preview",
+    "PT2_4_2_4": "gpt-4-1106-preview",
+    "PT2_4_2_5": "gpt-4-1106-preview",
+    "PT2_4_2_6": "gpt-4-1106-preview",
+    "PT2_1_3_1": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
+    "PT2_1_3_2": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
+    "PT2_1_3_3": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
+    "PT2_1_3_4": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
+    "PT2_1_3_5": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
+    "PT2_1_3_6": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
+    "PT2_2_3_1": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
+    "PT2_2_3_2": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
+    "PT2_2_3_3": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
+    "PT2_2_3_4": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
+    "PT2_2_3_5": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
+    "PT2_2_3_6": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
+    "PT2_3_3_1": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
+    "PT2_3_3_2": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
+    "PT2_3_3_3": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
+    "PT2_3_3_4": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
+    "PT2_3_3_5": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
+    "PT2_3_3_6": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
+    "PT2_4_3_1": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
+    "PT2_4_3_2": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
+    "PT2_4_3_3": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
+    "PT2_4_3_4": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
+    "PT2_4_3_5": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
+    "PT2_4_3_6": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3"
+    }
+
+# Dictionary to look up scenario number for a given experiment id. key: experiment id, value: scenario number
+PT2_scenario_dict = {
+    "PT2_1_1_1": 1,
+    "PT2_1_1_2": 1,
+    "PT2_1_1_3": 1,
+    "PT2_1_1_4": 1,
+    "PT2_1_1_5": 1,
+    "PT2_1_1_6": 1,
+    "PT2_2_1_1": 2,
+    "PT2_2_1_2": 2,
+    "PT2_2_1_3": 2,
+    "PT2_2_1_4": 2,
+    "PT2_2_1_5": 2,
+    "PT2_2_1_6": 2,
+    "PT2_3_1_1": 3,
+    "PT2_3_1_2": 3,
+    "PT2_3_1_3": 3,
+    "PT2_3_1_4": 3,
+    "PT2_3_1_5": 3,
+    "PT2_3_1_6": 3,
+    "PT2_4_1_1": 4,
+    "PT2_4_1_2": 4,
+    "PT2_4_1_3": 4,
+    "PT2_4_1_4": 4,
+    "PT2_4_1_5": 4,
+    "PT2_4_1_6": 4,
+    "PT2_1_2_1": 1,
+    "PT2_1_2_2": 1,
+    "PT2_1_2_3": 1,
+    "PT2_1_2_4": 1,
+    "PT2_1_2_5": 1,
+    "PT2_1_2_6": 1,
+    "PT2_2_2_1": 2,
+    "PT2_2_2_2": 2, 
+    "PT2_2_2_3": 2,
+    "PT2_2_2_4": 2,
+    "PT2_2_2_5": 2,
+    "PT2_2_2_6": 2,
+    "PT2_3_2_1": 3,
+    "PT2_3_2_2": 3,
+    "PT2_3_2_3": 3,
+    "PT2_3_2_4": 3,
+    "PT2_3_2_5": 3,
+    "PT2_3_2_6": 3,
+    "PT2_4_2_1": 4,
+    "PT2_4_2_2": 4,
+    "PT2_4_2_3": 4,
+    "PT2_4_2_4": 4,
+    "PT2_4_2_5": 4,
+    "PT2_4_2_6": 4,
+    "PT2_1_3_1": 1,
+    "PT2_1_3_2": 1,
+    "PT2_1_3_3": 1,
+    "PT2_1_3_4": 1,
+    "PT2_1_3_5": 1,
+    "PT2_1_3_6": 1,
+    "PT2_2_3_1": 2,
+    "PT2_2_3_2": 2,
+    "PT2_2_3_3": 2,
+    "PT2_2_3_4": 2,
+    "PT2_2_3_5": 2,
+    "PT2_2_3_6": 2,
+    "PT2_3_3_1": 3,
+    "PT2_3_3_2": 3,
+    "PT2_3_3_3": 3,
+    "PT2_3_3_4": 3,
+    "PT2_3_3_5": 3,
+    "PT2_3_3_6": 3,
+    "PT2_4_3_1": 4,
+    "PT2_4_3_2": 4,
+    "PT2_4_3_3": 4,
+    "PT2_4_3_4": 4,
+    "PT2_4_3_5": 4,
+    "PT2_4_3_6": 4,
+}
+
+# Dictionary to look up scenario configuration based on experiment id. key: experiment id, value: scenario configuration
+PT2_configuration_dict = {
+    "PT2_1_1_1": 1,
+    "PT2_1_1_2": 2,
+    "PT2_1_1_3": 3,
+    "PT2_1_1_4": 4,
+    "PT2_1_1_5": 5,
+    "PT2_1_1_6": 6,
+    "PT2_2_1_1": 1,
+    "PT2_2_1_2": 2,
+    "PT2_2_1_3": 3,
+    "PT2_2_1_4": 4,
+    "PT2_2_1_5": 5,
+    "PT2_2_1_6": 6,
+    "PT2_3_1_1": 1,
+    "PT2_3_1_2": 2,
+    "PT2_3_1_3": 3,
+    "PT2_3_1_4": 4,
+    "PT2_3_1_5": 5,
+    "PT2_3_1_6": 6,
+    "PT2_4_1_1": 1,
+    "PT2_4_1_2": 2,
+    "PT2_4_1_3": 3,
+    "PT2_4_1_4": 4,
+    "PT2_4_1_5": 5,
+    "PT2_4_1_6": 6,
+    "PT2_1_2_1": 1,
+    "PT2_1_2_2": 2,
+    "PT2_1_2_3": 3,
+    "PT2_1_2_4": 4,
+    "PT2_1_2_5": 5,
+    "PT2_1_2_6": 6,
+    "PT2_2_2_1": 1,
+    "PT2_2_2_2": 2,
+    "PT2_2_2_3": 3,
+    "PT2_2_2_4": 4,
+    "PT2_2_2_5": 5,
+    "PT2_2_2_6": 6,
+    "PT2_3_2_1": 1,
+    "PT2_3_2_2": 2,
+    "PT2_3_2_3": 3,
+    "PT2_3_2_4": 4,
+    "PT2_3_2_5": 5,
+    "PT2_3_2_6": 6,
+    "PT2_4_2_1": 1,
+    "PT2_4_2_2": 2,
+    "PT2_4_2_3": 3,
+    "PT2_4_2_4": 4,
+    "PT2_4_2_5": 5,
+    "PT2_4_2_6": 6,
+    "PT2_1_3_1": 1,
+    "PT2_1_3_2": 2,
+    "PT2_1_3_3": 3,
+    "PT2_1_3_4": 4,
+    "PT2_1_3_5": 5,
+    "PT2_1_3_6": 6,
+    "PT2_2_3_1": 1,
+    "PT2_2_3_2": 2,
+    "PT2_2_3_3": 3,
+    "PT2_2_3_4": 4,
+    "PT2_2_3_5": 5,
+    "PT2_2_3_6": 6,
+    "PT2_3_3_1": 1,
+    "PT2_3_3_2": 2,
+    "PT2_3_3_3": 3,
+    "PT2_3_3_4": 4,
+    "PT2_3_3_5": 5,
+    "PT2_3_3_6": 6,
+    "PT2_4_3_1": 1,
+    "PT2_4_3_2": 2,
+    "PT2_4_3_3": 3,
+    "PT2_4_3_4": 4,
+    "PT2_4_3_5": 5,
+    "PT2_4_3_6": 6,
+}
+
+
 
 ######################################## Experiment functions  ########################################
-# Prospect Theory experiment for openAI models
-# progress bar deleted for now 
+
+### Prospect Theory ###
 def PT_run_experiment_dashboard(experiment_id, n, temperature):
 
     """
@@ -589,9 +1060,9 @@ def PT_run_experiment_dashboard(experiment_id, n, temperature):
     results = results.set_index(pd.Index(["Experiment", "Temp", "p(A)", "p(B)", "p(C)", "Obs.", "Model", "Scenario", "Priming"]))
 
     # Getting percentage each answer
-    p_a = f"{(A / len_correct) * 100:.2f}%"
-    p_b = f"{(B / len_correct) * 100:.2f}%"
-    p_c = f"{(C / len_correct) * 100:.2f}%"
+    p_a = (A / len_correct) * 100
+    p_b = (B / len_correct) * 100
+    p_c = (C / len_correct) * 100
 
     # Collect probabilities in a dataframe
     probs = pd.DataFrame([experiment_id, temperature, p_a, p_b, p_c, len_correct, PT_model_dict[experiment_id], PT_scenario_dict[experiment_id], PT_priming_dict[experiment_id]])
@@ -635,9 +1106,9 @@ def PT_run_experiment_llama_dashboard(experiment_id, n, temperature):
     results = results.set_index(pd.Index(["Experiment", "Temp", "p(A)", "p(B)", "p(C)", "Obs.", "Model", "Scenario", "Priming"]))
 
     # Getting percentage each answer
-    p_a = f"{(A / len_correct) * 100:.2f}%"
-    p_b = f"{(B / len_correct) * 100:.2f}%"
-    p_c = f"{(C / len_correct) * 100:.2f}%"
+    p_a = (A / len_correct) * 100
+    p_b = (B / len_correct) * 100
+    p_c = (C / len_correct) * 100
 
     # Collect probabilities in a dataframe
     probs = pd.DataFrame([experiment_id, temperature, p_a, p_b, p_c, len_correct, PT_model_dict[experiment_id], PT_scenario_dict[experiment_id], PT_priming_dict[experiment_id]])
@@ -646,33 +1117,110 @@ def PT_run_experiment_llama_dashboard(experiment_id, n, temperature):
     # Give out results
     return results, probs
 
-# Function to plot results of Prospect Theory experiment
-def PT_plot_results(df):
+### Prospect Theory 2 ###
+def PT2_run_experiment_dashboard(experiment_id, n, temperature):
+
+    """
+    Function to query ChatGPT multiple times with a survey having answers designed as: A, B, C.
     
-    # Get experiment id and model name for plot title from dictionaries
-    experiment_id = df.iloc[0, 0]
-    model = PT_model_dict[experiment_id]
+    Args:
+        experiment_id (str): ID of the experiment to be run. Contains info about prompt and model
+        n (int): Number of queries to be made
+        temperature (int): Degree of randomness with range 0 (deterministic) to 2 (random)
+        max_tokens (int): Maximum number of tokens in response object
+        
+    Returns:
+        results (list): List containing count of answers for each option, also containing experiment_id, temperature and number of observations
+        probs (list): List containing probability of each option being chosen, also containing experiment_id, temeperature and number of observations
+    """
     
-    X = df.loc["Temp"]
-    p_a = df.loc["p(A)"].str.rstrip('%').astype('float')  # Convert percentages to float
-    p_b = df.loc["p(B)"].str.rstrip('%').astype('float')
-    p_c = df.loc["p(C)"].str.rstrip('%').astype('float')
+    answers = []
+    for _ in range(n): 
+        response = client.chat.completions.create(
+            model = PT2_model_dict[experiment_id], 
+            max_tokens = 1,
+            temperature = temperature, # range is 0 to 2
+            messages = [
+            {"role": "system", "content": "Only answer with the letter of the alternative you would choose without any reasoning."},        
+            {"role": "user", "content": PT2_experiment_prompts_dict[experiment_id]},
+                   ])
 
-    X_axis = np.arange(len(X)) 
+        # Store the answer in the list
+        answer = response.choices[0].message.content
+        answers.append(answer.strip())
+        # Update progress bar (given from either temperature loop, or set locally)
+        #progress_bar.update(1)
 
-    plt.figure(figsize = (10, 5))
-    ax = plt.gca()
-    ax.bar(X_axis- 0.25, p_a, 0.25, label = 'p(A)', color = "#8C1515") 
-    ax.bar(X_axis, p_b, 0.25,  label = 'p(B)', color = "#507FAB") 
-    ax.bar(X_axis+ 0.25 , p_c,  0.25, label = 'p(C)', color = '#D9A84A')
+    # Counting results
+    A = answers.count("A") 
+    B = answers.count("B") 
+    C = answers.count("C") 
 
-    ax.set_xticks(X_axis, X)
-    ax.set_xlabel("Temperature")
-    ax.set_ylabel("Probability (%)")
-    ax.set_ylim(0, 110)
-    ax.set_title(f"Distribution of answers per temperature value for experiment {experiment_id} using {model}")
-    ax.legend()  
-    plt.show()
+    # Count of "correct" answers, sums over indicator function thack checks if answer is either A, B or C
+    len_correct = sum(1 for ans in answers if ans in ["A", "B", "C"])
+
+    # Collecting results in a list
+    results = pd.DataFrame([experiment_id, temperature, A, B, C, len_correct, PT2_model_dict[experiment_id], PT2_scenario_dict[experiment_id], PT2_configuration_dict[experiment_id]])
+    results = results.set_index(pd.Index(["Experiment", "Temp", "p(A)", "p(B)", "p(C)", "Obs.", "Model", "Scenario", "Configuration"]))
+
+
+    # Getting percentage each answer
+    p_a = (A / len_correct) * 100
+    p_b = (B / len_correct) * 100
+    p_c = (C / len_correct) * 100
+
+    # Collect probabilities in a dataframe
+    probs = pd.DataFrame([experiment_id, temperature, p_a, p_b, p_c, len_correct, PT2_model_dict[experiment_id], PT2_scenario_dict[experiment_id], PT2_configuration_dict[experiment_id]])
+    probs = results.set_index(pd.Index(["Experiment", "Temp", "p(A)", "p(B)", "p(C)", "Obs.", "Model", "Scenario", "Configuration"]))
+    
+    # Give out results
+    return results, probs
+
+# Prospect Theory experiment 2 for Meta's Llama model 
+def PT2_run_experiment_llama_dashboard(experiment_id, n, temperature):
+    answers = []
+    for _ in range(n):
+        response = replicate.run(
+            PT2_model_dict[experiment_id],
+            input = {
+                "system_prompt": "Only answer with the letter of the alternative you would choose without any reasoning.",
+                "temperature": temperature,
+                "max_new_tokens": 2, 
+                "prompt": PT2_experiment_prompts_dict[experiment_id]
+            }
+        )
+        # Grab answer and append to list
+        answer = "" # Set to empty string, otherwise it would append the previous answer to the new one
+        for item in response:
+            answer = answer + item
+        answers.append(answer.strip())
+
+        # Update progress bar
+        #progress_bar.update(1)
+
+    # Counting results
+    A = answers.count("A") 
+    B = answers.count("B") 
+    C = answers.count("C") 
+
+    # Count of "correct" answers, sums over indicator function thack checks if answer is either A, B or C
+    len_correct = sum(1 for ans in answers if ans in ["A", "B", "C"])
+
+    # Collecting results in a list
+    results = pd.Dataframe([experiment_id, temperature, A, B, C, len_correct, PT2_model_dict[experiment_id], PT2_scenario_dict[experiment_id], PT2_configuration_dict[experiment_id]])
+    results = results.set_index(pd.Index(["Experiment", "Temp", "p(A)", "p(B)", "p(C)", "Obs.", "Model", "Scenario", "Configuration"]))
+
+    # Getting percentage each answer
+    p_a = (A / len_correct) * 100
+    p_b = (B / len_correct) * 100
+    p_c = (C / len_correct) * 100
+
+    # Collect probabilities in a dataframe
+    probs = pd.DataFrame([experiment_id, temperature, p_a, p_b, p_c, len_correct, PT2_model_dict[experiment_id], PT2_scenario_dict[experiment_id], PT2_configuration_dict[experiment_id]])
+    probs = probs.set_index(pd.Index(["Experiment", "Temp", "p(A)", "p(B)", "p(C)", "Obs.", "Model", "Scenario", "Configuration"]))
+    
+    # Give out results
+    return results, probs
 
 # Initialize the app
 app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -722,6 +1270,7 @@ sidebar = html.Div(
             [
                 dbc.DropdownMenuItem("Overview", href = "/live-experiment/overview"),
                 dbc.DropdownMenuItem("Prospect Theory", href = "/live-experiment/prospect-theory"),
+                dbc.DropdownMenuItem("Prospect Theory 2.0", href = "/live-experiment/prospect-theory-2"),
                 dbc.DropdownMenuItem("Decoy Effect", href = "/live-experiment/decoy-effect"),
                 dbc.DropdownMenuItem("Sunk Cost Fallacy", href = "live-experiment/sunk-cost"),
                 dbc.DropdownMenuItem("Ultimatum Game", href = "/live-experiment/ultimatum"),
@@ -828,8 +1377,6 @@ decoy_page = [
                             value = "gpt-3.5-turbo",
                             style={'width': '75%'},
                     ),
-                    # Add a button to trigger calback
-                    html.Button('Update Plot', id = 'update-button', n_clicks = 0),
                          ],
             style={'display': 'flex', 'flexDirection': 'column', 'align-items': 'center', 'width': '50%', 'align-self': 'center'},
             ),
@@ -837,7 +1384,6 @@ decoy_page = [
         ],
         
         style={'display': 'flex', 'flexDirection': 'row'})]
-   
 
 # Prospect Page
 prospect_page = [
@@ -1422,7 +1968,6 @@ loss_aversion_page = [
 
 
 # Individual Prospect Theory Page
-# Decoy Page
 individual_prospect_page = [
     html.H1("Prospect Theory Live Experiment", className="page-heading"), 
     html.Hr(),
@@ -1433,74 +1978,175 @@ individual_prospect_page = [
         children=[
             html.Div(
                 children=[
-                    dcc.Dropdown(
-                         id = "prospect-live-scenario-dropdown",
-                         options = [
+                            html.Label("Select a scenario", style={'textAlign': 'center'}),
+                            dcc.Dropdown(
+                            id = "prospect-live-scenario-dropdown",
+                            options = [
                               {"label": "Scenario 1: Segregation of gains", "value": 1},
                               {"label": "Scenario 2: Integration of losses", "value": 2},
                               {"label": "Scenario 3: Cancellation of losses against larger gains", "value": 3},
                               {"label": "Scenario 4: Segregation of silver linings", "value": 4},
                          ],
                          value = 1,
-                         style={'width': '75%'},
+                         style={'width': '75%', 'margin': 'auto'},
                     ),
-                    dcc.Dropdown(
-                         id = "prospect-live-model-dropdown",
-                         options = [
+                            html.Label("Select a language model", style={'textAlign': 'center'}),
+                            dcc.Dropdown(
+                            id = "prospect-live-model-dropdown",
+                            options = [
                               {"label": "GPT-3.5-Turbo", "value": "gpt-3.5-turbo"},
                               {"label": "GPT-4-1106-Preview", "value": "gpt-4-1106-preview"},
                               {"label": "LLama-2-70b", "value": "llama-2-70b"},
                             ],
                             value = "gpt-3.5-turbo",
-                            style={'width': '75%'},
+                            style={'width': '75%', 'margin': 'auto'},
                     ),
-                    dcc.Dropdown(
-                         id = "prospect-live-priming-dropdown",
-                         options = [
+                            html.Label("Select Prompt design", style={'textAlign': 'center'}),
+                            dcc.Dropdown(
+                            id = "prospect-live-priming-dropdown",
+                            options = [
                               {"label": "Unprimed", "value": 0},
                               {"label": "Primed", "value": 1},
                             ],
                             value = 0,
-                            style={'width': '75%'},
-                    ),
-                    html.Div(
-                        [    
-                            dbc.Label("Select number of iterations"),                
+                            style={'width': '75%', 'margin': 'auto'},
+
+                    ),     
+                            html.Label("Select number of requests", style={'textAlign': 'center'}),                
                             dbc.Input(
                             id = "prospect-live-iterations", 
                             type = "number",
                             value = 0, 
                             min = 0, 
-                            max = 1000, 
-                            step = 1
-                            ),
-                        ]
-                    ),
-
+                            max = 100, 
+                            step = 1,
+                            style={'width': '57%', 'margin': 'auto'}, # apparently default width for input is different from dropdown
+                    ),      
                     html.Div(
                         [
-                            dbc.Label("Select Temperature value"),             
+                            html.Label("Select Temperature value"),             
                             dcc.Slider(
                                 id="prospect-live-temperature",
                                 min=0.01,
                                 max=2,
-                                step=0.1,
-                                marks={0.01: '0.01', 0.5: '0.5', 1: '1', 1.5: '1.5', 2: '2'},
-                                value=0.01,
+                                step=0.01,
+                                marks={0.01: '0.01', 2: '2'},
+                                value=0.8,
+                                tooltip={'placement': 'top'},
                             ),
-                        ]
+                        ],
                     ),
 
                     # Add a button to trigger calback
-                    html.Button('Update Plot', id = 'update-button', n_clicks = 0),
+                    html.Button('Run the experiment', id = 'prospect-live-update-button', n_clicks = 0),
                          ],
             style={'display': 'flex', 'flexDirection': 'column', 'align-items': 'center', 'width': '50%', 'align-self': 'center'},
             ),
         dcc.Graph(id="prospect-live-output", style={'width': '70%', 'height': '60vh'}),
         ],
-        
-    style={'display': 'flex', 'flexDirection': 'row'})]
+    style={'display': 'flex', 'flexDirection': 'row'}
+    ),
+    # Additional text section
+    html.Div(
+            id='prospect-live-experiment-design',
+            style={'textAlign': 'center', 'margin': '20px'},
+    ),
+    html.Button("Download CSV", id="btn_csv"),
+        dcc.Download(id="download-dataframe-csv"),
+]
 
+
+
+# Individual Prospect Theory Page 2
+individual_prospect_page2 = [
+    html.H1("Prospect Theory Live Experiment 2.0", className="page-heading"), 
+    html.Hr(),
+    html.P("""Choose an experiment configuration from the options below and run the experiment yourself. You can choose 4 different scenarios, 3 different models and 
+           6 different configurations."""),
+    html.Br(),
+    html.Div(
+        children=[
+            html.Div(
+                children=[
+                            html.Label("Select a scenario", style={'textAlign': 'center'}),
+                            dcc.Dropdown(
+                            id = "prospect2-live-scenario-dropdown",
+                            options = [
+                              {"label": "Scenario 1: Segregation of gains", "value": 1},
+                              {"label": "Scenario 2: Integration of losses", "value": 2},
+                              {"label": "Scenario 3: Cancellation of losses against larger gains", "value": 3},
+                              {"label": "Scenario 4: Segregation of silver linings", "value": 4},
+                         ],
+                         value = 1,
+                         style={'width': '75%', 'margin': 'auto'},
+                    ),
+                            html.Label("Select a language model", style={'textAlign': 'center'}),
+                            dcc.Dropdown(
+                            id = "prospect2-live-model-dropdown",
+                            options = [
+                              {"label": "GPT-3.5-Turbo", "value": "gpt-3.5-turbo"},
+                              {"label": "GPT-4-1106-Preview", "value": "gpt-4-1106-preview"},
+                              {"label": "LLama-2-70b", "value": "llama-2-70b"},
+                            ],
+                            value = "gpt-3.5-turbo",
+                            style={'width': '75%', 'margin': 'auto'},
+                    ),
+                            html.Label("Select a configuration", style={'textAlign': 'center'}),
+                            dcc.Dropdown(
+                            id = "prospect2-live-configuration-dropdown",
+                            options = [
+                                {"label": "Configuration 1: Odd numbers 1", "value": 1},
+                                {"label": "Configuration 2: Odd numbers 2", "value": 2},
+                                {"label": "Configuration 3: A is better off by 25$", "value": 3},
+                                {"label": "Configuration 4: A is better off by 50$", "value": 4},
+                                {"label": "Configuration 5: B is better off by 25$", "value": 5},
+                                {"label": "Configuration 6: B is better off by 50$", "value": 6},
+                                ],
+                                value = 1,
+                                style = {'width': '75%', 'margin': 'auto'},
+                    ),   
+                            html.Label("Select number of requests", style={'textAlign': 'center'}),                
+                            dbc.Input(
+                            id = "prospect-live-iterations", 
+                            type = "number",
+                            value = 0, 
+                            min = 0, 
+                            max = 100, 
+                            step = 1,
+                            style={'width': '57%', 'margin': 'auto'}, # apparently default width for input is different from dropdown
+                    ),      
+                    html.Div(
+                        [
+                            html.Label("Select Temperature value"),             
+                            dcc.Slider(
+                                id="prospect2-live-temperature",
+                                min=0.01,
+                                max=2,
+                                step=0.01,
+                                marks={0.01: '0.01', 2: '2'},
+                                value=0.8,
+                                tooltip={'placement': 'top'},
+                            ),
+                        ],
+                    ),
+
+                    # Add a button to trigger calback
+                    html.Button('Run the experiment', id = 'prospect2-live-update-button', n_clicks = 0),
+                         ],
+            style={'display': 'flex', 'flexDirection': 'column', 'align-items': 'center', 'width': '50%', 'align-self': 'center'},
+            ),
+        dcc.Graph(id="prospect2-live-output", style={'width': '70%', 'height': '60vh'}),
+        ],
+    style={'display': 'flex', 'flexDirection': 'row'}
+    ),
+    # Additional text section
+    html.Div(
+            id='prospect2-live-experiment-design',
+            style={'textAlign': 'center', 'margin': '20px'},
+    ),
+    html.Button("Download CSV", id="btn_csv"),
+        dcc.Download(id="download-dataframe-csv"),
+]
 
 
 ################################################## Callbacks ##################################################
@@ -1562,18 +2208,14 @@ def update_prospect2_plot(selected_scenario, selected_configuration, selected_mo
 # Callback for decoy page
 @app.callback(
     Output("decoy-plot-output", "figure"),
-    Input("update-button", "n_clicks"),
-    [State("decoy-scenario-dropdown", "value"),
-     State("decoy-priming-dropdown", "value"),
-     State("decoy-reordering-dropdown", "value"),
-     State("decoy-model-dropdown", "value")]
+    [Input("decoy-scenario-dropdown", "value"),
+     Input("decoy-priming-dropdown", "value"),
+     Input("decoy-reordering-dropdown", "value"),
+     Input("decoy-model-dropdown", "value")]
      )
-def update_decoy_plot(n_clicks, selected_scenario, selected_priming, selected_reordering, selected_model):
-    # Check if the button was clicked
-    if n_clicks is not None:
-    # Pre-select dataframe with desired answer design 
-        df = DE_probs[DE_probs["Reorder"] == selected_reordering]
-        n_clicks == None # not neccesary I believe
+def update_decoy_plot(selected_scenario, selected_priming, selected_reordering, selected_model):
+    # Pre-select dataframe (plot_results disregards reordering option)
+    df = DE_probs[DE_probs["Reorder"] == selected_reordering]
     return plot_results(scenario = selected_scenario, priming = selected_priming, model = selected_model, df = df)
     
     
@@ -1625,8 +2267,9 @@ def update_loss_averion_plot(selected_temperature):
 
 #  Callback for Individual Prospect Theory Experiment
 @app.callback(
-    Output("prospect-live-output", "figure"),
-    [Input("update-button", "n_clicks")],
+    [Output("prospect-live-output", "figure"),
+     Output('prospect-live-experiment-design', 'children')], 
+    [Input("prospect-live-update-button", "n_clicks")],
     [State("prospect-live-scenario-dropdown", "value"),
      State("prospect-live-model-dropdown", "value"),
      State("prospect-live-priming-dropdown", "value"),
@@ -1693,9 +2336,181 @@ def update_prospect_live_plot(n_clicks, selected_scenario, selected_model, selec
         else:
             results, probs = PT_run_experiment_dashboard(experiment_id, selected_iterations, selected_temperature)
         n_clicks == None
-        return PT_plot_results(probs)
+        prompt = html.P(f"The prompt used in this experiment is: {PT_experiment_prompts_dict[experiment_id]} The original results were: {PT_results_dict[experiment_id]}.")
+        return plot_results_individual(probs), prompt
+
+# Call back for Individual Prospect Theory Experiment 2.0
+@app.callback(
+    [Output("prospect2-live-output", "figure"),
+     Output('prospect2-live-experiment-design', 'children')],
+    [Input("prospect2-live-update-button", "n_clicks")],
+    [State("prospect2-live-scenario-dropdown", "value"),
+     State("prospect2-live-model-dropdown", "value"),
+     State("prospect2-live-configuration-dropdown", "value"),
+     State("prospect-live-iterations", "value"),
+     State("prospect2-live-temperature", "value")]
+     )
+def update_prospect2_live_plot(n_clicks, selected_scenario, selected_model, selected_configuration, selected_iterations, selected_temperature):
+    # Check if button was clicked
+    if n_clicks is not None:
+        if selected_scenario == 1 and selected_model == "gpt-3.5-turbo" and selected_configuration == 1:
+            experiment_id = "PT2_1_1_1"
+        elif selected_scenario == 1 and selected_model == "gpt-3.5-turbo" and selected_configuration == 2:
+            experiment_id = "PT2_1_1_2"
+        elif selected_scenario == 1 and selected_model == "gpt-3.5-turbo" and selected_configuration == 3:
+            experiment_id = "PT2_1_1_3"
+        elif selected_scenario == 1 and selected_model == "gpt-3.5-turbo" and selected_configuration == 4:
+            experiment_id = "PT2_1_1_4"
+        elif selected_scenario == 1 and selected_model == "gpt-3.5-turbo" and selected_configuration == 5:
+            experiment_id = "PT2_1_1_5"
+        elif selected_scenario == 1 and selected_model == "gpt-3.5-turbo" and selected_configuration == 6:
+            experiment_id = "PT2_1_1_6"
+        elif selected_scenario == 2 and selected_model == "gpt-3.5-turbo" and selected_configuration == 1:
+            experiment_id = "PT2_2_1_1"
+        elif selected_scenario == 2 and selected_model == "gpt-3.5-turbo" and selected_configuration == 2:
+            experiment_id = "PT2_2_1_2"
+        elif selected_scenario == 2 and selected_model == "gpt-3.5-turbo" and selected_configuration == 3:
+            experiment_id = "PT2_2_1_3"
+        elif selected_scenario == 2 and selected_model == "gpt-3.5-turbo" and selected_configuration == 4:
+            experiment_id = "PT2_2_1_4"
+        elif selected_scenario == 2 and selected_model == "gpt-3.5-turbo" and selected_configuration == 5:
+            experiment_id = "PT2_2_1_5"
+        elif selected_scenario == 2 and selected_model == "gpt-3.5-turbo" and selected_configuration == 6:
+            experiment_id = "PT2_2_1_6"
+        elif selected_scenario == 3 and selected_model == "gpt-3.5-turbo" and selected_configuration == 1:
+            experiment_id = "PT2_3_1_1"
+        elif selected_scenario == 3 and selected_model == "gpt-3.5-turbo" and selected_configuration == 2:
+            experiment_id = "PT2_3_1_2"
+        elif selected_scenario == 3 and selected_model == "gpt-3.5-turbo" and selected_configuration == 3:
+            experiment_id = "PT2_3_1_3"
+        elif selected_scenario == 3 and selected_model == "gpt-3.5-turbo" and selected_configuration == 4:
+            experiment_id = "PT2_3_1_4"
+        elif selected_scenario == 3 and selected_model == "gpt-3.5-turbo" and selected_configuration == 5:
+            experiment_id = "PT2_3_1_5"
+        elif selected_scenario == 3 and selected_model == "gpt-3.5-turbo" and selected_configuration == 6:
+            experiment_id = "PT2_3_1_6"
+        elif selected_scenario == 4 and selected_model == "gpt-3.5-turbo" and selected_configuration == 1:
+            experiment_id = "PT2_4_1_1"
+        elif selected_scenario == 4 and selected_model == "gpt-3.5-turbo" and selected_configuration == 2:
+            experiment_id = "PT2_4_1_2"
+        elif selected_scenario == 4 and selected_model == "gpt-3.5-turbo" and selected_configuration == 3:
+            experiment_id = "PT2_4_1_3"
+        elif selected_scenario == 4 and selected_model == "gpt-3.5-turbo" and selected_configuration == 4:
+            experiment_id = "PT2_4_1_4"
+        elif selected_scenario == 4 and selected_model == "gpt-3.5-turbo" and selected_configuration == 5:
+            experiment_id = "PT2_4_1_5"
+        elif selected_scenario == 4 and selected_model == "gpt-3.5-turbo" and selected_configuration == 6:
+            experiment_id = "PT2_4_1_6"
+        elif selected_scenario == 1 and selected_model == "gpt-4-1106-preview" and selected_configuration == 1:
+            experiment_id = "PT2_1_2_1"
+        elif selected_scenario == 1 and selected_model == "gpt-4-1106-preview" and selected_configuration == 2:
+            experiment_id = "PT2_1_2_2"
+        elif selected_scenario == 1 and selected_model == "gpt-4-1106-preview" and selected_configuration == 3:
+            experiment_id = "PT2_1_2_3"
+        elif selected_scenario == 1 and selected_model == "gpt-4-1106-preview" and selected_configuration == 4:
+            experiment_id = "PT2_1_2_4"
+        elif selected_scenario == 1 and selected_model == "gpt-4-1106-preview" and selected_configuration == 5:
+            experiment_id = "PT2_1_2_5"
+        elif selected_scenario == 1 and selected_model == "gpt-4-1106-preview" and selected_configuration == 6:
+            experiment_id = "PT2_1_2_6"
+        elif selected_scenario == 2 and selected_model == "gpt-4-1106-preview" and selected_configuration == 1:
+            experiment_id = "PT2_2_2_1"
+        elif selected_scenario == 2 and selected_model == "gpt-4-1106-preview" and selected_configuration == 2:
+            experiment_id = "PT2_2_2_2"
+        elif selected_scenario == 2 and selected_model == "gpt-4-1106-preview" and selected_configuration == 3:
+            experiment_id = "PT2_2_2_3"
+        elif selected_scenario == 2 and selected_model == "gpt-4-1106-preview" and selected_configuration == 4:
+            experiment_id = "PT2_2_2_4"
+        elif selected_scenario == 2 and selected_model == "gpt-4-1106-preview" and selected_configuration == 5:
+            experiment_id = "PT2_2_2_5"
+        elif selected_scenario == 2 and selected_model == "gpt-4-1106-preview" and selected_configuration == 6:
+            experiment_id = "PT2_2_2_6"
+        elif selected_scenario == 3 and selected_model == "gpt-4-1106-preview" and selected_configuration == 1:
+            experiment_id = "PT2_3_2_1"
+        elif selected_scenario == 3 and selected_model == "gpt-4-1106-preview" and selected_configuration == 2:
+            experiment_id = "PT2_3_2_2"
+        elif selected_scenario == 3 and selected_model == "gpt-4-1106-preview" and selected_configuration == 3:
+            experiment_id = "PT2_3_2_3"
+        elif selected_scenario == 3 and selected_model == "gpt-4-1106-preview" and selected_configuration == 4:
+            experiment_id = "PT2_3_2_4"
+        elif selected_scenario == 3 and selected_model == "gpt-4-1106-preview" and selected_configuration == 5:
+            experiment_id = "PT2_3_2_5"
+        elif selected_scenario == 3 and selected_model == "gpt-4-1106-preview" and selected_configuration == 6:
+            experiment_id = "PT2_3_2_6"
+        elif selected_scenario == 4 and selected_model == "gpt-4-1106-preview" and selected_configuration == 1:
+            experiment_id = "PT2_4_2_1"
+        elif selected_scenario == 4 and selected_model == "gpt-4-1106-preview" and selected_configuration == 2:
+            experiment_id = "PT2_4_2_2"
+        elif selected_scenario == 4 and selected_model == "gpt-4-1106-preview" and selected_configuration == 3:
+            experiment_id = "PT2_4_2_3"
+        elif selected_scenario == 4 and selected_model == "gpt-4-1106-preview" and selected_configuration == 4:
+            experiment_id = "PT2_4_2_4"
+        elif selected_scenario == 4 and selected_model == "gpt-4-1106-preview" and selected_configuration == 5:
+            experiment_id = "PT2_4_2_5"
+        elif selected_scenario == 4 and selected_model == "gpt-4-1106-preview" and selected_configuration == 6:
+            experiment_id = "PT2_4_2_6"
+        elif selected_scenario == 1 and selected_model == "llama-2-70b" and selected_configuration == 1:
+            experiment_id = "PT2_1_3_1"
+        elif selected_scenario == 1 and selected_model == "llama-2-70b" and selected_configuration == 2:
+            experiment_id = "PT2_1_3_2"
+        elif selected_scenario == 1 and selected_model == "llama-2-70b" and selected_configuration == 3:
+            experiment_id = "PT2_1_3_3"
+        elif selected_scenario == 1 and selected_model == "llama-2-70b" and selected_configuration == 4:    
+            experiment_id = "PT2_1_3_4"
+        elif selected_scenario == 1 and selected_model == "llama-2-70b" and selected_configuration == 5:
+            experiment_id = "PT2_1_3_5"
+        elif selected_scenario == 1 and selected_model == "llama-2-70b" and selected_configuration == 6:
+            experiment_id = "PT2_1_3_6"
+        elif selected_scenario == 2 and selected_model == "llama-2-70b" and selected_configuration == 1:
+            experiment_id = "PT2_2_3_1"
+        elif selected_scenario == 2 and selected_model == "llama-2-70b" and selected_configuration == 2:
+            experiment_id = "PT2_2_3_2"
+        elif selected_scenario == 2 and selected_model == "llama-2-70b" and selected_configuration == 3:
+            experiment_id = "PT2_2_3_3"
+        elif selected_scenario == 2 and selected_model == "llama-2-70b" and selected_configuration == 4:
+            experiment_id = "PT2_2_3_4"
+        elif selected_scenario == 2 and selected_model == "llama-2-70b" and selected_configuration == 5:
+            experiment_id = "PT2_2_3_5"
+        elif selected_scenario == 2 and selected_model == "llama-2-70b" and selected_configuration == 6:
+            experiment_id = "PT2_2_3_6"
+        elif selected_scenario == 3 and selected_model == "llama-2-70b" and selected_configuration == 1:
+            experiment_id = "PT2_3_3_1"
+        elif selected_scenario == 3 and selected_model == "llama-2-70b" and selected_configuration == 2:
+            experiment_id = "PT2_3_3_2"
+        elif selected_scenario == 3 and selected_model == "llama-2-70b" and selected_configuration == 3:
+            experiment_id = "PT2_3_3_3"
+        elif selected_scenario == 3 and selected_model == "llama-2-70b" and selected_configuration == 4:
+            experiment_id = "PT2_3_3_4"
+        elif selected_scenario == 3 and selected_model == "llama-2-70b" and selected_configuration == 5:
+            experiment_id = "PT2_3_3_5"
+        elif selected_scenario == 3 and selected_model == "llama-2-70b" and selected_configuration == 6:
+            experiment_id = "PT2_3_3_6"
+        elif selected_scenario == 4 and selected_model == "llama-2-70b" and selected_configuration == 1:
+            experiment_id = "PT2_4_3_1"
+        elif selected_scenario == 4 and selected_model == "llama-2-70b" and selected_configuration == 2:
+            experiment_id = "PT2_4_3_2"
+        elif selected_scenario == 4 and selected_model == "llama-2-70b" and selected_configuration == 3:
+            experiment_id = "PT2_4_3_3"
+        elif selected_scenario == 4 and selected_model == "llama-2-70b" and selected_configuration == 4:
+            experiment_id = "PT2_4_3_4"
+        elif selected_scenario == 4 and selected_model == "llama-2-70b" and selected_configuration == 5:
+            experiment_id = "PT2_4_3_5"
+        elif selected_scenario == 4 and selected_model == "llama-2-70b" and selected_configuration == 6:
+            experiment_id = "PT2_4_3_6"
+        else:
+            experiment_id = None
+
+        # Run Experiment for selected parameters
+        if selected_model == "llama-2-70b":
+            results, probs = PT2_run_experiment_llama_dashboard(experiment_id, selected_iterations, selected_temperature)
+        else:
+            results, probs = PT2_run_experiment_dashboard(experiment_id, selected_iterations, selected_temperature)
+        n_clicks == None
+        prompt = html.P(f"The prompt used in this experiment is: {PT2_experiment_prompts_dict[experiment_id]} The original results were: {PT2_results_dict[experiment_id]}.")
+        return plot_results_individual(probs), prompt
 
 
+ 
 # Callback for navigation bar
 @app.callback(Output("page-content", "children"),
              [Input("url", "pathname")])
@@ -1720,6 +2535,8 @@ def render_page_content(pathname):
         return html.P("Overview of live experiments is not yet implemented. Sorry!")
     elif pathname == "/live-experiment/prospect-theory":
          return html.P(individual_prospect_page)
+    elif pathname == "/live-experiment/prospect-theory-2":
+        return html.P(individual_prospect_page2)
     elif pathname == "/live-experiment/decoy-effect":
          return html.P("Decoy Effect live experiment not yet implemented. Sorry!")
     elif pathname == "/live-experiment/sunk-cost":
