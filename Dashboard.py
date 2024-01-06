@@ -239,6 +239,10 @@ def plot_results_individual(df):
     # Get model
     model = df.loc["Model"][0]
 
+    # Rename for better readability
+    if model == "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3":
+        model = "llama-2-70b-chat"
+
 
     fig = go.Figure(data=[
         go.Bar(
@@ -1753,7 +1757,7 @@ def run_individual_experiment_llama(prompt, model, iterations, temperature):
     p_c = (C / (len_correct + 0.000000001)) * 100
 
     # Collect probabilities in a dataframe
-    probs = [temperature, p_a, p_b, p_c, len_correct, model]
+    probs = pd.DataFrame([temperature, p_a, p_b, p_c, len_correct, model])
     probs = probs.set_index(pd.Index(["Temp", "p(A)", "p(B)", "p(C)", "Obs.", "Model"]))
     
     # Give out results
@@ -3337,6 +3341,7 @@ def update_individual_experiment(n_clicks, prompt, answer_a, answer_b, answer_c,
         print(f"Selected iterations: {selected_iterations}")
         print(f"Selected temperature: {selected_temperature}")
         if selected_model == "llama-2-70b":
+            selected_model = "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3"
             results, probs = run_individual_experiment_llama(prompt, selected_model, selected_iterations, selected_temperature)
         else:
             results, probs = run_individual_experiment_openai(prompt, selected_model, selected_iterations, selected_temperature)
