@@ -17,6 +17,7 @@ import replicate
 import pickle 
 
 
+
 ##### To-Do #####
 # Actual Live Experiment !!! 
 # Adapt plotting functions to new data format (PT, DE, more?)
@@ -406,6 +407,48 @@ PT_prompt_8 = """You are a market researcher and focus on Prospect Theory and Me
          C: No difference.
          Which option would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
 
+### Decoy Effect ###
+DE_prompt_1 = """You are presented with the following subscription alternatives for the "The Economist" magazine:
+        A: One-year subscription to Economist.com. Includes online access to all articles from The Economist since 1997, priced at 59$.
+        B: One-year subscription to the print edition of The Economist, priced at 125$.
+        C: One-year subscription to the print edition of The Economist and online access to all articles from The Economist since 1997, priced at 125$.
+        Which alternative would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
+DE_prompt_2 = """You are presented with the following subscription alternatives for the "The Economist" magazine:
+        A: One-year subscription to Economist.com. Includes online access to all articles from The Economist since 1997, priced at 59$.
+        B: One-year subscription to the print edition of The Economist and online access to all articles from The Economist since 1997, priced at 125$. 
+        Which alternative would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
+DE_prompt_3 = """You are a market researcher that knows about the Decoy Effect in pricing. 
+        You are presented with the following subscription alternatives for the "The Economist" magazine:
+        A: One-year subscription to Economist.com. Includes online access to all articles from The Economist since 1997, priced at 59$.
+        B: One-year subscription to the print edition of The Economist, priced at 125$.
+        C: One-year subscription to the print edition of The Economist and online access to all articles from The Economist since 1997, priced at 125$.
+        Which alternative would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
+DE_prompt_4 = """You are a market researcher that knows about the Decoy Effect in pricing. 
+         You are presented with the following subscription alternatives for the "The Economist" magazine:
+         A: One-year subscription to Economist.com. Includes online access to all articles from The Economist since 1997, priced at 59$.
+         B: One-year subscription to the print edition of The Economist and online access to all articles from The Economist since 1997, priced at 125$.
+         Which alternative would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
+DE_prompt_5 = """You are presented with the following subscription alternatives for the "The Economist" magazine:
+         Q: One-year subscription to the print edition of The Economist, priced at 125$.
+         X: One-year subscription to the print edition of The Economist and online access to all articles from The Economist since 1997, priced at 125$.
+         Y: One-year subscription to Economist.com. Includes online access to all articles from The Economist since 1997, priced at 59$. 
+         Which alternative would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
+DE_prompt_6 = """You are presented with the following subscription alternatives for the "The Economist" magazine:
+         X: One-year subscription to the print edition of The Economist and online access to all articles from The Economist since 1997, priced at 125$.
+         Y: One-year subscription to Economist.com. Includes online access to all articles from The Economist since 1997, priced at 59$. 
+         Which alternative would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
+DE_prompt_7 = """You are a market researcher that knows about the Decoy Effect in pricing. 
+         You are presented with the following subscription alternatives for the "The Economist" magazine:
+         Q: One-year subscription to the print edition of The Economist, priced at 125$.
+         X: One-year subscription to the print edition of The Economist and online access to all articles from The Economist since 1997, priced at 125$.
+         Y: One-year subscription to Economist.com. Includes online access to all articles from The Economist since 1997, priced at 59$. 
+         Which alternative would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
+DE_prompt_8 = """You are a market researcher that knows about the Decoy Effect in pricing. 
+         You are presented with the following subscription alternatives for the "The Economist" magazine:
+         X: One-year subscription to the print edition of The Economist and online access to all articles from The Economist since 1997, priced at 125$.
+         Y: One-year subscription to Economist.com. Includes online access to all articles from The Economist since 1997, priced at 59$. 
+         Which alternative would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
+
 ### Prospect Theory 2.0 ###
 # Scenario 1
 with open("PT2_prompts_1.pkl", "rb") as file:
@@ -459,7 +502,6 @@ PT_experiment_prompts_dict = {
     "PT_3_8": PT_prompt_8,
 }
 
-# The following dictionary is only used for a check in the function calls.
 # It returns the variable name of the prompt that was used in the experiment. key: experiment_id, value: prompt_name
 PT_prompt_ids_dict = {
     "PT_1_1": "PT_prompt_1",
@@ -627,6 +669,7 @@ PT_results_dict = {
     "PT_3_7": PT_p_scenario3,
     "PT_3_8": PT_p_scenario4,
     }
+
 
 ### Prospect Theory 2.0 ###
 # Dictionary to look up prompt for a given experiment id. key: experiment id, value: prompt
@@ -1010,10 +1053,208 @@ PT2_configuration_dict = {
 }
 
 
+### Decoy Effect ###
+# Dictionary that returns the literal prompt for a given experiment id (used in function call). key: experiment_id, value: prompt
+DE_experiment_prompts_dict = {
+    "DE_1_1": DE_prompt_1,
+    "DE_1_2": DE_prompt_2,
+    "DE_1_3": DE_prompt_3,
+    "DE_1_4": DE_prompt_4,
+    "DE_1_5": DE_prompt_5,
+    "DE_1_6": DE_prompt_6,
+    "DE_1_7": DE_prompt_7,
+    "DE_1_8": DE_prompt_8,
+    "DE_2_1": DE_prompt_1,
+    "DE_2_2": DE_prompt_2,
+    "DE_2_3": DE_prompt_3,
+    "DE_2_4": DE_prompt_4,
+    "DE_2_5": DE_prompt_5,
+    "DE_2_6": DE_prompt_6,
+    "DE_2_7": DE_prompt_7,
+    "DE_2_8": DE_prompt_8,
+    "DE_3_1": DE_prompt_1,
+    "DE_3_2": DE_prompt_2,
+    "DE_3_3": DE_prompt_3,
+    "DE_3_4": DE_prompt_4,
+    "DE_3_5": DE_prompt_5,
+    "DE_3_6": DE_prompt_6,
+    "DE_3_7": DE_prompt_7,
+    "DE_3_8": DE_prompt_8,
+}
+
+# It returns the variable name of the prompt that was used in the experiment. key: experiment_id, value: prompt_name
+DE_prompt_ids_dict = {
+    "DE_1_1": "DE_prompt_1",
+    "DE_1_2": "DE_prompt_2",
+    "DE_1_3": "DE_prompt_3",
+    "DE_1_4": "DE_prompt_4",
+    "DE_1_5": "DE_prompt_5",
+    "DE_1_6": "DE_prompt_6",
+    "DE_1_7": "DE_prompt_7",
+    "DE_1_8": "DE_prompt_8",
+    "DE_2_1": "DE_prompt_1",
+    "DE_2_2": "DE_prompt_2",
+    "DE_2_3": "DE_prompt_3",
+    "DE_2_4": "DE_prompt_4",
+    "DE_2_5": "DE_prompt_5",
+    "DE_2_6": "DE_prompt_6",
+    "DE_2_7": "DE_prompt_7",
+    "DE_2_8": "DE_prompt_8",
+    "DE_3_1": "DE_prompt_1",
+    "DE_3_2": "DE_prompt_2",
+    "DE_3_3": "DE_prompt_3",
+    "DE_3_4": "DE_prompt_4",
+    "DE_3_5": "DE_prompt_5",
+    "DE_3_6": "DE_prompt_6",
+    "DE_3_7": "DE_prompt_7",
+    "DE_3_8": "DE_prompt_8",
+}
+
+# Dictionary to look up which model to use for a given experiment id (used in function call). key: experiment id, value: model name
+DE_model_dict = {
+    "DE_1_1": "gpt-3.5-turbo",
+    "DE_1_2": "gpt-3.5-turbo",
+    "DE_1_3": "gpt-3.5-turbo",
+    "DE_1_4": "gpt-3.5-turbo",
+    "DE_1_5": "gpt-3.5-turbo",
+    "DE_1_6": "gpt-3.5-turbo",
+    "DE_1_7": "gpt-3.5-turbo",
+    "DE_1_8": "gpt-3.5-turbo",
+    "DE_2_1": "gpt-4-1106-preview",
+    "DE_2_2": "gpt-4-1106-preview",
+    "DE_2_3": "gpt-4-1106-preview",
+    "DE_2_4": "gpt-4-1106-preview",
+    "DE_2_5": "gpt-4-1106-preview",
+    "DE_2_6": "gpt-4-1106-preview",
+    "DE_2_7": "gpt-4-1106-preview",
+    "DE_2_8": "gpt-4-1106-preview",
+    "DE_3_1": 'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3',
+    "DE_3_2": 'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3',
+    "DE_3_3": 'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3',
+    "DE_3_4": 'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3',
+    "DE_3_5": 'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3',
+    "DE_3_6": 'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3',
+    "DE_3_7": 'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3',
+    "DE_3_8": 'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3',
+    }
+
+# Dictionary to look up the original results of the experiments. key: experiment id, value: original result
+DE_results_dict = {
+    "DE_1_1": "A: 16%, B: 0%, C: 84%",
+    "DE_1_2": "A: 68%, B: 0%, C: 32%",
+    "DE_1_3": "A: 16%, B: 0%, C: 84%",
+    "DE_1_4": "A: 68%, B: 0%, C: 32%",
+    "DE_1_5": "A: 16%, B: 0%, C: 84%",
+    "DE_1_6": "A: 68%, B: 0%, C: 32%",
+    "DE_1_7": "A: 16%, B: 0%, C: 84%",
+    "DE_1_8": "A: 68%, B: 0%, C: 32%",
+    "DE_2_1": "A: 16%, B: 0%, C: 84%",
+    "DE_2_2": "A: 68%, B: 0%, C: 32%",
+    "DE_2_3": "A: 16%, B: 0%, C: 84%",
+    "DE_2_4": "A: 68%, B: 0%, C: 32%",
+    "DE_2_5": "A: 16%, B: 0%, C: 84%",
+    "DE_2_6": "A: 68%, B: 0%, C: 32%",
+    "DE_2_7": "A: 16%, B: 0%, C: 84%",
+    "DE_2_8": "A: 68%, B: 0%, C: 32%",
+    "DE_3_1": "A: 16%, B: 0%, C: 84%",
+    "DE_3_2": "A: 68%, B: 0%, C: 32%",
+    "DE_3_3": "A: 16%, B: 0%, C: 84%",
+    "DE_3_4": "A: 68%, B: 0%, C: 32%",
+    "DE_3_5": "A: 16%, B: 0%, C: 84%",
+    "DE_3_6": "A: 68%, B: 0%, C: 32%",
+    "DE_3_7": "A: 16%, B: 0%, C: 84%",
+    "DE_3_8": "A: 68%, B: 0%, C: 32%",
+}
+
+# Dictionary to look up the scenario of each experiment. key: experiment id, value: scenario (1: With Decoy, 2: Without Decoy)
+DE_scenario_dict = {
+    "DE_1_1": 1,
+    "DE_1_2": 2,
+    "DE_1_3": 1,
+    "DE_1_4": 2,
+    "DE_1_5": 1,
+    "DE_1_6": 2,
+    "DE_1_7": 1,
+    "DE_1_8": 2,
+    "DE_2_1": 1,
+    "DE_2_2": 2,
+    "DE_2_3": 1,
+    "DE_2_4": 2,
+    "DE_2_5": 1,
+    "DE_2_6": 2,
+    "DE_2_7": 1,
+    "DE_2_8": 2,
+    "DE_3_1": 1,
+    "DE_3_2": 2,
+    "DE_3_3": 1,
+    "DE_3_4": 2,
+    "DE_3_5": 1,
+    "DE_3_6": 2,
+    "DE_3_7": 1,
+    "DE_3_8": 2,
+}
+
+# Dictionary to look up, whether the experiment was primed or not. key: experiment id, value: priming (1: Primed, 0: Unprimed)
+DE_priming_dict = {
+    "DE_1_1": 0,
+    "DE_1_2": 0,
+    "DE_1_3": 1,
+    "DE_1_4": 1,
+    "DE_1_5": 0,
+    "DE_1_6": 0,
+    "DE_1_7": 1,
+    "DE_1_8": 1,
+    "DE_2_1": 0,
+    "DE_2_2": 0,
+    "DE_2_3": 1,
+    "DE_2_4": 1,
+    "DE_2_5": 0,
+    "DE_2_6": 0,
+    "DE_2_7": 1,
+    "DE_2_8": 1,
+    "DE_3_1": 0,
+    "DE_3_2": 0,
+    "DE_3_3": 1,
+    "DE_3_4": 1,
+    "DE_3_5": 0,
+    "DE_3_6": 0,
+    "DE_3_7": 1,
+    "DE_3_8": 1,
+}
+
+# Dictionary to look up, whether answers were renamed and reordered or not. key: experiment id, value: indicator (1: Renamed and reordered, 0: Not renamed and reordered)
+DE_reorder_dict = {
+    "DE_1_1": 0,
+    "DE_1_2": 0,
+    "DE_1_3": 0,
+    "DE_1_4": 0,
+    "DE_1_5": 1,
+    "DE_1_6": 1,
+    "DE_1_7": 1,
+    "DE_1_8": 1,
+    "DE_2_1": 0,
+    "DE_2_2": 0,
+    "DE_2_3": 0,
+    "DE_2_4": 0,
+    "DE_2_5": 1,
+    "DE_2_6": 1,
+    "DE_2_7": 1,
+    "DE_2_8": 1,
+    "DE_3_1": 0,
+    "DE_3_2": 0,
+    "DE_3_3": 0,
+    "DE_3_4": 0,
+    "DE_3_5": 1,
+    "DE_3_6": 1,
+    "DE_3_7": 1,
+    "DE_3_8": 1,
+}
+
 
 ######################################## Experiment functions  ########################################
 
 ### Prospect Theory ###
+# Function to run PT experiment with OpenAi models 
 def PT_run_experiment_dashboard(experiment_id, n, temperature):
 
     """
@@ -1057,12 +1298,12 @@ def PT_run_experiment_dashboard(experiment_id, n, temperature):
 
     # Collecting results in a list
     results = pd.DataFrame([experiment_id, temperature, A, B, C, len_correct, PT_model_dict[experiment_id], PT_scenario_dict[experiment_id], PT_priming_dict[experiment_id]])
-    results = results.set_index(pd.Index(["Experiment", "Temp", "p(A)", "p(B)", "p(C)", "Obs.", "Model", "Scenario", "Priming"]))
+    results = results.set_index(pd.Index(["Experiment", "Temp", "A", "B", "C", "Obs.", "Model", "Scenario", "Priming"]))
 
     # Getting percentage each answer
-    p_a = (A / len_correct) * 100
-    p_b = (B / len_correct) * 100
-    p_c = (C / len_correct) * 100
+    p_a = (A / (len_correct + 0.000000001)) * 100
+    p_b = (B / (len_correct + 0.000000001)) * 100
+    p_c = (C / (len_correct + 0.000000001)) * 100
 
     # Collect probabilities in a dataframe
     probs = pd.DataFrame([experiment_id, temperature, p_a, p_b, p_c, len_correct, PT_model_dict[experiment_id], PT_scenario_dict[experiment_id], PT_priming_dict[experiment_id]])
@@ -1071,7 +1312,7 @@ def PT_run_experiment_dashboard(experiment_id, n, temperature):
     # Give out results
     return results, probs
 
-# Prospect Theory experiment for Meta's LLama model
+# Function to run PT experiment with Meta's llama model
 def PT_run_experiment_llama_dashboard(experiment_id, n, temperature):
     answers = []
     for _ in range(n):
@@ -1103,12 +1344,12 @@ def PT_run_experiment_llama_dashboard(experiment_id, n, temperature):
 
     # Collecting results in a list
     results = pd.DataFrame([experiment_id, temperature, A, B, C, len_correct, PT_model_dict[experiment_id], PT_scenario_dict[experiment_id], PT_priming_dict[experiment_id]])
-    results = results.set_index(pd.Index(["Experiment", "Temp", "p(A)", "p(B)", "p(C)", "Obs.", "Model", "Scenario", "Priming"]))
+    results = results.set_index(pd.Index(["Experiment", "Temp", "A", "B", "C", "Obs.", "Model", "Scenario", "Priming"]))
 
     # Getting percentage each answer
-    p_a = (A / len_correct) * 100
-    p_b = (B / len_correct) * 100
-    p_c = (C / len_correct) * 100
+    p_a = (A / (len_correct + 0.000000001)) * 100
+    p_b = (B / (len_correct + 0.000000001)) * 100
+    p_c = (C / (len_correct + 0.000000001)) * 100
 
     # Collect probabilities in a dataframe
     probs = pd.DataFrame([experiment_id, temperature, p_a, p_b, p_c, len_correct, PT_model_dict[experiment_id], PT_scenario_dict[experiment_id], PT_priming_dict[experiment_id]])
@@ -1117,7 +1358,9 @@ def PT_run_experiment_llama_dashboard(experiment_id, n, temperature):
     # Give out results
     return results, probs
 
+
 ### Prospect Theory 2 ###
+# Function to run PT2 experiment with OpenAI models
 def PT2_run_experiment_dashboard(experiment_id, n, temperature):
 
     """
@@ -1161,13 +1404,13 @@ def PT2_run_experiment_dashboard(experiment_id, n, temperature):
 
     # Collecting results in a list
     results = pd.DataFrame([experiment_id, temperature, A, B, C, len_correct, PT2_model_dict[experiment_id], PT2_scenario_dict[experiment_id], PT2_configuration_dict[experiment_id]])
-    results = results.set_index(pd.Index(["Experiment", "Temp", "p(A)", "p(B)", "p(C)", "Obs.", "Model", "Scenario", "Configuration"]))
+    results = results.set_index(pd.Index(["Experiment", "Temp", "A", "B", "C", "Obs.", "Model", "Scenario", "Configuration"]))
 
 
     # Getting percentage each answer
-    p_a = (A / len_correct) * 100
-    p_b = (B / len_correct) * 100
-    p_c = (C / len_correct) * 100
+    p_a = (A / (len_correct + 0.000000001)) * 100
+    p_b = (B / (len_correct + 0.000000001)) * 100
+    p_c = (C / (len_correct + 0.000000001)) * 100
 
     # Collect probabilities in a dataframe
     probs = pd.DataFrame([experiment_id, temperature, p_a, p_b, p_c, len_correct, PT2_model_dict[experiment_id], PT2_scenario_dict[experiment_id], PT2_configuration_dict[experiment_id]])
@@ -1176,7 +1419,7 @@ def PT2_run_experiment_dashboard(experiment_id, n, temperature):
     # Give out results
     return results, probs
 
-# Prospect Theory experiment 2 for Meta's Llama model 
+# Function to run PT2 experiment with Meta's LLama model
 def PT2_run_experiment_llama_dashboard(experiment_id, n, temperature):
     answers = []
     for _ in range(n):
@@ -1208,16 +1451,149 @@ def PT2_run_experiment_llama_dashboard(experiment_id, n, temperature):
 
     # Collecting results in a list
     results = pd.Dataframe([experiment_id, temperature, A, B, C, len_correct, PT2_model_dict[experiment_id], PT2_scenario_dict[experiment_id], PT2_configuration_dict[experiment_id]])
-    results = results.set_index(pd.Index(["Experiment", "Temp", "p(A)", "p(B)", "p(C)", "Obs.", "Model", "Scenario", "Configuration"]))
+    results = results.set_index(pd.Index(["Experiment", "Temp", "A", "B", "C", "Obs.", "Model", "Scenario", "Configuration"]))
 
     # Getting percentage each answer
-    p_a = (A / len_correct) * 100
-    p_b = (B / len_correct) * 100
-    p_c = (C / len_correct) * 100
+    p_a = (A / (len_correct + 0.000000001)) * 100
+    p_b = (B / (len_correct + 0.000000001)) * 100
+    p_c = (C / (len_correct + 0.000000001)) * 100
 
     # Collect probabilities in a dataframe
     probs = pd.DataFrame([experiment_id, temperature, p_a, p_b, p_c, len_correct, PT2_model_dict[experiment_id], PT2_scenario_dict[experiment_id], PT2_configuration_dict[experiment_id]])
     probs = probs.set_index(pd.Index(["Experiment", "Temp", "p(A)", "p(B)", "p(C)", "Obs.", "Model", "Scenario", "Configuration"]))
+    
+    # Give out results
+    return results, probs
+
+
+### Decoy Effect ###
+# Function to count individual answers in DE experiment
+def DE_count_answers(answers: list, experiment_id: str):
+    if experiment_id in ["DE_1_1", "DE_1_3","DE_2_1", "DE_2_3", "DE_3_1", "DE_3_3"]:
+        A = answers.count("A")
+        B = answers.count("B")
+        C = answers.count("C")
+    elif experiment_id in ["DE_1_2", "DE_1_4", "DE_2_2", "DE_2_4", "DE_3_2", "DE_3_4"]:
+        A = answers.count("A")
+        B = 0 # Option B was removed
+        C = answers.count("B") # makes comparison of results over prompts easier 
+    elif experiment_id in ["DE_1_5", "DE_1_7", "DE_2_5", "DE_2_7", "DE_3_5", "DE_3_7"]:
+        A = answers.count("Y")
+        B = answers.count("Q")
+        C = answers.count("X")
+    elif experiment_id in ["DE_1_6", "DE_1_8", "DE_2_6", "DE_2_8", "DE_3_6", "DE_3_8"]:
+        A = answers.count("Y")
+        B = 0 # Option Q was removed
+        C = answers.count("X")
+    return A, B, C
+
+# Function to count total correct answers in DE experiment 
+def DE_correct_answers(answers: list, experiment_id: str):
+    if experiment_id in ["DE_1_1", "DE_1_3","DE_2_1", "DE_2_3", "DE_3_1", "DE_3_3"]:
+        len_correct = sum(1 for ans in answers if ans in ["A", "B", "C"])
+    elif experiment_id in ["DE_1_2", "DE_1_4", "DE_2_2", "DE_2_4", "DE_3_2", "DE_3_4"]:
+        len_correct = sum(1 for ans in answers if ans in ["A", "B"])
+    elif experiment_id in ["DE_1_5", "DE_1_7", "DE_2_5", "DE_2_7", "DE_3_5", "DE_3_7"]:
+        len_correct = sum(1 for ans in answers if ans in ["Y", "Q", "X"])
+    elif experiment_id in ["DE_1_6", "DE_1_8", "DE_2_6", "DE_2_8", "DE_3_6", "DE_3_8"]:
+        len_correct = sum(1 for ans in answers if ans in ["Y", "X"])
+    return len_correct  
+
+# Function to run DE experiment n times with OpenAI models 
+def DE_run_experiment_dashboard(experiment_id: int, n: int, temperature: int):
+    """
+    Function to query ChatGPT multiple times with a survey having answers designed as: A, B, C.
+    
+    Args:
+        experiment_id (str): ID of the experiment to be run. Contains info about prompt and model
+        n (int): Number of queries to be made
+        temperature (int): Degree of randomness with range 0 (deterministic) to 2 (random)
+        max_tokens (int): Maximum number of tokens in response object
+        
+    Returns:
+        results (list): List containing count of answers for each option, also containing experiment_id, temperature and number of observations
+        probs (list): List containing probability of each option being chosen, also containing experiment_id, temeperature and number of observations
+    """
+    answers = []
+    for _ in range(n): 
+        response = client.chat.completions.create(
+            model = DE_model_dict[experiment_id], 
+            max_tokens = 5,
+            temperature = temperature, # range is 0 to 2
+            messages = [
+            {"role": "system", "content": "Only answer with the letter of the alternative you would choose without any reasoning."},
+            {"role": "user", "content": DE_experiment_prompts_dict[experiment_id]},
+                   ])
+
+        # Store the answer in the list
+        answer = response.choices[0].message.content
+        answers.append(answer.strip())
+        # Update progress bar (given from either temperature loop, or set locally)
+        #progress_bar.update(1)
+
+    # Count the answers
+    A, B, C = DE_count_answers(answers, experiment_id) # if/else statement of function deals with different answer options in different experiments
+    
+    # Count of correct answers
+    len_correct = int(DE_correct_answers(answers, experiment_id)) # if/else of function makes sure that we count the correct answers according to the experiment id 
+
+    # Collecting results in a list
+    results = pd.DataFrame([experiment_id, temperature, A, B, C, len_correct, DE_model_dict[experiment_id], DE_scenario_dict[experiment_id], DE_priming_dict[experiment_id], DE_reorder_dict[experiment_id]])
+    results = results.set_index(pd.Index(["Experiment", "Temp", "A", "B", "C", "Obs.", "Model", "Scenario", "Priming", "Reorder"]))
+
+    # Calculate probabilities
+    p_a = (A / (len_correct + 0.000000001)) * 100
+    p_b = (B / (len_correct + 0.000000001)) * 100
+    p_c = (C / (len_correct + 0.000000001)) * 100
+
+    # Collect probabilities in a dataframe
+    probs = pd.DataFrame([experiment_id, temperature, p_a, p_b, p_c, len_correct, DE_model_dict[experiment_id], DE_scenario_dict[experiment_id], DE_priming_dict[experiment_id], DE_reorder_dict[experiment_id]])
+    probs = probs.set_index(pd.Index(["Experiment", "Temp", "p(A)", "p(B)", "p(C)", "Obs.", "Model", "Scenario", "Priming", "Reorder"]))
+    # Print progress
+    # print(f"Experiment {experiment_id} with {n} observations, using {prompt_ids_dict[experiment_id]} and temperature {temperature} completed.")
+
+    return results, probs 
+
+# Function to run DE experiment n times with Meta's Llama model
+def DE_run_experiment_llama_dashboard(experiment_id, n, temperature):
+    answers = []
+    for _ in range(n):
+        response = replicate.run(
+            DE_model_dict[experiment_id],
+            input = {
+                "system_prompt": "Only answer with the letter of the alternative you would choose without any reasoning.",
+                "temperature": temperature,
+                "max_new_tokens": 2, 
+                "prompt": DE_experiment_prompts_dict[experiment_id]
+            }
+        )
+        # Grab answer and append to list
+        answer = "" # Set to empty string, otherwise it would append the previous answer to the new one
+        for item in response:
+            answer = answer + item
+        answers.append(answer.strip())
+
+        # Update progress bar
+        #progress_bar.update(1)
+
+    # Count the answers
+    A, B, C = DE_count_answers(answers, experiment_id) # if/else statement of function deals with different answer options in different experiments
+    
+    # Count of correct answers
+    len_correct = int(DE_correct_answers(answers, experiment_id)) # if/else of function makes sure that we count the correct answers according to the experiment id 
+
+    # Collecting results in a list
+    results = pd.DataFrame([experiment_id, temperature, A, B, C, len_correct, DE_model_dict[experiment_id], DE_scenario_dict[experiment_id], DE_priming_dict[experiment_id], DE_reorder_dict[experiment_id]])
+    results = results.set_index(pd.Index(["Experiment", "Temp", "A", "B", "C", "Obs.", "Model", "Scenario", "Priming", "Reorder"]))
+
+    # Getting percentage each answer
+    p_a = (A / (len_correct + 0.000000001)) * 100
+    p_b = (B / (len_correct + 0.000000001)) * 100
+    p_c = (C / (len_correct + 0.000000001)) * 100
+
+    # Collect probabilities in a dataframe
+    probs = pd.DataFrame([experiment_id, temperature, p_a, p_b, p_c, len_correct, DE_model_dict[experiment_id], DE_scenario_dict[experiment_id], DE_priming_dict[experiment_id], DE_reorder_dict[experiment_id]])
+    probs = probs.set_index(pd.Index(["Experiment", "Temp", "p(A)", "p(B)", "p(C)", "Obs.", "Model", "Scenario", "Priming", "Reorder"]))
     
     # Give out results
     return results, probs
@@ -2016,7 +2392,7 @@ individual_prospect_page = [
                             dbc.Input(
                             id = "prospect-live-iterations", 
                             type = "number",
-                            value = 0, 
+                            value = 1, 
                             min = 0, 
                             max = 100, 
                             step = 1,
@@ -2038,7 +2414,7 @@ individual_prospect_page = [
                     ),
 
                     # Add a button to trigger calback
-                    html.Button('Run the experiment', id = 'prospect-live-update-button', n_clicks = 0),
+                    html.Button('Run the experiment', id = 'prospect-live-update-button', n_clicks = None),
                          ],
             style={'display': 'flex', 'flexDirection': 'column', 'align-items': 'center', 'width': '50%', 'align-self': 'center'},
             ),
@@ -2131,7 +2507,7 @@ individual_prospect_page2 = [
                     ),
 
                     # Add a button to trigger calback
-                    html.Button('Run the experiment', id = 'prospect2-live-update-button', n_clicks = 0),
+                    html.Button('Run the experiment', id = 'prospect2-live-update-button', n_clicks = None),
                          ],
             style={'display': 'flex', 'flexDirection': 'column', 'align-items': 'center', 'width': '50%', 'align-self': 'center'},
             ),
@@ -2148,6 +2524,104 @@ individual_prospect_page2 = [
         dcc.Download(id="download-dataframe-csv"),
 ]
 
+
+
+# Individual Decoy Effect page
+individual_decoy_page = [
+    html.H1("Decoy Effect Live Experiment", className="page-heading"), 
+    html.Hr(),
+    html.P("""Choose an experiment configuration from the options below and run the experiment yourself. You can choose 2 different scenarios, 3 different models,
+           primed vs. unprimed prompts and reordered vs original answer options."""),
+    html.Br(),
+    html.Div(
+        children=[
+            html.Div(
+                children=[
+                            html.Label("Select a scenario", style={'textAlign': 'center'}),
+                            dcc.Dropdown(
+                            id = "decoy-live-scenario-dropdown",
+                            options = [
+                              {"label": "Scenario 1: All answer options", "value": 1},
+                              {"label": "Scenario 2: Decoy option removed", "value": 2},
+                         ],
+                         value = 1,
+                         style={'width': '75%', 'margin': 'auto'},
+                    ),
+                            html.Label("Select a language model", style={'textAlign': 'center'}),
+                            dcc.Dropdown(
+                            id = "decoy-live-model-dropdown",
+                            options = [
+                              {"label": "GPT-3.5-Turbo", "value": "gpt-3.5-turbo"},
+                              {"label": "GPT-4-1106-Preview", "value": "gpt-4-1106-preview"},
+                              {"label": "LLama-2-70b", "value": "llama-2-70b"},
+                            ],
+                            value = "gpt-3.5-turbo",
+                            style={'width': '75%', 'margin': 'auto'},
+                    ),
+                            html.Label("Select Prompt design", style={'textAlign': 'center'}),
+                            dcc.Dropdown(
+                            id = "decoy-live-priming-dropdown",
+                            options = [
+                              {"label": "Unprimed", "value": 0},
+                              {"label": "Primed", "value": 1},
+                            ],
+                            value = 0,
+                            style={'width': '75%', 'margin': 'auto'},
+
+                    ),     
+                            html.Label("Select answer structure", style={'textAlign': 'center'}),
+                            dcc.Dropdown(
+                            id = "decoy-live-reorder-dropdown",
+                            options = [
+                              {"label": "Original order", "value": 0},
+                              {"label": "Renamed & reordered", "value": 1},
+                            ],
+                            value = 0,
+                            style={'width': '75%', 'margin': 'auto'},
+
+                    ),   
+                            html.Label("Select number of requests", style={'textAlign': 'center'}),                
+                            dbc.Input(
+                            id = "decoy-live-iterations", 
+                            type = "number",
+                            value = 0, 
+                            min = 0, 
+                            max = 100, 
+                            step = 1,
+                            style={'width': '57%', 'margin': 'auto'}, # apparently default width for input is different from dropdown
+                    ),      
+                    html.Div(
+                        [
+                            html.Label("Select Temperature value"),             
+                            dcc.Slider(
+                                id="decoy-live-temperature",
+                                min=0.01,
+                                max=2,
+                                step=0.01,
+                                marks={0.01: '0.01', 2: '2'},
+                                value=0.8,
+                                tooltip={'placement': 'top'},
+                            ),
+                        ],
+                    ),
+
+                    # Add a button to trigger calback
+                    html.Button('Run the experiment', id = 'decoy-live-update-button', n_clicks = None),
+                         ],
+            style={'display': 'flex', 'flexDirection': 'column', 'align-items': 'center', 'width': '50%', 'align-self': 'center'},
+            ),
+        dcc.Graph(id="decoy-live-output", style={'width': '70%', 'height': '60vh'}),
+        ],
+    style={'display': 'flex', 'flexDirection': 'row'}
+    ),
+    # Additional text section
+    html.Div(
+            id='decoy-live-experiment-design',
+            style={'textAlign': 'center', 'margin': '20px'},
+    ),
+    html.Button("Download CSV", id="btn_csv"),
+        dcc.Download(id="download-dataframe-csv"),
+]
 
 ################################################## Callbacks ##################################################
 
@@ -2335,11 +2809,11 @@ def update_prospect_live_plot(n_clicks, selected_scenario, selected_model, selec
             results, probs = PT_run_experiment_llama_dashboard(experiment_id, selected_iterations, selected_temperature)
         else:
             results, probs = PT_run_experiment_dashboard(experiment_id, selected_iterations, selected_temperature)
-        n_clicks == None
+        n_clicks = None
         prompt = html.P(f"The prompt used in this experiment is: {PT_experiment_prompts_dict[experiment_id]} The original results were: {PT_results_dict[experiment_id]}.")
         return plot_results_individual(probs), prompt
 
-# Call back for Individual Prospect Theory Experiment 2.0
+# Callback for Individual Prospect Theory Experiment 2.0
 @app.callback(
     [Output("prospect2-live-output", "figure"),
      Output('prospect2-live-experiment-design', 'children')],
@@ -2505,12 +2979,88 @@ def update_prospect2_live_plot(n_clicks, selected_scenario, selected_model, sele
             results, probs = PT2_run_experiment_llama_dashboard(experiment_id, selected_iterations, selected_temperature)
         else:
             results, probs = PT2_run_experiment_dashboard(experiment_id, selected_iterations, selected_temperature)
-        n_clicks == None
+        n_clicks = None
         prompt = html.P(f"The prompt used in this experiment is: {PT2_experiment_prompts_dict[experiment_id]} The original results were: {PT2_results_dict[experiment_id]}.")
         return plot_results_individual(probs), prompt
 
+# Callback for individual Decoy Effect experiment 
+@app.callback(
+    [Output("decoy-live-output", "figure"),
+     Output('decoy-live-experiment-design', 'children')],
+    [Input("decoy-live-update-button", "n_clicks")],
+    [State("decoy-live-scenario-dropdown", "value"),
+     State("decoy-live-model-dropdown", "value"),
+     State("decoy-live-priming-dropdown", "value"),
+     State("decoy-live-reorder-dropdown", "value"),
+     State("decoy-live-iterations", "value"),
+     State("decoy-live-temperature", "value")]
+     )
 
- 
+def update_decoy_live_plot(n_clicks, selected_scenario, selected_model, selected_priming, selected_reordering, selected_iterations, selected_temperature):
+    # Check if button was clicked
+    if n_clicks is not None:
+        if selected_scenario == 1 and selected_model == "gpt-3.5-turbo" and selected_priming == 0 and selected_reordering == 0:
+            experiment_id = "DE_1_1"
+        elif selected_scenario == 2 and selected_model == "gpt-3.5-turbo" and selected_priming == 0 and selected_reordering == 0:
+            experiment_id = "DE_1_2"
+        elif selected_scenario == 1 and selected_model == "gpt-3.5-turbo" and selected_priming == 1 and selected_reordering == 0:
+            experiment_id = "DE_1_3"
+        elif selected_scenario == 2 and selected_model == "gpt-3.5-turbo" and selected_priming == 1 and selected_reordering == 0:
+            experiment_id = "DE_1_4"
+        elif selected_scenario == 1 and selected_model == "gpt-3.5-turbo" and selected_priming == 0 and selected_reordering == 1:
+            experiment_id = "DE_1_5"
+        elif selected_scenario == 2 and selected_model == "gpt-3.5-turbo" and selected_priming == 0 and selected_reordering == 1:
+            experiment_id = "DE_1_6"
+        elif selected_scenario == 1 and selected_model == "gpt-3.5-turbo" and selected_priming == 1 and selected_reordering == 1:
+            experiment_id = "DE_1_7"
+        elif selected_scenario == 2 and selected_model == "gpt-3.5-turbo" and selected_priming == 1 and selected_reordering == 1:
+            experiment_id = "DE_1_8"
+        elif selected_scenario == 1 and selected_model == "gpt-4-1106-preview" and selected_priming == 0 and selected_reordering == 0:
+            experiment_id = "DE_2_1"
+        elif selected_scenario == 2 and selected_model == "gpt-4-1106-preview" and selected_priming == 0 and selected_reordering == 0:
+            experiment_id = "DE_2_2"
+        elif selected_scenario == 1 and selected_model == "gpt-4-1106-preview" and selected_priming == 1 and selected_reordering == 0:
+            experiment_id = "DE_2_3"
+        elif selected_scenario == 2 and selected_model == "gpt-4-1106-preview" and selected_priming == 1 and selected_reordering == 0:
+            experiment_id = "DE_2_4"
+        elif selected_scenario == 1 and selected_model == "gpt-4-1106-preview" and selected_priming == 0 and selected_reordering == 1:
+            experiment_id = "DE_2_5"
+        elif selected_scenario == 2 and selected_model == "gpt-4-1106-preview" and selected_priming == 0 and selected_reordering == 1:
+            experiment_id = "DE_2_6"
+        elif selected_scenario == 1 and selected_model == "gpt-4-1106-preview" and selected_priming == 1 and selected_reordering == 1:
+            experiment_id = "DE_2_7"
+        elif selected_scenario == 2 and selected_model == "gpt-4-1106-preview" and selected_priming == 1 and selected_reordering == 1:
+            experiment_id = "DE_2_8"
+        elif selected_scenario == 1 and selected_model == "llama-2-70b" and selected_priming == 0 and selected_reordering == 0:
+            experiment_id = "DE_3_1"
+        elif selected_scenario == 2 and selected_model == "llama-2-70b" and selected_priming == 0 and selected_reordering == 0:
+            experiment_id = "DE_3_2"
+        elif selected_scenario == 1 and selected_model == "llama-2-70b" and selected_priming == 1 and selected_reordering == 0:
+            experiment_id = "DE_3_3"
+        elif selected_scenario == 2 and selected_model == "llama-2-70b" and selected_priming == 1 and selected_reordering == 0:
+            experiment_id = "DE_3_4"
+        elif selected_scenario == 1 and selected_model == "llama-2-70b" and selected_priming == 0 and selected_reordering == 1:
+            experiment_id = "DE_3_5"
+        elif selected_scenario == 2 and selected_model == "llama-2-70b" and selected_priming == 0 and selected_reordering == 1:
+            experiment_id = "DE_3_6"
+        elif selected_scenario == 1 and selected_model == "llama-2-70b" and selected_priming == 1 and selected_reordering == 1:
+            experiment_id = "DE_3_7"
+        elif selected_scenario == 2 and selected_model == "llama-2-70b" and selected_priming == 1 and selected_reordering == 1:
+            experiment_id = "DE_3_8"
+        else:
+            experiment_id = "test"
+        
+        # Run Experiment for selected parameters
+        if selected_model == "llama-2-70b":
+            results, probs = DE_run_experiment_llama_dashboard(experiment_id, selected_iterations, selected_temperature)
+        else:
+            results, probs = DE_run_experiment_dashboard(experiment_id, selected_iterations, selected_temperature)
+        n_clicks = None
+        prompt = html.P(f"The prompt used in this experiment is: {DE_experiment_prompts_dict[experiment_id]} The original results were: {DE_results_dict[experiment_id]}.")
+        return plot_results_individual(probs), prompt
+
+
+
 # Callback for navigation bar
 @app.callback(Output("page-content", "children"),
              [Input("url", "pathname")])
@@ -2538,7 +3088,7 @@ def render_page_content(pathname):
     elif pathname == "/live-experiment/prospect-theory-2":
         return html.P(individual_prospect_page2)
     elif pathname == "/live-experiment/decoy-effect":
-         return html.P("Decoy Effect live experiment not yet implemented. Sorry!")
+         return html.P(individual_decoy_page)
     elif pathname == "/live-experiment/sunk-cost":
             return html.P("Sunk cost live experiment not yet implemented. Sorry!")
     elif pathname == "/live-experiment/ultimatum":
@@ -2562,4 +3112,4 @@ def render_page_content(pathname):
 
 
 if __name__ == "__main__":
-    app.run_server(port=8888, debug = False)
+    app.run_server(port=8888, debug = True)
