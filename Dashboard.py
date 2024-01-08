@@ -15,6 +15,7 @@ import pandas as pd
 from tqdm import tqdm
 import replicate
 import pickle 
+import random 
 
 
 
@@ -1678,6 +1679,32 @@ instructions = "Which alternative would you choose? Please answer by only giving
 def create_prompt2(prompt_design, answers):
     prompt = f"""{prompt_design} Option A: {answers[0]} Option B: {answers[1]} Option C: {answers[2]}. {instructions}"""
     return prompt
+
+def create_prompt(prompt_design, answers):
+    if len(answers) == 2:
+        prompt = f"""{prompt_design} Option A: {answers[0]} Option B: {answers[1]}. {instructions}"""
+    elif len(answers) == 3:
+        prompt = f"""{prompt_design} Option A: {answers[0]} Option B: {answers[1]} Option C: {answers[2]}. {instructions}"""
+    elif len(answers) == 4:
+        prompt = f"""{prompt_design} Option A: {answers[0]} Option B: {answers[1]} Option C: {answers[2]} Option D: {answers[3]}. {instructions}"""
+    elif len(answers) == 5:
+        prompt = f"""{prompt_design} Option A: {answers[0]} Option B: {answers[1]} Option C: {answers[2]} Option D: {answers[3]} Option E: {answers[4]}. {instructions}"""
+    elif len(answers) == 6:
+        prompt = f"""{prompt_design} Option A: {answers[0]} Option B: {answers[1]} Option C: {answers[2]} Option D: {answers[3]} Option E: {answers[4]} Option F: {answers[5]}. {instructions}"""
+    return prompt
+
+def answer_randomization(options: list):
+    # Generation of random letters 
+    letters = random.sample('ABCDEFGHIJKLMNOPQRSTUVWXYZ', len(options))
+
+    # Create a dictionary to map random letters to randomly ordered options
+    options_random = random.sample(options, len(options))
+    letter_mapping = {letters[i]: options_random[i] for i in range(len(options))}
+
+    # Create the output string
+    answer_options = ', '.join([f'{letters[i]}: {options_random[i]}' for i in range(len(options))])
+    
+    return answer_options
 
 # Function to run individual experiment with OpenAI models
 def run_individual_experiment_openai(prompt, model, iterations, temperature):
@@ -3401,4 +3428,4 @@ def render_page_content(pathname):
 
 
 if __name__ == "__main__":
-    app.run_server(port=8888, debug = True)
+    app.run_server(port=8888, debug = False)
