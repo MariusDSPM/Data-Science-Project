@@ -1,15 +1,11 @@
 # Import required libraries 
 import dash
 import dash_bootstrap_components as dbc
-from dash import Input, Output, dcc, html, State
-import matplotlib.pyplot as plt
-import plotly.graph_objects as go
+from dash import html
 import os
-from PIL import Image
-from openai import OpenAI
 import openai
-import matplotlib.pyplot as plt
-import os 
+from openai import OpenAI
+
 
 
 # Get openAI API key (previously saved as environmental variable)

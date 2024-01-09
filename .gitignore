@@ -2,7 +2,8 @@
 
 Literatur/
 
-
 openai_api_key*
 
 data/
+
+**/__pycache__/
