@@ -1,12 +1,11 @@
 # Import required libraries 
 import pandas as pd
 import dash
-import dash_bootstrap_components as dbc
-from dash import Input, Output, dcc, html, State
+from dash import Input, Output, dcc, html
 import plotly.graph_objects as go
 
 
-dash.register_page(__name__, path='/decoy_effect', name='Decoy Effect', location='experiments')
+dash.register_page(__name__, path='/decoy-effect', name='Decoy Effect', location='experiments')
 
 
 # Load in results of Decoy Effect experiments
