@@ -4,7 +4,7 @@ import dash_bootstrap_components as dbc
 from dash import Input, Output, dcc, html, State
 
 
-dash.register_page(__name__, path='/overview', name='Overview', location='experiments')
+dash.register_page(__name__, path='/overview', name='Overview', location='experiments', order=0)
 
 
 # Start Page

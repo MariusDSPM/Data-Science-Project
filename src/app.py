@@ -2,18 +2,7 @@
 import dash
 import dash_bootstrap_components as dbc
 from dash import html
-import os
-import openai
-from openai import OpenAI
 
-
-
-# Get openAI API key (previously saved as environmental variable)
-openai.api_key = os.environ["OPENAI_API_KEY"]
-
-# Set client
-client = OpenAI()
-######################################   
 
 # Initialize the app
 app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP],
