@@ -23,12 +23,11 @@ openai.api_key = os.environ["OPENAI_API_KEY"]
 client = OpenAI()
 
 
-
 presets = {
     "Default": {
         "prompt": "You are a random pedestrian being chosen for a survey. The question is: Would you rather:",
         "num_options": 3,
-        "iterations": 50,
+        "iterations": 1,
         "models": ["gpt-3.5-turbo"],
         "temperature": 1,
         "answer_texts": ['Win a car', 'Win a house', 'Win a boat'],
@@ -72,7 +71,7 @@ presets = {
 
 def run_experiment_with_openai(model, prompt, instruction, temperature, n, max_tokens=1):
     answers = []
-    for _ in range(n):
+    for i in range(n):
         response = client.chat.completions.create(
             model=model,  
             messages=[
@@ -102,7 +101,7 @@ def run_experiment_with_openai(model, prompt, instruction, temperature, n, max_t
 def run_experiment_with_llama(model, prompt, instruction, temperature, n, max_tokens=2):
     model = 'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3'
     answers = []
-    for _ in range(n):
+    for i in range(n):
         response = replicate.run(model,
                                  input = {
                                     "temperature": temperature,
@@ -128,8 +127,6 @@ def run_experiment_with_llama(model, prompt, instruction, temperature, n, max_to
 def run_individual_experiment(models, prompt, instruction, n, temperature, num_options):
     results_list = []
     
-    
-
     for model in models:
         if model == 'llama-2-70b':
             answers = run_experiment_with_llama(model, prompt, instruction, temperature, n)
@@ -168,6 +165,35 @@ def run_individual_experiment(models, prompt, instruction, n, temperature, num_o
     return df
 
 
+# Function for plotting
+def plot_share_of_answers(df, temperature, iterations):
+    # Extract answer options columns
+    answer_options = [col for col in df.columns if col.startswith('Share of ')]
+
+    # Create a bar plot
+    fig = go.Figure()
+
+    # Create traces for each answer option
+    for option in answer_options:
+        fig.add_trace(go.Bar(
+            x=df['Model'],
+            y=df[option],
+            name=option,
+            hovertemplate=f"{option}: %{{y:.2f}}<extra></extra>"
+        ))
+
+    fig.update_layout(
+        barmode='group',
+        xaxis=dict(title='Model'),
+        yaxis=dict(title='Share', range=[0, 1.1]),
+        title=dict(text="Share of Answers for each Model (Temperature: " + str(temperature) + ", Iterations: " + str(iterations) + ")"),
+        legend=dict(),
+        bargap=0.3  # Gap between models
+    )
+
+    return fig
+
+
 def create_prompt(prompt, answer_prompts):
     answer_option_labels = ['A', 'B', 'C', 'D', 'E', 'F'] 
     
@@ -191,7 +217,7 @@ layout = [
             # Dropdown for presets
             html.Div(
                 children=[
-                    html.Label("Select Preset", style={'textAlign': 'center'}),
+                    html.Label("Load Preset", style={'textAlign': 'center'}),
                     dcc.Dropdown(
                         id="preset-dropdown",
                         options=[{"label": preset, "value": preset} for preset in presets.keys()],
@@ -254,7 +280,7 @@ layout = [
                             dbc.Input(
                                 id="individual-iterations",
                                 type="number",
-                                value=50,
+                                value=1,
                                 min=0,
                                 max=100,
                                 step=1,
@@ -272,7 +298,7 @@ layout = [
                                 ],
                                 value=["gpt-3.5-turbo"],
                                 inline=False,
-                                style={'width': '57%', 'margin': 'auto', 'marginBottom': '20px', 'lineHeight': '30px'},
+                                style={'width': '60%', 'margin': 'auto', 'marginBottom': '20px', 'lineHeight': '30px'},
                                 inputStyle={'margin-right': '10px'},
                                 persistence=True,
                                 persistence_type='session',
@@ -308,15 +334,13 @@ layout = [
             ),
         ],
         style={'display': 'flex', 'flexWrap': 'wrap'}
-    ),
+    ),  
+    html.Hr(),
     # Additional text section
-    html.Div(
-        id='individual-experiment-design',
-        style={'textAlign': 'center', 'margin': '20px'},
-    ),
-    html.Button("Download CSV", id="btn_csv"),
+    html.Div(id='experiment_prompt'),
+    html.Div(id="download-dataframe-csv-container"),
     dcc.Download(id="download-dataframe-csv"),
-    html.Div(id="output-table-container"),
+    dcc.Graph(id="graph_1", style={'width': '70%', 'height': '60vh'}),
 ]
 
 
@@ -354,7 +378,7 @@ def update_instruction_field(instruction_checklist):
 def update_answer_options(num_options):
     answer_option_labels = ['A', 'B', 'C', 'D', 'E', 'F']
     # placeholder_text = ['Win $50', 'Lose $100', 'Win $100', 'Lose $50', 'Win $200', 'Lose $200']
-    placeholder_text = ['Win a car', 'Win a house', 'Win a boat', 'Win a plane', 'Win a bike', 'Win a motorcycle']
+    placeholder_text = ['Win a car.', 'Win a house.', 'Win a boat.', 'Win a plane.', 'Win a bike.', 'Win a motorcycle.']
     
     answer_options = []
     textarea_style = {'width': '100%', 'height': 30} 
@@ -373,20 +397,30 @@ def update_answer_options(num_options):
 
     return answer_options  
 
+
     
 # Callback to run individual live experiment
 @dash.callback(
-    [Output("output-table-container", "children")],
-    [Input("individual-update-button", "n_clicks")],
-    [State("individual-prompt", "value"),
-     State("individual-model-checklist", "value"),
-     State("individual-iterations", "value"),
-     State("individual-temperature", "value"),
-     State("num-answer-options", "value"),
-     State({"type": "individual-answer", "index": ALL}, "value"),
-     State("instruction-checklist", "value"),
-     State({"type": "instruction-text", "index": ALL}, "value")]
+    [
+        Output("experiment_prompt", "children"),
+        Output("download-dataframe-csv-container", "children"),
+        Output("graph_1", "figure")
+    ],
+    [
+        Input("individual-update-button", "n_clicks")
+    ],
+    [
+        State("individual-prompt", "value"),
+        State("individual-model-checklist", "value"),
+        State("individual-iterations", "value"),
+        State("individual-temperature", "value"),
+        State("num-answer-options", "value"),
+        State({"type": "individual-answer", "index": ALL}, "value"),
+        State("instruction-checklist", "value"),
+        State({"type": "instruction-text", "index": ALL}, "value")
+    ],
 )
+
 def update_individual_experiment(n_clicks, prompt, selected_models, selected_iterations, selected_temperature, num_options, answer_values, instruction_checklist, instruction_text):
     # Check if button was clicked
     if n_clicks is not None:
@@ -397,6 +431,9 @@ def update_individual_experiment(n_clicks, prompt, selected_models, selected_ite
             instruction = instruction_text[0]
         else:
             instruction = ""
+            
+        # For loading bar
+        total = selected_models * selected_iterations
 
         df = run_individual_experiment(selected_models, experiment_prompt, instruction, selected_iterations, selected_temperature, num_options)
         n_clicks = None
@@ -406,15 +443,39 @@ def update_individual_experiment(n_clicks, prompt, selected_models, selected_ite
             id='output-table',
             columns=[{'name': col, 'id': col} for col in df.columns],
             data=df.to_dict('records'),
+            style_table={'margin-top': '50px', 'margin-bottom': '30px'}
         )
 
-        # Return the DataTable
-        return [output_table]
+        results = (
+            [html.H2("Results:", style={'margin-top': '50px', 'margin-bottom': '30px'})] +
+            [html.H6("The prompt used in this experiment:", style={'margin-bottom': '10px'})] +
+            [html.P(paragraph, style={'margin-bottom': '5px'}) for paragraph in experiment_prompt.split('\n')] +
+            [output_table]
+        )
+        download_button = html.Button("Download CSV", id="btn_csv")
+        
+        figure = plot_share_of_answers(df, selected_temperature, selected_iterations)
+
+        return results, download_button, figure
+
+
+
+# @dash.callback(
+#     [Output("progress", "value"), 
+#      Output("progress", "label")],
+#     [Input("progress-interval", "n_intervals")],
+# )
+# def update_progress(n):
+#     # check progress of some background process, in this example we'll just
+#     # use n_intervals constrained to be in 0-100
+#     progress = min(n % 110, 100)
+#     # only add text after 5% progress to ensure text isn't squashed too much
+#     return progress, f"{progress} %" if progress >= 5 else ""
+
 
 
 # 2 Callbacks to load preset values into the input elements
-
-# 1st. Callback  to load preset values into the input elements 
+# 1st Callback  to load preset values into the input elements 
 @dash.callback(
     [
         Output("individual-prompt", "value"),
@@ -441,7 +502,7 @@ def update_preset(selected_preset):
         
     )
     
-# 2nd. Callback to load preset values into the input elements
+# 2nd Callback to load preset values into the input elements
 @dash.callback(
     [
         Output({"type": "individual-answer", "index": ALL}, "value"),
