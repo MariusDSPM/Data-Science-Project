@@ -25,44 +25,63 @@ client = OpenAI()
 
 presets = {
     "Default": {
-        "prompt": "You are a random pedestrian being chosen for a survey. The question is: Would you rather:",
+        "prompts": ["You are a random pedestrian being chosen for a survey. The question is: Would you rather:"],
+        "num_scenarios": 1,
         "num_options": 3,
         "iterations": 1,
         "models": ["gpt-3.5-turbo"],
         "temperature": 1,
-        "answer_texts": ['Win a car', 'Win a house', 'Win a boat'],
+        "answer_texts": ['Win a car.', 'Win a house.', 'Win a boat.'],
         "instruction_checklist": ["add_instruction"],
         "instruction_text": ["Only answer with the letter of the alternative you would choose without any reasoning."],
     },
     "Loss Aversion Settings": {
-        "prompt": "You are offered two choices. Which choice would you prefer?",
+        "prompts": ["You are offered two choices. Which choice would you prefer?",
+                    "You are offered two choices. Which choice would you prefer?"],
+        "num_scenarios": 2,
         "num_options": 2,
         "iterations": 50,
         "models": ["gpt-3.5-turbo", "gpt-4-1106-preview", "llama-2-70b"],
         "temperature": 1.5,
-        "answer_texts": ['A sure gain of $100.', 'A 50% chance to gain $200 and a 50% chance to lose $0.'],
+        "answer_texts": ['A sure gain of $100.', 'A 50% chance to gain $200 and a 50% chance to lose $0.',
+                         'A sure loss of $100.', 'A 50% chance to lose $200 and a 50% chance to lose $0.'],
         "instruction_checklist": ["add_instruction"],
-        "instruction_text": ["Please answer by only giving the letter of the answer option A or B."],
+        "instruction_text": ["Please answer by only giving the letter of the answer option A or B.",
+                             "Please answer by only giving the letter of the answer option A or B."],
     },
     "Sunk Cost Fallacy 1 Settings": {
-        "prompt": "Assume that you have spent $90 for a ticket to a theater performance. Several weeks later you buy a $30 ticket to a rock concert. You think you will enjoy the rock concert more than the theater performance. As you are putting your just-purchased rock concert ticket in your wallet, you notice that both events are scheduled for the same evening. The tickets are non-transferable, nor can they be exchanged. You can use only one of the tickets and not the other. Which ticket will you use?",
+        "prompts": ["Assume that you have spent $90 for a ticket to a theater performance. Several weeks later you buy a $30 ticket to a rock concert. You think you will enjoy the rock concert more than the theater performance. As you are putting your just-purchased rock concert ticket in your wallet, you notice that both events are scheduled for the same evening. The tickets are non-transferable, nor can they be exchanged. You can use only one of the tickets and not the other. Which ticket will you use?",
+                    "Assume that you have spent $250 for a ticket to a theater performance. Several weeks later you buy a $30 ticket to a rock concert. You think you will enjoy the rock concert more than the theater performance. As you are putting your just-purchased rock concert ticket in your wallet, you notice that both events are scheduled for the same evening. The tickets are non-transferable, nor can they be exchanged. You can use only one of the tickets and not the other. Which ticket will you use?",
+                    "Assume that you have spent $10000 for a ticket to a theater performance. Several weeks later you buy a $30 ticket to a rock concert. You think you will enjoy the rock concert more than the theater performance. As you are putting your just-purchased rock concert ticket in your wallet, you notice that both events are scheduled for the same evening. The tickets are non-transferable, nor can they be exchanged. You can use only one of the tickets and not the other. Which ticket will you use?",],
+        "num_scenarios": 3,
         "num_options": 2,
         "iterations": 50,
         "models": ["gpt-3.5-turbo", "gpt-4-1106-preview", "llama-2-70b"],
         "temperature": 1,
-        "answer_texts": ['Theater performance.', 'Rock concert.'],
+        "answer_texts": ['Theater performance.', 'Rock concert.',
+                         'Theater performance.', 'Rock concert.',
+                         'Theater performance.', 'Rock concert.'],
         "instruction_checklist": ["add_instruction"],
-        "instruction_text": ["Please answer by only giving the letter of the answer option A or B."],
+        "instruction_text": ["Please answer by only giving the letter of the answer option A or B.",
+                             "Please answer by only giving the letter of the answer option A or B.",
+                             "Please answer by only giving the letter of the answer option A or B."],
     },
     "Sunk Cost Fallacy 2 Settings": {
-        "prompt": "Suppose you bought a case of good Bordeaux in the futures market for $20 a bottle. The wine now sells at auction for about $75. You have decided to drink a bottle. Which of the following best captures your feeling of the cost to you of drinking the bottle?",
+        "prompts": ["Suppose you bought a case of good Bordeaux in the futures market for $20 a bottle. The wine now sells at auction for about $75. You have decided to drink a bottle. Which of the following best captures your feeling of the cost to you of drinking the bottle?",
+                    "Suppose you bought a case of good Bordeaux in the futures market for $20 a bottle. The wine now sells at auction for about $75. You have decided to drink a bottle. Which of the following best captures your feeling of the cost to you of drinking the bottle?",
+                    "Suppose you bought a case of good Bordeaux in the futures market for $20 a bottle. The wine now sells at auction for about $75. You have decided to drink a bottle. Which of the following best captures your feeling of the cost to you of drinking the bottle?"],
+        "num_scenarios": 3,
         "num_options": 5,
         "iterations": 50,
         "models": ["gpt-3.5-turbo", "gpt-4-1106-preview", "llama-2-70b"],
         "temperature": 1,
-        "answer_texts": ['$0. I already paid for it.', '$20, what I paid for.', '$20, plus interest.', '$75, what I could get if I sold the bottle.', '-$55, I get to drink a bottle that is worth $75 that I only paid $20 for so I save money by drinking the bottle.'],
+        "answer_texts": ['$0. I already paid for it.', '$20, what I paid for.', '$20, plus interest.', '$75, what I could get if I sold the bottle.', '-$55, I get to drink a bottle that is worth $75 that I only paid $20 for so I save money by drinking the bottle.',
+                         '$75, what I could get if I sold the bottle.', '-$55, I get to drink a bottle that is worth $75 that I only paid $20 for so I save money by drinking the bottle.', '$0. I already paid for it.', '$20, what I paid for.', '$20, plus interest.',
+                         '-$55, I get to drink a bottle that is worth $75 that I only paid $20 for so I save money by drinking the bottle.', '$75, what I could get if I sold the bottle.', '$20, plus interest.', '$0. I already paid for it.', '$20, what I paid for.'],
         "instruction_checklist": ["add_instruction"],
-        "instruction_text": ["Please complete the answer by only giving the letter of the answer option A, B, C, D or E."],
+        "instruction_text": ["Please complete the answer by only giving the letter of the answer option A, B, C, D or E.",
+                             "Please complete the answer by only giving the letter of the answer option A, B, C, D or E.",
+                             "Please complete the answer by only giving the letter of the answer option A, B, C, D or E."],
     },
 }
 
@@ -124,41 +143,43 @@ def run_experiment_with_llama(model, prompt, instruction, temperature, n, max_to
     return answers
 
 
-def run_individual_experiment(models, prompt, instruction, n, temperature, num_options):
+def run_individual_experiment(models, prompts, instructions, n, temperature, num_options):
     results_list = []
     
     for model in models:
-        if model == 'llama-2-70b':
-            answers = run_experiment_with_llama(model, prompt, instruction, temperature, n)
-        else:
-            answers = run_experiment_with_openai(model, prompt, instruction, temperature, n)
+        for i, (prompt, instruction) in enumerate(zip(prompts, instructions)):
+            if model == 'llama-2-70b':
+                answers = run_experiment_with_llama(model, prompt, instruction, temperature, n)
+            else:
+                answers = run_experiment_with_openai(model, prompt, instruction, temperature, n)
+                
+                
+            answer_option_labels = ['A', 'B', 'C', 'D', 'E', 'F']
+            answer_option_labels = answer_option_labels[:num_options]
             
+            # Count of "correct" answers
+            len_correct = sum(1 for ans in answers if ans in answer_option_labels)
             
-        answer_option_labels = ['A', 'B', 'C', 'D', 'E', 'F']
-        answer_option_labels = answer_option_labels[:num_options]
-        
-        # Count of "correct" answers
-        len_correct = sum(1 for ans in answers if ans in answer_option_labels)
-        
-        result_dict = {
-            'Model': model,
-            'Temperature': temperature,
-            'Iterations': n,
-            'Correct Answers': len_correct
-        }
-        
-        # Check if len_correct is non-zero before performing further calculations
-        if len_correct > 0:
-            # Counting results
-            for label in answer_option_labels:
-                label_share = answers.count(label) / len_correct
-                result_dict['Share of ' + label] = label_share
-        else:
-            # Set NaN values for share of labels when len_correct is 0
-            for label in answer_option_labels:
-                result_dict['Share of ' + label] = float('nan')
+            result_dict = {
+                'Model': model,
+                'Scenario': i+1,
+                'Temperature': temperature,
+                'Iterations': n,
+                'Correct Answers': len_correct
+            }
             
-        results_list.append(result_dict)
+            # Check if len_correct is non-zero before performing further calculations
+            if len_correct > 0:
+                # Counting results
+                for label in answer_option_labels:
+                    label_share = answers.count(label) / len_correct
+                    result_dict['Share of ' + label] = label_share
+            else:
+                # Set NaN values for share of labels when len_correct is 0
+                for label in answer_option_labels:
+                    result_dict['Share of ' + label] = float('nan')
+                
+            results_list.append(result_dict)
         
     df = pd.DataFrame(results_list)    
     
@@ -231,19 +252,7 @@ layout = [
             ),
             html.Div(
                 children=[
-                    # Left column
-                    html.Label("Select a scenario", style={'textAlign': 'center'}),
-                    dcc.Textarea(
-                        id='individual-prompt',
-                        value="You are a random pedestrian being chosen for a survey. The question is: Would you rather:",
-                        style={'width': '100%', 'height': 100},
-                        persistence=True,
-                        persistence_type='session',
-                    ),
-                    # Answer options dynamically generated based on dropdown selection
-                    html.Div(id='answer-options-container', style={'width': '100%'}),
-                    # Instruction text
-                    html.Div(id='instruction-text-container', style={'width': '100%', 'marginTop': 30}),
+                    html.Div(id='scenarios-container', style={'width': '100%', 'marginBottom': '20px'}),
                 ],
                 style={'display': 'flex', 'flexDirection': 'column', 'alignItems': 'center', 'width': '50%'},
             ),
@@ -271,6 +280,18 @@ layout = [
                                 value=3,
                                 min=2,
                                 max=6,
+                                step=1,
+                                style={'width': '57%', 'margin': 'auto', 'marginBottom': '20px'},
+                                persistence=True,
+                                persistence_type='session',
+                            ),
+                            html.Label("Select number of scenarios", style={'textAlign': 'center'}),
+                            dbc.Input(
+                                id="num-scenarios",
+                                type="number",
+                                value=1,
+                                min=1,
+                                max=4,
                                 step=1,
                                 style={'width': '57%', 'margin': 'auto', 'marginBottom': '20px'},
                                 persistence=True,
@@ -346,57 +367,69 @@ layout = [
 
 #################### Callbacks ####################
 
-# Callback to add instruction text
+
+# Callback to dynamically generate new scenarios
 @dash.callback(
-    Output('instruction-text-container', 'children'),
-    [Input('instruction-checklist', 'value')]
-)
-def update_instruction_field(instruction_checklist):
-    instruction_field = []
-
-    if "add_instruction" in instruction_checklist:
-        instruction_field.extend([
-            html.Label(f"Instruction:", style={'textAlign': 'center'}),
-            dcc.Textarea(
-                id={"type": "instruction-text", "index": 0},
-                value='Only answer with the letter of the alternative you would choose without any reasoning.',
-                style={'width': '100%', 'height': 30}, 
-                persistence=True,
-                persistence_type='session',
-            )
-        ])
-
-    return instruction_field
-
-
-# Callback to dynamically generate answer options based on the dropdown selection
-@dash.callback(
-    Output('answer-options-container', 'children'),
-    [Input('num-answer-options', 'value')]
+    Output('scenarios-container', 'children'),
+    [Input('num-scenarios', 'value'),
+     Input('num-answer-options', 'value'),
+     Input('instruction-checklist', 'value')]
 )
 
-def update_answer_options(num_options):
-    answer_option_labels = ['A', 'B', 'C', 'D', 'E', 'F']
-    # placeholder_text = ['Win $50', 'Lose $100', 'Win $100', 'Lose $50', 'Win $200', 'Lose $200']
-    placeholder_text = ['Win a car.', 'Win a house.', 'Win a boat.', 'Win a plane.', 'Win a bike.', 'Win a motorcycle.']
+def update_num_scenarios(num_scenarios, num_options, instruction):
     
-    answer_options = []
-    textarea_style = {'width': '100%', 'height': 30} 
-
-    for i in range(num_options):
-        answer_options.extend([
-            html.Label(f"Answer option {answer_option_labels[i]}:", style={'textAlign': 'center'}),
-            dcc.Textarea(
-                id={"type": "individual-answer", "index": i},
-                value=placeholder_text[i],
-                style=textarea_style,
-                persistence=True,
-                persistence_type='session',
-            )
+    container = []
+    count = 0
+    
+    answer_option_labels = ['A', 'B', 'C', 'D', 'E', 'F']
+    placeholder_text = ['Win a car.', 'Win a house.', 'Win a boat.', 'Win a plane.', 'Win a bike.', 'Win a motorcycle.']
+    answer_textarea_style = {'width': '100%', 'height': 30} 
+    
+    for i in range(num_scenarios):
+        container.extend([
+            html.Div(
+                children=[
+                    html.Label(f"Scenario {i+1}:", style={'textAlign': 'center', 'font-size': '18px', 'font-weight': 'bold'}),
+                    dcc.Textarea(
+                        id={"type": "individual-prompt", "index": i},
+                        value="You are a random pedestrian being chosen for a survey. The question is: Would you rather:",
+                        style={'width': '100%', 'height': 100},
+                        persistence=True,
+                        persistence_type='session',
+                    ),
+                ],
+                style={'width': '100%', 'textAlign': 'center', 'marginBottom': '20px'},
+            ),
         ])
-
-    return answer_options  
-
+        for j in range(num_options):
+            container.extend([
+                html.Label(f"Answer option {answer_option_labels[j]}:", style={'textAlign': 'center'}),
+                dcc.Textarea(
+                    id={"type": "individual-answer", "index": count},
+                    value=placeholder_text[j],
+                    style=answer_textarea_style,
+                    persistence=True,
+                    persistence_type='session',
+                )
+            ])
+            count += 1
+        
+        if "add_instruction" in instruction:
+            container.extend([
+                html.Label(f"Instruction:", style={'textAlign': 'center', 'marginTop': '20px'}),
+                dcc.Textarea(
+                    id={"type": "instruction-text", "index": i},
+                    value='Only answer with the letter of the alternative you would choose without any reasoning.',
+                    style=answer_textarea_style, 
+                    persistence=True,
+                    persistence_type='session',
+                )
+            ])
+            
+        # Add a larger space between scenarios
+        container.append(html.Div(style={'height': '60px'}))
+    
+    return container
 
     
 # Callback to run individual live experiment
@@ -410,7 +443,7 @@ def update_answer_options(num_options):
         Input("individual-update-button", "n_clicks")
     ],
     [
-        State("individual-prompt", "value"),
+        State({"type": "individual-prompt", "index": ALL}, "value"),
         State("individual-model-checklist", "value"),
         State("individual-iterations", "value"),
         State("individual-temperature", "value"),
@@ -421,21 +454,29 @@ def update_answer_options(num_options):
     ],
 )
 
-def update_individual_experiment(n_clicks, prompt, selected_models, selected_iterations, selected_temperature, num_options, answer_values, instruction_checklist, instruction_text):
+def update_individual_experiment(n_clicks, prompts, selected_models, selected_iterations, selected_temperature, num_options, selected_answer_values, instruction_checklist, instruction_text):
     # Check if button was clicked
     if n_clicks is not None:
-        experiment_prompt = create_prompt(prompt, answer_values)
-
-        # Check if the instruction checklist is checked
-        if "add_instruction" in instruction_checklist and instruction_text is not None:
-            instruction = instruction_text[0]
+        
+        
+        # Create prompts for each scenario
+        len_answer_sublists = len(selected_answer_values) // num_options
+        split_answer_lists = [selected_answer_values[i * num_options:(i + 1) * num_options] for i in range(len_answer_sublists)]
+        
+        experiment_prompts = [create_prompt(prompt, answer_values) for prompt, answer_values in zip(prompts, split_answer_lists)]
+        
+        # Instructions
+        if "add_instruction" in instruction_checklist:
+            instructions = [text if text is not None else "" for text in instruction_text]
         else:
-            instruction = ""
+            instructions = ["" for _ in range(len(prompts))]
+        
             
         # For loading bar
         total = selected_models * selected_iterations
-
-        df = run_individual_experiment(selected_models, experiment_prompt, instruction, selected_iterations, selected_temperature, num_options)
+        
+        # Run experiment
+        df = run_individual_experiment(selected_models, experiment_prompts, instructions, selected_iterations, selected_temperature, num_options)
         n_clicks = None
 
         # Generate the output table 
@@ -449,7 +490,9 @@ def update_individual_experiment(n_clicks, prompt, selected_models, selected_ite
         results = (
             [html.H2("Results:", style={'margin-top': '50px', 'margin-bottom': '30px'})] +
             [html.H6("The prompt used in this experiment:", style={'margin-bottom': '10px'})] +
-            [html.P(paragraph, style={'margin-bottom': '5px'}) for paragraph in experiment_prompt.split('\n')] +
+            [html.P(paragraph, style={'margin-bottom': '5px'}) 
+             for experiment_prompt in experiment_prompts
+             for paragraph in experiment_prompt.split('\n')] +
             [output_table]
         )
         download_button = html.Button("Download CSV", id="btn_csv")
@@ -460,25 +503,11 @@ def update_individual_experiment(n_clicks, prompt, selected_models, selected_ite
 
 
 
-# @dash.callback(
-#     [Output("progress", "value"), 
-#      Output("progress", "label")],
-#     [Input("progress-interval", "n_intervals")],
-# )
-# def update_progress(n):
-#     # check progress of some background process, in this example we'll just
-#     # use n_intervals constrained to be in 0-100
-#     progress = min(n % 110, 100)
-#     # only add text after 5% progress to ensure text isn't squashed too much
-#     return progress, f"{progress} %" if progress >= 5 else ""
-
-
-
 # 2 Callbacks to load preset values into the input elements
 # 1st Callback  to load preset values into the input elements 
 @dash.callback(
     [
-        Output("individual-prompt", "value"),
+        Output("num-scenarios", "value"),
         Output("num-answer-options", "value"),
         Output("individual-iterations", "value"),
         Output("individual-model-checklist", "value"),
@@ -493,7 +522,7 @@ def update_preset(selected_preset):
 
     preset_values = presets[selected_preset]
     return (
-        preset_values["prompt"],
+        preset_values["num_scenarios"],
         preset_values["num_options"],
         preset_values["iterations"],
         preset_values["models"],
@@ -502,9 +531,10 @@ def update_preset(selected_preset):
         
     )
     
-# 2nd Callback to load preset values into the input elements
+# 2nd Callback to fill in the textareas
 @dash.callback(
     [
+        Output({"type": "individual-prompt", "index": ALL}, "value"),
         Output({"type": "individual-answer", "index": ALL}, "value"),
         Output({"type": "instruction-text", "index": ALL}, "value")
     ],
@@ -518,6 +548,7 @@ def update_preset(selected_preset):
 
     preset_values = presets[selected_preset]
     return (
+        preset_values["prompts"],
         preset_values["answer_texts"],
         preset_values["instruction_text"],
     )
