@@ -347,6 +347,7 @@ layout = [
                             ),
                             # Add a button to trigger callback
                             html.Button('Run the experiment', id='individual-update-button', n_clicks=None),
+                            html.Div(id='cost-estimate', style={'margin-top': '20px'})
                         ],
                         style={'padding': '20px', 'width': '57%'},
                     ),
@@ -552,3 +553,36 @@ def update_preset(selected_preset):
         preset_values["answer_texts"],
         preset_values["instruction_text"],
     )
+    
+    
+    
+@dash.callback(
+    [
+        Output("cost-estimate", "children"),
+    ],
+    [
+        Input({"type": "individual-prompt", "index": ALL}, "value"),
+        Input({"type": "individual-answer", "index": ALL}, "value"),
+        Input("individual-iterations", "value"),
+        Input("individual-model-checklist", "value"),
+    ]
+)
+def update_cost_estimate(prompts, answers, iterations, models):
+    # Function to count words in a list of sentences
+    def count_words(sentences_list):
+        word_count = sum(len(sentence.split()) for sentence in sentences_list)
+        return word_count
+    
+    total_tokens = (count_words(prompts) + count_words(answers)) * iterations
+    
+    estimated_cost = 0
+    if "gpt-3.5-turbo" in models:
+        estimated_cost += 0.001 * (total_tokens / 1000) + 0.002 * (1/1000)
+    if "gpt-4-1106-preview" in models:
+        estimated_cost += 0.01 * (total_tokens / 1000) + 0.03 * (1/1000)
+    
+    
+    cost_estimate = html.P(f"Estimated cost for OpenAi models: {estimated_cost:.2f} USD",
+                           style={'text-align': 'center'})
+    
+    return [cost_estimate]
