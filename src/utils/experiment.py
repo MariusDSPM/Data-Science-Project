@@ -9,7 +9,6 @@ import replicate
 import os
 
 
-
 # Get openAI API key (previously saved as environmental variable)
 openai.api_key = os.environ["OPENAI_API_KEY"]
 
@@ -26,7 +25,8 @@ class Experiment:
     LLAMA_DELAY = 1/50
     ANSWER_OPTION_LABELS = ['A', 'B', 'C', 'D', 'E', 'F']
     
-    def __init__(self, prompts, models, iterations, temperature, num_options, answers, instruction_checklist, instructions):
+    def __init__(self, prompts, models, iterations, temperature, num_options, 
+                 answers, instruction_checklist, instructions, shuffle_option=False):
         self.prompts = prompts
         self.models = models
         self.iterations = iterations
@@ -35,10 +35,14 @@ class Experiment:
         self.answers = answers
         self.instruction_checklist = instruction_checklist
         self.instructions = instructions
+        self.shuffle_options = shuffle_option
         self.model_answers_dict = {}
+        self.answer_option_labels = Experiment.ANSWER_OPTION_LABELS[:self.num_options]
         
     def run(self):
         
+        if self.shuffle_options:
+            self.shuffle_answers()
         self.create_prompts()
         self.process_instructions()
         
@@ -53,11 +57,9 @@ class Experiment:
                 
                 # Store answers of corresping model and scenario in a dictionary
                 self.model_answers_dict[f'{model} - {i}'] = self.model_answers
-                    
-                answer_option_labels = Experiment.ANSWER_OPTION_LABELS[:self.num_options]
         
                 # Count of "correct" answers
-                len_correct = sum(1 for ans in self.model_answers if ans in answer_option_labels)
+                len_correct = sum(1 for ans in self.model_answers if ans in self.answer_option_labels)
                 
                 result_dict = {
                     'Model': model,
@@ -67,7 +69,10 @@ class Experiment:
                     'Correct Answers': len_correct
                 }
                 
-                result_dict = self.count_answers(len_correct, answer_option_labels, result_dict)
+                if not self.shuffle_options:
+                    result_dict = self.count_answers(len_correct, result_dict)
+                if self.shuffle_options:
+                    self.count_answers_with_shuffle(len_correct, result_dict, i)
                     
                 results_list.append(result_dict)
             
@@ -115,15 +120,13 @@ class Experiment:
         len_answer_sublists = len(self.answers) // self.num_options
         split_answer_lists = [self.answers[i * self.num_options:(i + 1) * self.num_options] for i in range(len_answer_sublists)]
         
-        answer_option_labels = ['A', 'B', 'C', 'D', 'E', 'F'] 
-        
         self.experiment_prompts = []
         
         for prompt, answers in zip(self.prompts, split_answer_lists):
             
             experiment_prompts = f"""{prompt}\nA: {answers[0]}\nB: {answers[1]}"""
             
-            for i, label in enumerate(answer_option_labels[2:len(answers)]):
+            for i, label in enumerate(self.answer_option_labels[2:]):
                 experiment_prompts += f"""\n{label}: {answers[i+2]}"""
                 
             self.experiment_prompts.append(experiment_prompts)
@@ -136,19 +139,31 @@ class Experiment:
             self.instructions = ["" for _ in range(len(self.prompts))]
             
             
-    def count_answers(self, len_correct, answer_option_labels, result_dict):
+    def count_answers(self, len_correct, result_dict):
         # Check if len_correct is non-zero before performing further calculations
         if len_correct > 0:
             # Counting results
-            for label in answer_option_labels:
+            for label in self.answer_option_labels:
                 label_share = self.model_answers.count(label) / len_correct
                 result_dict['Share of ' + label] = label_share
         else:
             # Set NaN values for share of labels when len_correct is 0
-            for label in answer_option_labels:
+            for label in self.answer_option_labels:
                 result_dict['Share of ' + label] = float('nan')
                 
         return result_dict
+    
+    
+    def count_answers_with_shuffle(self, len_correct, result_dict, i):
+        # Check if len_correct is non-zero before performing further calculations
+        if len_correct > 0:
+            for ans in self.answer_label_mapping[i].keys():
+                label_share = self.model_answers.count(self.answer_label_mapping[i][ans]) / len_correct
+                result_dict[f'Share of "{ans}"'] = label_share
+            
+        else: 
+            for ans in self.answer_label_mapping[i].keys():
+                result_dict[f'Share of "{ans}"'] = float('nan')  
             
             
     def openai_api_call(self, model, prompt, instruction):
@@ -176,6 +191,37 @@ class Experiment:
                                  )
         
         return response
+    
+    
+    def shuffle_answers(self):
+        num_shuffles = 2 if self.num_options == 2 else 3
+        
+        # Duplicate prompt
+        self.prompts = [self.prompts[0]] * num_shuffles
+        
+        # Duplicate instructions
+        if "add_instruction" in self.instruction_checklist:
+            self.instructions = [self.instructions[0]] * num_shuffles
+        else:
+            self.instructions = None
+
+        # Shuffle answers
+        shuffled_answers1 = self.answers.copy()
+        
+        for i in range(num_shuffles-1):
+            shuffled_answers2 = shuffled_answers1.copy()
+            while shuffled_answers1 == shuffled_answers2:
+                random.shuffle(shuffled_answers1)
+            self.answers += shuffled_answers1
+        
+        # Create answer-label dictionary to keep track which label corresponds to which answer
+        self.answer_label_mapping = []
+        # Iterate through answers and create dictionaries
+        count = 0
+        while count < len(self.answers):
+            answers = self.answers[count:count+self.num_options]
+            self.answer_label_mapping.append({answer: label for label, answer in zip(self.answer_option_labels, answers)})
+            count += self.num_options
     
     
     def plot_results(self):

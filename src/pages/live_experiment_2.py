@@ -300,11 +300,19 @@ def update_num_scenarios(num_scenarios, num_options, instruction):
         State({"type": "individual-answer", "index": ALL}, "value"),
         State("instruction-checklist", "value"),
         State({"type": "instruction-text", "index": ALL}, "value"),
+        State("shuffle-checklist", "value"),
     ],
 )
-def update_individual_experiment(n_clicks, prompts, models, iterations, temperature, num_options, answer_values, instruction_checklist, instruction_text):
+def update_individual_experiment(n_clicks, prompts, models, iterations, temperature, 
+                                 num_options, answer_values, instruction_checklist, 
+                                 instruction_text, shuffle_checklist):
     # Check if button was clicked
     if n_clicks is not None:  
+        
+        if shuffle_checklist is not None:
+            shuffle_option = True
+        else:
+            shuffle_option = False
         
         # Create experiment object
         experiment = Experiment(
@@ -316,6 +324,7 @@ def update_individual_experiment(n_clicks, prompts, models, iterations, temperat
             num_options=num_options,
             instruction_checklist=instruction_checklist,
             instructions=instruction_text,
+            shuffle_option=shuffle_option,
         )
             
         # Run experiment
@@ -458,4 +467,4 @@ def update_shuffle_checklist(num_scenarios):
                     persistence_type='session',
                 )]
     else:
-        return [html.Div()]
+        return [html.Div(id="shuffle-checklist")]
