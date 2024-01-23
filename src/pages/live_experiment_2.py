@@ -1,26 +1,14 @@
 # Import required libraries 
-import pandas as pd
-import random
-import time
 import dash
 import dash_bootstrap_components as dbc
 from dash import Input, Output, ALL, dcc, html, State, dash_table
 from dash.exceptions import PreventUpdate
-import plotly.graph_objects as go
-from openai import OpenAI
-import openai
-import replicate
-import os
+
+# Local imports
+from utils.experiment import Experiment
 
 
 dash.register_page(__name__, path='/live-experiment-2', name='Live Experiment 2.0', location='sidebar')
-
-
-# Get openAI API key (previously saved as environmental variable)
-openai.api_key = os.environ["OPENAI_API_KEY"]
-
-# Set client
-client = OpenAI()
 
 
 presets = {
@@ -86,147 +74,6 @@ presets = {
 }
 
 
-
-
-def run_experiment_with_openai(model, prompt, instruction, temperature, n, max_tokens=1):
-    answers = []
-    for i in range(n):
-        response = client.chat.completions.create(
-            model=model,  
-            messages=[
-                {"role": "system", "content": instruction},
-
-                {"role": "user", "content": prompt}
-            ],
-            max_tokens=max_tokens,
-            temperature=temperature
-        )
-
-        # Store the answer in the list
-        answer = response.choices[0].message.content
-        answers.append(answer.strip())
-        
-        # Add delay before the next API call
-        if model == 'gpt-3.5-turbo-1106':
-            # 3500 requests per minute
-            time.sleep(60/3500)
-        else:
-            # 500 requests per minute
-            time.sleep(60/500)
-
-    return answers
-
-
-def run_experiment_with_llama(model, prompt, instruction, temperature, n, max_tokens=2):
-    model = 'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3'
-    answers = []
-    for i in range(n):
-        response = replicate.run(model,
-                                 input = {
-                                    "temperature": temperature,
-                                    "system_prompt": instruction,
-                                    "prompt": prompt,
-                                    "max_new_tokens": max_tokens}
-                                )
-
-        # Store the answer in the list
-        answer = ''
-        for item in response:
-            answer += item
-
-        answers.append(answer.strip())
-        
-        # Add delay before the next API call
-        # 50 requests per second
-        time.sleep(1/50)
-
-    return answers
-
-
-def run_individual_experiment(models, prompts, instructions, n, temperature, num_options):
-    results_list = []
-    
-    for model in models:
-        for i, (prompt, instruction) in enumerate(zip(prompts, instructions)):
-            if model == 'llama-2-70b':
-                answers = run_experiment_with_llama(model, prompt, instruction, temperature, n)
-            else:
-                answers = run_experiment_with_openai(model, prompt, instruction, temperature, n)
-                
-                
-            answer_option_labels = ['A', 'B', 'C', 'D', 'E', 'F']
-            answer_option_labels = answer_option_labels[:num_options]
-            
-            # Count of "correct" answers
-            len_correct = sum(1 for ans in answers if ans in answer_option_labels)
-            
-            result_dict = {
-                'Model': model,
-                'Scenario': i+1,
-                'Temperature': temperature,
-                'Iterations': n,
-                'Correct Answers': len_correct
-            }
-            
-            # Check if len_correct is non-zero before performing further calculations
-            if len_correct > 0:
-                # Counting results
-                for label in answer_option_labels:
-                    label_share = answers.count(label) / len_correct
-                    result_dict['Share of ' + label] = label_share
-            else:
-                # Set NaN values for share of labels when len_correct is 0
-                for label in answer_option_labels:
-                    result_dict['Share of ' + label] = float('nan')
-                
-            results_list.append(result_dict)
-        
-    df = pd.DataFrame(results_list)    
-    
-    return df
-
-
-# Function for plotting
-def plot_share_of_answers(df, temperature, iterations):
-    # Extract answer options columns
-    answer_options = [col for col in df.columns if col.startswith('Share of ')]
-
-    # Create a bar plot
-    fig = go.Figure()
-
-    # Create traces for each answer option
-    for option in answer_options:
-        fig.add_trace(go.Bar(
-            x=df['Model'],
-            y=df[option],
-            name=option,
-            hovertemplate=f"{option}: %{{y:.2f}}<extra></extra>"
-        ))
-
-    fig.update_layout(
-        barmode='group',
-        xaxis=dict(title='Model'),
-        yaxis=dict(title='Share', range=[0, 1.1]),
-        title=dict(text="Share of Answers for each Model (Temperature: " + str(temperature) + ", Iterations: " + str(iterations) + ")"),
-        legend=dict(),
-        bargap=0.3  # Gap between models
-    )
-
-    return fig
-
-
-def create_prompt(prompt, answer_prompts):
-    answer_option_labels = ['A', 'B', 'C', 'D', 'E', 'F'] 
-    
-    prompt = f"""{prompt}\nA: {answer_prompts[0]}\nB: {answer_prompts[1]}"""
-    
-    for i, label in enumerate(answer_option_labels[2:len(answer_prompts)]):
-        prompt += f"""\n{label}: {answer_prompts[i+2]}"""
-    
-    return prompt
-
-
-
 # Page for individual experiment
 layout = [
     html.H1("Conduct your own individual experiment", className="page-heading"),
@@ -273,18 +120,6 @@ layout = [
                                 persistence=True,
                                 persistence_type='session',
                             ),
-                            html.Label("Select number of answer options", style={'textAlign': 'center'}),
-                            dbc.Input(
-                                id="num-answer-options",
-                                type="number",
-                                value=3,
-                                min=2,
-                                max=6,
-                                step=1,
-                                style={'width': '57%', 'margin': 'auto', 'marginBottom': '20px'},
-                                persistence=True,
-                                persistence_type='session',
-                            ),
                             html.Label("Select number of scenarios", style={'textAlign': 'center'}),
                             dbc.Input(
                                 id="num-scenarios",
@@ -297,6 +132,19 @@ layout = [
                                 persistence=True,
                                 persistence_type='session',
                             ),
+                            html.Label("Select number of answer options", style={'textAlign': 'center'}),
+                            dbc.Input(
+                                id="num-answer-options",
+                                type="number",
+                                value=3,
+                                min=2,
+                                max=6,
+                                step=1,
+                                style={'width': '57%', 'margin': 'auto', 'marginBottom': '20px'},
+                                persistence=True,
+                                persistence_type='session',
+                            ),
+                            html.Div(id='shuffle-checklist-container'),
                             html.Label("Select number of requests", style={'textAlign': 'center'}),
                             dbc.Input(
                                 id="individual-iterations",
@@ -451,54 +299,53 @@ def update_num_scenarios(num_scenarios, num_options, instruction):
         State("num-answer-options", "value"),
         State({"type": "individual-answer", "index": ALL}, "value"),
         State("instruction-checklist", "value"),
-        State({"type": "instruction-text", "index": ALL}, "value")
+        State({"type": "instruction-text", "index": ALL}, "value"),
     ],
 )
-
-def update_individual_experiment(n_clicks, prompts, selected_models, selected_iterations, selected_temperature, num_options, selected_answer_values, instruction_checklist, instruction_text):
+def update_individual_experiment(n_clicks, prompts, models, iterations, temperature, num_options, answer_values, instruction_checklist, instruction_text):
     # Check if button was clicked
-    if n_clicks is not None:
+    if n_clicks is not None:  
         
-        
-        # Create prompts for each scenario
-        len_answer_sublists = len(selected_answer_values) // num_options
-        split_answer_lists = [selected_answer_values[i * num_options:(i + 1) * num_options] for i in range(len_answer_sublists)]
-        
-        experiment_prompts = [create_prompt(prompt, answer_values) for prompt, answer_values in zip(prompts, split_answer_lists)]
-        
-        # Instructions
-        if "add_instruction" in instruction_checklist:
-            instructions = [text if text is not None else "" for text in instruction_text]
-        else:
-            instructions = ["" for _ in range(len(prompts))]
-        
+        # Create experiment object
+        experiment = Experiment(
+            prompts=prompts,
+            answers=answer_values,
+            iterations=iterations,
+            models=models,
+            temperature=temperature,
+            num_options=num_options,
+            instruction_checklist=instruction_checklist,
+            instructions=instruction_text,
+        )
             
-        # For loading bar
-        total = selected_models * selected_iterations
-        
         # Run experiment
-        df = run_individual_experiment(selected_models, experiment_prompts, instructions, selected_iterations, selected_temperature, num_options)
+        experiment.run()
+        
         n_clicks = None
 
         # Generate the output table 
         output_table = dash_table.DataTable(
             id='output-table',
-            columns=[{'name': col, 'id': col} for col in df.columns],
-            data=df.to_dict('records'),
+            columns=[{'name': col, 'id': col} for col in experiment.results_df.columns],
+            data=experiment.results_df.to_dict('records'),
             style_table={'margin-top': '50px', 'margin-bottom': '30px'}
         )
 
         results = (
             [html.H2("Results:", style={'margin-top': '50px', 'margin-bottom': '30px'})] +
-            [html.H6("The prompt used in this experiment:", style={'margin-bottom': '10px'})] +
-            [html.P(paragraph, style={'margin-bottom': '5px'}) 
-             for experiment_prompt in experiment_prompts
-             for paragraph in experiment_prompt.split('\n')] +
+            [
+                html.Div(
+                    [html.H6(f"The prompt used in scenario {i+1}:", style={'margin-bottom': '10px'})] +
+                    [html.P(paragraph, style={'margin-bottom': '5px'}) 
+                    for paragraph in experiment_prompt.split('\n')]
+                )
+                for i, experiment_prompt in enumerate(experiment.experiment_prompts)
+            ] +
             [output_table]
         )
         download_button = html.Button("Download CSV", id="btn_csv")
         
-        figure = plot_share_of_answers(df, selected_temperature, selected_iterations)
+        figure = experiment.plot_results()
 
         return results, download_button, figure
 
@@ -555,7 +402,7 @@ def update_preset(selected_preset):
     )
     
     
-    
+# Callback for cost estimate
 @dash.callback(
     [
         Output("cost-estimate", "children"),
@@ -582,7 +429,33 @@ def update_cost_estimate(prompts, answers, iterations, models):
         estimated_cost += 0.01 * (total_tokens / 1000) + 0.03 * (1/1000)
     
     
-    cost_estimate = html.P(f"Estimated cost for OpenAi models: {estimated_cost:.2f} USD",
+    cost_estimate = html.P(f"Estimated cost for OpenAI models: {estimated_cost:.2f} USD",
                            style={'text-align': 'center'})
     
     return [cost_estimate]
+
+
+# Callback for shuffle option
+@dash.callback(
+    [
+        Output("shuffle-checklist-container", "children"),
+    ],
+    [
+        Input("num-scenarios", "value"),
+    ]
+)
+def update_shuffle_checklist(num_scenarios):
+    if num_scenarios == 1:
+        return [dcc.Checklist(
+                    id="shuffle-checklist",
+                    options=[
+                        {"label": "Shuffle answer options", "value": "shuffle_options"}
+                    ],
+                    inline=False,
+                    style={'width': '57%', 'margin': 'auto', 'marginBottom': '20px', 'textAlign': 'center'},
+                    inputStyle={'margin-right': '10px'},
+                    persistence=True,
+                    persistence_type='session',
+                )]
+    else:
+        return [html.Div()]
