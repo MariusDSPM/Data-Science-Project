@@ -5,11 +5,12 @@ import plotly.graph_objects as go
 
 def plot_results(df, x_axis, groupby, iterations, temperature):
 
-    # Filter based on x_axis
-    if x_axis == "Model":
-        df = df[df["Scenario"] == groupby]
-    elif x_axis == "Scenario":
-        df = df[df["Model"] == groupby]
+    df['Scenario'] = df['Scenario'].astype(str)
+    groupby = str(groupby)
+    
+    filtered = "Model" if x_axis == "Scenario" else "Scenario"
+    
+    df = df[df[filtered] == groupby]
 
     # Extract answer options columns
     answer_options = [col for col in df.columns if col.startswith('Share of ')]
@@ -30,9 +31,9 @@ def plot_results(df, x_axis, groupby, iterations, temperature):
         barmode='group',
         xaxis=dict(title=x_axis),
         yaxis=dict(title='Share', range=[0, 1.1]),
-        title=dict(text="Share of Answers for each Model (Temperature: " + str(temperature) + ", Iterations: " + str(iterations) + ")"),
+        title=dict(text=f"Share of Answers for each {x_axis} ({filtered}: {groupby}, Temperature: {temperature} , Iterations: {iterations})"),
         legend=dict(),
-        bargap=0.3  # Gap between models
+        bargap=0.3  # Gap between modelsS
     )
 
     return fig
