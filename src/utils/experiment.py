@@ -224,29 +224,29 @@ class Experiment:
             count += self.num_options
     
     
-    def plot_results(self):
-        # Extract answer options columns
-        answer_options = [col for col in self.results_df.columns if col.startswith('Share of ')]
+    # def plot_results(self, x_axis):
+    #     # Extract answer options columns
+    #     answer_options = [col for col in self.results_df.columns if col.startswith('Share of ')]
 
-        # Create a bar plot
-        fig = go.Figure()
+    #     # Create a bar plot
+    #     fig = go.Figure()
 
-        # Create traces for each answer option
-        for option in answer_options:
-            fig.add_trace(go.Bar(
-                x=self.results_df['Model'],
-                y=self.results_df[option],
-                name=option,
-                hovertemplate=f"{option}: %{{y:.2f}}<extra></extra>"
-            ))
+    #     # Create traces for each answer option
+    #     for option in answer_options:
+    #         fig.add_trace(go.Bar(
+    #             x=self.results_df[x_axis],
+    #             y=self.results_df[option],
+    #             name=option,
+    #             hovertemplate=f"{option}: %{{y:.2f}}<extra></extra>"
+    #         ))
 
-        fig.update_layout(
-            barmode='group',
-            xaxis=dict(title='Model'),
-            yaxis=dict(title='Share', range=[0, 1.1]),
-            title=dict(text="Share of Answers for each Model (Temperature: " + str(self.temperature) + ", Iterations: " + str(self.iterations) + ")"),
-            legend=dict(),
-            bargap=0.3  # Gap between models
-        )
+    #     fig.update_layout(
+    #         barmode='group',
+    #         xaxis=dict(title='Model'),
+    #         yaxis=dict(title='Share', range=[0, 1.1]),
+    #         title=dict(text="Share of Answers for each Model (Temperature: " + str(self.temperature) + ", Iterations: " + str(self.iterations) + ")"),
+    #         legend=dict(),
+    #         bargap=0.3  # Gap between models
+    #     )
 
-        return fig
+    #     return fig

@@ -3,9 +3,11 @@ import dash
 import dash_bootstrap_components as dbc
 from dash import Input, Output, ALL, dcc, html, State, dash_table
 from dash.exceptions import PreventUpdate
+import pandas as pd
 
 # Local imports
 from utils.experiment import Experiment
+from utils.plotting import plot_results
 
 
 dash.register_page(__name__, path='/live-experiment-2', name='Live Experiment 2.0', location='sidebar')
@@ -210,7 +212,24 @@ layout = [
     html.Div(id='experiment_prompt'),
     html.Div(id="download-dataframe-csv-container"),
     dcc.Download(id="download-dataframe-csv"),
-    dcc.Graph(id="graph_1", style={'width': '70%', 'height': '60vh'}),
+    html.Div(
+        style={'display': 'flex'},
+        children=[
+            html.Div(
+                style={'width': '70%', 'padding': '20px'},
+                children=[
+                    dbc.Col(dcc.Graph(id="graph_1"))
+                ]
+            ),
+            html.Div(
+                style={'width': '30%', 'padding': '20px'},
+                children=[
+                    html.Div(id="graph_settings")
+                ]
+            ),
+        ],
+    )
+    ,
 ]
 
 
@@ -285,8 +304,7 @@ def update_num_scenarios(num_scenarios, num_options, instruction):
 @dash.callback(
     [
         Output("experiment_prompt", "children"),
-        Output("download-dataframe-csv-container", "children"),
-        Output("graph_1", "figure")
+        Output("graph_settings", "children")
     ],
     [
         Input("individual-update-button", "n_clicks")
@@ -302,6 +320,7 @@ def update_num_scenarios(num_scenarios, num_options, instruction):
         State({"type": "instruction-text", "index": ALL}, "value"),
         State("shuffle-checklist", "value"),
     ],
+    prevent_initial_call=True
 )
 def update_individual_experiment(n_clicks, prompts, models, iterations, temperature, 
                                  num_options, answer_values, instruction_checklist, 
@@ -331,13 +350,13 @@ def update_individual_experiment(n_clicks, prompts, models, iterations, temperat
         experiment.run()
         
         n_clicks = None
-
+        
         # Generate the output table 
         output_table = dash_table.DataTable(
             id='output-table',
             columns=[{'name': col, 'id': col} for col in experiment.results_df.columns],
             data=experiment.results_df.to_dict('records'),
-            style_table={'margin-top': '50px', 'margin-bottom': '30px'}
+            style_table={'margin-top': '50px', 'margin-bottom': '30px'},
         )
 
         results = (
@@ -350,13 +369,99 @@ def update_individual_experiment(n_clicks, prompts, models, iterations, temperat
                 )
                 for i, experiment_prompt in enumerate(experiment.experiment_prompts)
             ] +
-            [output_table]
+            [output_table] +
+            [html.Button("Download CSV", id="btn_csv")]
         )
-        download_button = html.Button("Download CSV", id="btn_csv")
         
-        figure = experiment.plot_results()
+        graph_settings = html.Div(
+            [
+                html.Div([html.H3("Graph Settings")], style={'margin-bottom': '20px'}),
+                html.Div(
+                    [
+                        html.H6('X-Axis'),
+                        dcc.Dropdown(
+                            id="graph_x_axis",
+                            options=[
+                                {"label": "Model", "value": "Model"},
+                                {"label": "Scenario", "value": "Scenario"},
+                            ],
+                            value="Model",
+                            style={'marginBottom': '20px'}
+                        ),
+                    ]
+                ),
+                html.Div(id="graph_groupby_container"),
+            ]
+        )
 
-        return results, download_button, figure
+        return results, graph_settings
+    
+
+@dash.callback(
+    [
+        Output("graph_groupby_container", "children"),
+    ],
+    [
+        Input("graph_x_axis", "value"),
+        Input("output-table", "data"),
+    ],
+)
+def update_graph(x_axis, data):
+    
+    df = pd.DataFrame(data)
+    
+    if x_axis == "Model":
+        groupby_container = html.Div(
+            [
+                html.H6('Select Scenario'),
+                dcc.Dropdown(
+                    id="graph_groupby",
+                    options=[
+                        {"label": scenario, "value": scenario}
+                        for scenario in df["Scenario"].unique()
+                    ],
+                    value=df["Scenario"].unique()[0],
+                    style={'marginBottom': '20px'}
+                ),
+            ]
+        )
+    else:
+        groupby_container = html.Div(
+            [
+                html.H6('Select Model'),
+                dcc.Dropdown(
+                    id="graph_groupby",
+                    options=[
+                        {"label": model, "value": model}
+                        for model in df["Model"].unique()
+                    ],
+                    value=df["Model"].unique()[0],
+                ),
+            ]
+        )
+    
+    return [groupby_container]
+
+
+@dash.callback(
+    [
+        Output("graph_1", "figure"),
+    ],
+    [
+        Input("graph_x_axis", "value"),
+        Input("graph_groupby", "value"),
+        Input("output-table", "data"),
+        Input("individual-iterations", "value"),
+        Input("individual-temperature", "value"),
+    ],
+)
+def update_graph(x_axis, groupby, data, iterations, temperature):
+    
+    df = pd.DataFrame(data)
+    
+    figure = plot_results(df, x_axis, groupby, iterations, temperature)
+    
+    return [figure]
 
 
 
