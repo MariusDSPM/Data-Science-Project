@@ -66,8 +66,8 @@ class Experiment:
                 else:
                     self.model_answers = self.run_experiment_with_openai(model, prompt, instruction, self.max_tokens_openai)
                 
-                # Store answers of corresponding model and scenario in a dictionary
-                self.model_answers_dict[f'{model} - {i}'] = self.model_answers
+                # Store answers of corresponding model and scenario in a dictionary (for control purposes)
+                # self.model_answers_dict[f'{model} - {i}'] = self.model_answers
                 
                 result_dict = {
                     'Model': model,
@@ -84,7 +84,7 @@ class Experiment:
                         result_dict = self.count_answers_with_shuffle(result_dict, i)
                         
                 elif self.experiment_type == 'numeric':
-                    result_dict = self.count_answers_numeric(result_dict)
+                    result_dict = self.count_answers_numeric(result_dict, model, i)
                     
                 results_list.append(result_dict)
             
@@ -190,16 +190,21 @@ class Experiment:
         return result_dict
                 
                 
-    def count_answers_numeric(self, result_dict):
+    def count_answers_numeric(self, result_dict, model, i):
         
         valid_prices = [item for item in self.model_answers if item.startswith("$")]
         
         prices = [float(item.replace('$', '')) for item in valid_prices]
+        if model not in self.model_answers_dict.keys():
+            self.model_answers_dict[model] = {i: prices}
+        else:
+            self.model_answers_dict[model][i] = prices
         
         result_dict['Correct Answers'] = len(valid_prices)
         # result_dict['Answers'] = prices
         
         result_dict['Average'] = np.mean(prices)
+        result_dict['Median'] = np.median(prices) 
         
         return result_dict
         
@@ -260,4 +265,3 @@ class Experiment:
             answers = self.answers[count:count+self.num_options]
             self.answer_label_mapping.append({answer: label for label, answer in zip(self.answer_option_labels, answers)})
             count += self.num_options
-    

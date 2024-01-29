@@ -1,14 +1,18 @@
 # Import required libraries 
+import pandas as pd
 import dash
 import dash_bootstrap_components as dbc
 from dash import Input, Output, ALL, dcc, html, State, dash_table
 
 # Local imports
 from utils.experiment import Experiment
+from utils.plotting import plot_results_numeric
 
 
 def numeric_layout():
     layout = [
+        dcc.Store(id='experiment-data-numeric', storage_type='session'),
+        html.Div(id='test'),
         html.Div(
             children=[
                 # Dropdown for presets
@@ -195,7 +199,7 @@ def update_num_scenarios(num_scenarios, instruction):
 @dash.callback(
     [
         Output("experiment_prompt-numeric", "children"),
-        # Output("graph_settings", "children")
+        Output("experiment-data-numeric", "data")
     ],
     [
         Input("individual-update-button-numeric", "n_clicks")
@@ -247,4 +251,20 @@ def update_individual_experiment(n_clicks, prompts, models, iterations, temperat
             [html.Button("Download CSV", id="btn_csv")]
         )
 
-        return [results]
+        return [results, experiment.model_answers_dict]
+    
+    
+@dash.callback(
+    [
+        Output("graph_1-numeric", "figure"),
+    ],
+    [
+        Input("experiment-data-numeric", "data"),
+    ]
+)
+def test(data):
+    df = pd.DataFrame(data)
+    
+    figure = plot_results_numeric(df)
+    
+    return [figure]
