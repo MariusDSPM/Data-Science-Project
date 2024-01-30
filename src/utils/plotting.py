@@ -1,5 +1,4 @@
 # Import required libraries 
-import pandas as pd
 import plotly.graph_objects as go
 
 
@@ -36,4 +35,22 @@ def plot_results(df, x_axis, groupby, iterations, temperature):
         bargap=0.3  # Gap between modelsS
     )
 
+    return fig
+
+
+
+def plot_results_numeric(df):
+    # Create traces for each cell
+    
+    traces = []
+    for column in df.columns:
+        for i in range(len(df)):
+            traces.append(go.Box(y=df[column][i], name=f'Scenario {i+1}, {column}'))
+
+    # Create layout
+    layout = go.Layout(title='Boxplots for each Model and Scenario')
+
+    # Create figure
+    fig = go.Figure(data=traces, layout=layout)
+    
     return fig
