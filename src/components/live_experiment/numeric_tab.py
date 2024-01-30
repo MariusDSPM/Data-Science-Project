@@ -9,19 +9,14 @@ from utils.experiment import Experiment
 from utils.plotting import plot_results_numeric
 
 
+
+input_style = {'width': '25%', 'marginBottom': '25px'}
+
 def numeric_layout():
     layout = [
         dcc.Store(id='experiment-data-numeric', storage_type='session'),
-        html.Div(id='test'),
         html.Div(
             children=[
-                # Dropdown for presets
-                html.Div(
-                    children=[
-                        html.Label("Load Preset", style={'textAlign': 'center'}),
-                    ],
-                    style={'width': '100%', 'textAlign': 'center', 'marginBottom': '20px'},
-                ),
                 html.Div(
                     children=[
                         html.Div(id='scenarios-container-numeric', style={'width': '100%', 'marginBottom': '20px'}),
@@ -33,19 +28,8 @@ def numeric_layout():
                         # Right column
                         dbc.Card(
                             children=[
-                                dcc.Checklist(
-                                    id="instruction-checklist-numeric",
-                                    options=[
-                                        {"label": "Add instruction", "value": "add_instruction"}
-                                    ],
-                                    value=["add_instruction"],
-                                    inline=False,
-                                    style={'width': '57%', 'margin': 'auto', 'marginBottom': '20px', 'textAlign': 'center'},
-                                    inputStyle={'margin-right': '10px'},
-                                    persistence=True,
-                                    persistence_type='session',
-                                ),
-                                html.Label("Select number of scenarios", style={'textAlign': 'center'}),
+                                html.H3("Experiment Settings", style={'marginBottom': '30px'}),
+                                html.H6("Select number of scenarios"),
                                 dbc.Input(
                                     id="num-scenarios-numeric",
                                     type="number",
@@ -53,11 +37,11 @@ def numeric_layout():
                                     min=1,
                                     max=4,
                                     step=1,
-                                    style={'width': '57%', 'margin': 'auto', 'marginBottom': '20px'},
+                                    style=input_style,
                                     persistence=True,
                                     persistence_type='session',
                                 ),
-                                html.Label("Select number of requests", style={'textAlign': 'center'}),
+                                html.H6("Select number of requests"),
                                 dbc.Input(
                                     id="individual-iterations-numeric",
                                     type="number",
@@ -65,12 +49,25 @@ def numeric_layout():
                                     min=0,
                                     max=100,
                                     step=1,
-                                    style={'width': '57%', 'margin': 'auto', 'marginBottom': '20px'},
+                                    style=input_style,
                                     persistence=True,
                                     persistence_type='session',
                                 ),
-                                html.Label("Select language models", style={'textAlign': 'center'}),
-                                dcc.Checklist(
+                                dbc.Checklist(
+                                    id="instruction-checklist-numeric",
+                                    options=[
+                                        {"label": "Add instruction", "value": "add_instruction"}
+                                    ],
+                                    value=["add_instruction"],
+                                    switch=True,
+                                    inline=False,
+                                    style={'marginBottom': '25px'},
+                                    inputStyle={'margin-right': '10px'},
+                                    persistence=True,
+                                    persistence_type='session',
+                                ),
+                                html.H6("Select language models"),
+                                dbc.Checklist(
                                     id="individual-model-checklist-numeric",
                                     options=[
                                         {"label": "GPT-3.5-Turbo", "value": "gpt-3.5-turbo"},
@@ -79,37 +76,34 @@ def numeric_layout():
                                     ],
                                     value=["gpt-3.5-turbo"],
                                     inline=False,
-                                    style={'width': '60%', 'margin': 'auto', 'marginBottom': '20px', 'lineHeight': '30px'},
+                                    style={'marginBottom': '25px', 'lineHeight': '30px'},
                                     inputStyle={'margin-right': '10px'},
                                     persistence=True,
                                     persistence_type='session',
                                 ),
                                 html.Div(
                                     [
-                                        html.Div(
-                                            [
-                                                html.Label("Select Temperature value", style={'textAlign': 'center'}),
-                                                dcc.Slider(
-                                                    id="individual-temperature-numeric",
-                                                    min=0.01,
-                                                    max=2,
-                                                    step=0.01,
-                                                    marks={0.01: '0.01', 1: '1', 2: '2'},
-                                                    value=1,
-                                                    tooltip={'placement': 'top'},
-                                                    persistence=True,
-                                                    persistence_type='session',
-                                                ),
-                                            ],
-                                            style={'width': '65%', 'margin': 'auto', 'marginBottom': '20px'}, 
+                                        html.H6("Select Temperature value"),
+                                        dcc.Slider(
+                                            id="individual-temperature-numeric",
+                                            min=0.01,
+                                            max=2,
+                                            step=0.01,
+                                            marks={0.01: '0.01', 1: '1', 2: '2'},
+                                            value=1,
+                                            tooltip={'placement': 'top'},
+                                            persistence=True,
+                                            persistence_type='session',
                                         ),
                                     ],
+                                    style={'width': '100%', 'marginBottom': '40px'}, 
                                 ),
                                 # Add a button to trigger callback
-                                html.Button('Run the experiment', id='individual-update-button-numeric', n_clicks=None),
-                                html.Div(id='cost-estimate-numeric', style={'margin-top': '20px'})
+                                html.Button('Run the experiment', id='individual-update-button-numeric', 
+                                            n_clicks=None, style={'marginBottom': '25px', 'width': '100%'}),
+                                html.Div(id='cost-estimate-numeric')
                             ],
-                            style={'padding': '20px', 'width': '57%'},
+                            style={'padding': '20px', 'width': '55%', 'marginBottom': '30px'},
                         ),
                     ],
                     style={'display': 'flex', 'flexDirection': 'column', 'alignItems': 'center', 'width': '50%'},
