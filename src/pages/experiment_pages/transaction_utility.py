@@ -7,23 +7,26 @@ from PIL import Image
 import pickle
 from ast import literal_eval
 import pandas as pd
+import numpy as np
+from collections import Counter
 
 dash.register_page(__name__, path='/transaction-utility', name='Transaction Utility', location='experiments')
 
 ### Setup ###
 
 TU_results = pd.read_csv('Output/TU_results.csv')
-#TU_resullts2 = pd.read_csv('Output/TU_results2.csv')
+TU_resullts2 = pd.read_csv('Output/TU2_results.csv')
+
 
 # Function to extract the dollar amount of the answer from LLMs
 def extract_dollar_amounts(answers):
     # Only return values that start with "$"
-    valid_prices = [item for item in answers if item.startswith("$")]
+    valid_prices = [item for item in answers if item.startswith("$") and item[1:].replace('.', '').isdigit()] # check if everything after $ is a digit, exlcuding commas
     # Delete the "$" from the beginning of each price
     prices = [item.replace('$', '') for item in valid_prices]
     return prices
 
-# Function for plottings results of transaction utility experiments
+# Function to plot results of first experiment
 def TU_plot_results(initial_costs, orientation_price, buyer, model, temperature, df):
     # Select requested subset of results
     df = df[(TU_results["Model"] == model) & (TU_results["Temperature"] == temperature) & (TU_results["Initial_cost"] == initial_costs) & (TU_results["Orientation_price"] == orientation_price) & (TU_results["Buyer"] == buyer)]
@@ -104,9 +107,169 @@ def TU_plot_results(initial_costs, orientation_price, buyer, model, temperature,
     
     return fig
 
-# Prompts used in the experiment
+# Function to plot results of second experiment
+# This function is coded rather complicated. However, not converting the answers to strings has the advantage using the Histogram w/o bins.
+def TU2_plot_results(place, income, model, temperature, df):
+    # Select requested subset of results
+    df = df[(df["Model"] == model) & (df["Temperature"] == temperature) & (df["Place"] == place) & (df["Income"] == income)]
+    # Transpose for plotting
+    df = df.transpose()
+    # Apply literal_eval to convert string to list
+    answers = df.loc["Answers"].apply(literal_eval).iloc[0]
+    # Get number of observations 
+    n_observations = df.loc["Obs."].iloc[0] 
+    # Get stated WTP
+    prices = extract_dollar_amounts(answers)
+    # Get temperature value 
+    temperature = temperature
+    # Get place
+    place = place
+    # Adjust name of place for plot title
+    if place == "grocery":
+        place = "grocery store"
+    # Compute median of WTP and align format with actual median value
+    median_value = np.median([float(price) for price in prices])
+    decimal_places = 0 if median_value.is_integer() else 2  # Determine the number of decimal places
+    median = f"{median_value:.{decimal_places}f}" 
+    # Order prices ascendingly
+    prices.sort(key=float)
+    
+    
+    # Plot histogram
+    fig = go.Figure(data=[
+        go.Histogram(
+            x=prices,
+            name="Model answers",
+            customdata = [n_observations] * len(prices), # * len(prices) so it is displayed at every bar
+            hovertemplate = "Value: %{x}<br>Number of observations: %{y}<br>Number of total observations: %{customdata}<extra></extra>",
+            marker_color = "rgb(55, 83, 109)"
+        ),
+    # Add vertical line for median
+    go.Scatter(
+        x = [median, median], #start and enf of x
+        y = [0, Counter(prices).most_common(1)[0][1]], # count of most common price
+        mode="lines",
+        name="Median",
+        line=dict(color="red", width=4, dash="dash"),
+        hovertemplate = "Median: %{x}<extra></extra>",
+        
+    )
+    ]
+    )
+
+
+    # Layout
+    fig.update_layout(
+    xaxis = dict(
+        title = "Willingness to pay (USD)",
+        titlefont_size = 18,
+        tickfont_size = 16,
+        tickformat=".2f"
+    ),
+    yaxis = dict(
+        title = "Frequency",
+        titlefont_size = 18,
+        tickfont_size = 16,
+    ),
+    title = dict(
+    text =  f"Distribution of {model}'s WTP for beer at the {place} for temperature {temperature}",
+    x = 0.5, 
+    y = 0.95,
+    font_size = 18,
+    ),
+    legend=dict(
+        x=1.01, 
+        y=0.9,
+        font=dict(family='Arial', size=12, color='black'),
+        bordercolor='black',  
+        borderwidth=2,  
+    ),
+    showlegend = True,
+    width = 1000,
+    margin=dict(t=60)
+    )
+
+    # Show the plot
+    return fig 
+
+# Prompts used in the first experiment
 with open("Output/TU_prompts.pkl", "rb") as file:
     TU_prompts = pickle.load(file)
+# Prompts used in the second experiment
+with open("Output/TU2_prompts.pkl", "rb") as file:
+    TU2_prompts = pickle.load(file)
+
+# Dictionary of prompts used in first experiment
+TU_experiment_prompts_dict = {
+    "TU_1_1_1_1": TU_prompts[0],
+    "TU_1_1_1_2": TU_prompts[1],
+    "TU_1_1_2_1": TU_prompts[2],
+    "TU_1_1_2_2": TU_prompts[3],
+    "TU_1_2_1_1": TU_prompts[4],
+    "TU_1_2_1_2": TU_prompts[5],
+    "TU_1_2_2_1": TU_prompts[6],
+    "TU_1_2_2_2": TU_prompts[7],
+    "TU_1_3_1_1": TU_prompts[8],
+    "TU_1_3_1_2": TU_prompts[9],
+    "TU_1_3_2_1": TU_prompts[10],
+    "TU_1_3_2_2": TU_prompts[11],
+    "TU_2_1_1_1": TU_prompts[0],
+    "TU_2_1_1_2": TU_prompts[1],
+    "TU_2_1_2_1": TU_prompts[2],
+    "TU_2_1_2_2": TU_prompts[3],
+    "TU_2_2_1_1": TU_prompts[4],
+    "TU_2_2_1_2": TU_prompts[5],
+    "TU_2_2_2_1": TU_prompts[6],
+    "TU_2_2_2_2": TU_prompts[7],
+    "TU_2_3_1_1": TU_prompts[8],
+    "TU_2_3_1_2": TU_prompts[9],
+    "TU_2_3_2_1": TU_prompts[10],
+    "TU_2_3_2_2": TU_prompts[11],
+    "TU_3_1_1_1": TU_prompts[0],
+    "TU_3_1_1_2": TU_prompts[1],
+    "TU_3_1_2_1": TU_prompts[2],
+    "TU_3_1_2_2": TU_prompts[3],
+    "TU_3_2_1_1": TU_prompts[4],
+    "TU_3_2_1_2": TU_prompts[5],
+    "TU_3_2_2_1": TU_prompts[6],
+    "TU_3_2_2_2": TU_prompts[7],
+    "TU_3_3_1_1": TU_prompts[8],
+    "TU_3_3_1_2": TU_prompts[9],
+    "TU_3_3_2_1": TU_prompts[10],
+    "TU_3_3_2_2": TU_prompts[11],
+}
+
+# Dictionary of prompts used in second experiment
+TU2_experiment_prompts_dict = {
+    "TU2_1_1_1": TU2_prompts[0],
+    "TU2_1_1_2": TU2_prompts[1],
+    "TU2_1_1_3": TU2_prompts[2],
+    "TU2_1_1_4": TU2_prompts[3],
+    "TU2_1_2_1": TU2_prompts[4],
+    "TU2_1_2_2": TU2_prompts[5],
+    "TU2_1_2_3": TU2_prompts[6],
+    "TU2_1_2_4": TU2_prompts[7],
+    "TU2_2_1_1": TU2_prompts[0],
+    "TU2_2_1_2": TU2_prompts[1],
+    "TU2_2_1_3": TU2_prompts[2],
+    "TU2_2_1_4": TU2_prompts[3],
+    "TU2_2_2_1": TU2_prompts[4],
+    "TU2_2_2_2": TU2_prompts[5],
+    "TU2_2_2_3": TU2_prompts[6],
+    "TU2_2_2_4": TU2_prompts[7],
+    "TU2_3_1_1": TU2_prompts[0],
+    "TU2_3_1_2": TU2_prompts[1],
+    "TU2_3_1_3": TU2_prompts[2],
+    "TU2_3_1_4": TU2_prompts[3],
+    "TU2_3_2_1": TU2_prompts[4],
+    "TU2_3_2_2": TU2_prompts[5],
+    "TU2_3_2_3": TU2_prompts[6],
+    "TU2_3_2_4": TU2_prompts[7]
+}
+
+
+
+
 
 ### Layout ###
 layout = [
@@ -183,13 +346,90 @@ layout = [
         ],
         style={'display': 'flex', 'flexDirection': 'row'},
     ),
+    # Display of prompt 
+    html.Div(
+            id='tu1-prompt',
+            style={'textAlign': 'center', 'margin': '20px'},
+    ),
+
+    ########## Experiment 2
+    html.Hr(),
+    html.H2("Experiment 2: Beer at the grocery store"),
+    html.Br(),
+    html.Div(
+        children=[
+            html.Div(
+                children=[
+                    html.Label("Select place of purchase", style={'textAlign': 'center'}),
+                    dcc.Dropdown(
+                        id="tu2-place-dropdown",
+                        options=[
+                            {"label": "Fancy resort hotel", "value": "hotel"},
+                            {"label": "Run-down grocery store", "value": "grocery"},
+                        ],
+                        value="hotel",
+                        style={'width': '75%', 'margin': 'auto'},
+                    ),
+                    html.Label("Select annual income", style={'textAlign': 'center'}),
+                    dcc.Dropdown(
+                        id="tu2-income-dropdown",
+                        options=[
+                            {"label": "No information given", "value": "0"},
+                            {"label": "$50k", "value": "$50k"},
+                            {"label": "$70k", "value": "$70k"},
+                            {"label": "$120k", "value": "$120k"},
+                        ],
+                        value="0",
+                        style={'width': '75%', 'margin': 'auto'},                        
+                    ),
+
+                    html.Label("Select language model", style={'textAlign': 'center'}),
+                    dcc.Dropdown(
+                        id="tu2-language-model-dropdown",
+                        options=[
+                            {"label": "GPT-3.5-Turbo", "value": "gpt-3.5-turbo"},
+                            {"label": "GPT-4-1106-Preview", "value": "gpt-4-1106-preview"},
+                            {"label": "LLama-2-70b", "value": "llama-2-70b"},
+                        ],
+                        value="gpt-3.5-turbo",
+                        style={'width': '75%', 'margin': 'auto'},                        
+                    ),
+                    html.Div(
+                        [
+                            html.Label("Select Temperature value"),             
+                            dcc.Slider(
+                                id="tu2-temperature-slider",
+                                min=0.01,
+                                max=2,
+                                step=0.5,
+                                marks={0.01: '0.01', 0.5: '0.5', 1: '1', 1.5: '1.5', 2: '2'},
+                                value=0.5,
+                                tooltip={'placement': 'top'},
+                            ),
+                        ],
+                    ),
+                ],
+                style={'display': 'flex', 'flexDirection': 'column', 'align-items': 'center', 'width': '50%', 'align-self': 'center'},
+            ),
+            dcc.Graph(id="tu2-plot", style={'width': '70%', 'height': '60vh'}),
+        ],
+        style={'display': 'flex', 'flexDirection': 'row'},
+    ),
+    # Display of prompt
+    html.Div(
+            id='tu2-prompt',
+            style={'textAlign': 'center', 'margin': '20px'},
+    ),
 ]
 
 
+
 ### Callback ###
-# Experiment 1
+
+### Experiment 1
 @dash.callback(
-    Output("tu1-plot", "figure"),
+    [Output("tu1-plot", "figure"),
+    Output('tu1-prompt', 'children')],
     [
         Input("tu1-initial-cost-dropdown", "value"),
         Input("tu1-current-cost-dropdown", "value"),
@@ -200,12 +440,32 @@ layout = [
 )
 
 
-def update_tu1_plot(initial_costs, orientation_price, buyer, model, temperature):
-    print(f"Selected initial costs: {initial_costs}"),
-    print(f"Selected current costs: {orientation_price}"),
-    print(f"Selected buyer: {buyer}"),
-    print(f"Selected model: {model}"),
-    print(f"Selected temperature: {temperature}"),
-    
-    return TU_plot_results(initial_costs, orientation_price, buyer, model, temperature, TU_results)
+def update_tu1(initial_costs, orientation_price, buyer, model, temperature):
+    # Get prompt
+    df = TU_results[(TU_results["Model"] == model) & (TU_results["Temperature"] == temperature) & (TU_results["Initial_cost"] == initial_costs)
+                     & (TU_results["Orientation_price"] == orientation_price) & (TU_results["Buyer"] == buyer)]
+    experiment_id = df["Experiment_id"].iloc[0]
+    prompt = TU_experiment_prompts_dict[experiment_id]
+    prompt = html.P(f"The prompt used in this experiment is: {prompt}")
+    return TU_plot_results(initial_costs, orientation_price, buyer, model, temperature, TU_results), prompt
 
+### Experiument 2
+@dash.callback(
+    [Output("tu2-plot", "figure"),
+     Output('tu2-prompt', 'children')],
+    [
+        Input("tu2-place-dropdown", "value"),
+        Input("tu2-income-dropdown", "value"),
+        Input("tu2-language-model-dropdown", "value"),
+        Input("tu2-temperature-slider", "value"),
+    ],
+)
+
+def update_tu2(place, income, model, temperature):
+    # Get prompt
+    df = TU_resullts2[(TU_resullts2["Model"] == model) & (TU_resullts2["Temperature"] == temperature) &
+                       (TU_resullts2["Place"] == place) & (TU_resullts2["Income"] == income)]
+    experiment_id = df["Experiment_id"].iloc[0]
+    prompt = TU2_experiment_prompts_dict[experiment_id]
+    prompt = html.P(f"The prompt used in this experiment is: {prompt}")
+    return TU2_plot_results(place, income, model, temperature, TU_resullts2), prompt
