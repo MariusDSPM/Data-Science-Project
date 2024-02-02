@@ -1,7 +1,9 @@
 # Import required libraries 
 import dash
 import dash_bootstrap_components as dbc
-from dash import Input, Output, ALL, dcc, html, State, dash_table
+from dash import Input, Output, ALL, dcc, html
+from replicate.client import Client
+from openai import OpenAI
 
 # Local imports
 from components.live_experiment.answer_options_tab import answer_option_layout
@@ -14,7 +16,25 @@ dash.register_page(__name__, path='/live-experiment', name='Live Experiment', lo
 layout = [
     html.H1("Conduct your own individual experiment", className="page-heading"),
     html.Hr(),
-    html.P("""Think of a multiple-choice-style experiment to conduct. Choose a prompt, a model, and answer options to run the experiment yourself."""),
+    html.H6("To run your own individual experiment, you'll need to provide API keys to get access to the LLMs:"),
+    html.Br(),
+    html.Div(
+        [
+            dbc.Input(id='input-openai-key', placeholder="OpenAI API Key", type="text"),
+            dbc.FormText("You'll need an OpenAI API key to use GPT-3.5-Turbo and GPT-4-1106-Preview. You can get one from the OpenAI website (https://platform.openai.com)."),
+        ]
+    ),
+    html.Br(),
+    html.Div(
+        [
+            dbc.Input(id='input-repliate-key', placeholder="Replicate API Key", type="text"),
+            dbc.FormText("You'll need a Replicate API key to use Llama-2-70b. You can get one from the Replicate website (https://replicate.com)."),
+        ]
+    ),
+    dcc.Store(id='user-api-keys'),
+    html.Hr(),
+    html.Br(),
+    html.P("""Choose scenarios, models, and answer options to run the experiment yourself."""),
     html.Br(),
     html.Div(
         style={"display": "flex"},
@@ -59,3 +79,16 @@ def render_tab(tab_choice):
         return [answer_option_layout()]
     elif tab_choice == "numeric":
         return [numeric_layout()]
+    
+    
+@dash.callback(
+    [
+        Output("user-api-keys", "data"),
+    ],
+    [
+        Input("input-openai-key", "value"),
+        Input("input-repliate-key", "value"),
+    ]
+)
+def update_api_keys(openai_key, replicate_key):
+    return [{"openai": openai_key, "replicate": replicate_key}]
