@@ -10,14 +10,12 @@ from utils.experiment import Experiment
 from utils.plotting import plot_results
 
 
-# dash.register_page(__name__, path='/live-experiment-2', name='Live Experiment 2.0', location='sidebar')
-
-
 presets = {
     "Default": {
         "prompts": ["You are a random pedestrian being chosen for a survey. The question is: Would you rather:"],
         "num_scenarios": 1,
         "num_options": 3,
+        "shuffle-checklist": [],
         "iterations": 1,
         "models": ["gpt-3.5-turbo"],
         "temperature": 1,
@@ -30,6 +28,7 @@ presets = {
                     "You are offered two choices. Which choice would you prefer?"],
         "num_scenarios": 2,
         "num_options": 2,
+        "shuffle-checklist": [],
         "iterations": 50,
         "models": ["gpt-3.5-turbo", "gpt-4-1106-preview", "llama-2-70b"],
         "temperature": 1.5,
@@ -45,6 +44,7 @@ presets = {
                     "Assume that you have spent $10000 for a ticket to a theater performance. Several weeks later you buy a $30 ticket to a rock concert. You think you will enjoy the rock concert more than the theater performance. As you are putting your just-purchased rock concert ticket in your wallet, you notice that both events are scheduled for the same evening. The tickets are non-transferable, nor can they be exchanged. You can use only one of the tickets and not the other. Which ticket will you use?",],
         "num_scenarios": 3,
         "num_options": 2,
+        "shuffle-checklist": [],
         "iterations": 50,
         "models": ["gpt-3.5-turbo", "gpt-4-1106-preview", "llama-2-70b"],
         "temperature": 1,
@@ -57,23 +57,20 @@ presets = {
                              "Please answer by only giving the letter of the answer option A or B."],
     },
     "Sunk Cost Fallacy 2 Settings": {
-        "prompts": ["Suppose you bought a case of good Bordeaux in the futures market for $20 a bottle. The wine now sells at auction for about $75. You have decided to drink a bottle. Which of the following best captures your feeling of the cost to you of drinking the bottle?",
-                    "Suppose you bought a case of good Bordeaux in the futures market for $20 a bottle. The wine now sells at auction for about $75. You have decided to drink a bottle. Which of the following best captures your feeling of the cost to you of drinking the bottle?",
-                    "Suppose you bought a case of good Bordeaux in the futures market for $20 a bottle. The wine now sells at auction for about $75. You have decided to drink a bottle. Which of the following best captures your feeling of the cost to you of drinking the bottle?"],
-        "num_scenarios": 3,
+        "prompts": ["Suppose you bought a case of good Bordeaux in the futures market for $20 a bottle. The wine now sells at auction for about $75. You have decided to drink a bottle. Which of the following best captures your feeling of the cost to you of drinking the bottle?"],
+        "num_scenarios": 1,
         "num_options": 5,
+        "shuffle-checklist": ["shuffle_options"],
         "iterations": 50,
         "models": ["gpt-3.5-turbo", "gpt-4-1106-preview", "llama-2-70b"],
         "temperature": 1,
-        "answer_texts": ['$0. I already paid for it.', '$20, what I paid for.', '$20, plus interest.', '$75, what I could get if I sold the bottle.', '-$55, I get to drink a bottle that is worth $75 that I only paid $20 for so I save money by drinking the bottle.',
-                         '$75, what I could get if I sold the bottle.', '-$55, I get to drink a bottle that is worth $75 that I only paid $20 for so I save money by drinking the bottle.', '$0. I already paid for it.', '$20, what I paid for.', '$20, plus interest.',
-                         '-$55, I get to drink a bottle that is worth $75 that I only paid $20 for so I save money by drinking the bottle.', '$75, what I could get if I sold the bottle.', '$20, plus interest.', '$0. I already paid for it.', '$20, what I paid for.'],
+        "answer_texts": ['$0. I already paid for it.', '$20, what I paid for.', '$20, plus interest.', '$75, what I could get if I sold the bottle.', '-$55, I get to drink a bottle that is worth $75 that I only paid $20 for so I save money by drinking the bottle.'],
         "instruction_checklist": ["add_instruction"],
-        "instruction_text": ["Please complete the answer by only giving the letter of the answer option A, B, C, D or E.",
-                             "Please complete the answer by only giving the letter of the answer option A, B, C, D or E.",
-                             "Please complete the answer by only giving the letter of the answer option A, B, C, D or E."],
+        "instruction_text": ["Please complete the answer by only giving the letter of the answer option A, B, C, D or E."],
     },
 }
+
+input_style = {'width': '25%', 'marginBottom': '25px'}
 
 
 # Page for individual experiment
@@ -84,7 +81,7 @@ def answer_option_layout():
                 # Dropdown for presets
                 html.Div(
                     children=[
-                        html.Label("Load Preset", style={'textAlign': 'center'}),
+                        html.H6("Load Preset", style={'textAlign': 'center'}),
                         dcc.Dropdown(
                             id="preset-dropdown",
                             options=[{"label": preset, "value": preset} for preset in presets.keys()],
@@ -107,19 +104,8 @@ def answer_option_layout():
                         # Right column
                         dbc.Card(
                             children=[
-                                dcc.Checklist(
-                                    id="instruction-checklist",
-                                    options=[
-                                        {"label": "Add instruction", "value": "add_instruction"}
-                                    ],
-                                    value=["add_instruction"],
-                                    inline=False,
-                                    style={'width': '57%', 'margin': 'auto', 'marginBottom': '20px', 'textAlign': 'center'},
-                                    inputStyle={'margin-right': '10px'},
-                                    persistence=True,
-                                    persistence_type='session',
-                                ),
-                                html.Label("Select number of scenarios", style={'textAlign': 'center'}),
+                                html.H3("Experiment Settings", style={'marginBottom': '30px'}),
+                                html.H6("Select number of scenarios"),
                                 dbc.Input(
                                     id="num-scenarios",
                                     type="number",
@@ -127,11 +113,11 @@ def answer_option_layout():
                                     min=1,
                                     max=4,
                                     step=1,
-                                    style={'width': '57%', 'margin': 'auto', 'marginBottom': '20px'},
+                                    style=input_style,
                                     persistence=True,
                                     persistence_type='session',
                                 ),
-                                html.Label("Select number of answer options", style={'textAlign': 'center'}),
+                                html.H6("Select number of answer options"),
                                 dbc.Input(
                                     id="num-answer-options",
                                     type="number",
@@ -139,12 +125,11 @@ def answer_option_layout():
                                     min=2,
                                     max=6,
                                     step=1,
-                                    style={'width': '57%', 'margin': 'auto', 'marginBottom': '20px'},
+                                    style=input_style,
                                     persistence=True,
                                     persistence_type='session',
                                 ),
-                                html.Div(id='shuffle-checklist-container'),
-                                html.Label("Select number of requests", style={'textAlign': 'center'}),
+                                html.H6("Select number of requests"),
                                 dbc.Input(
                                     id="individual-iterations",
                                     type="number",
@@ -152,12 +137,26 @@ def answer_option_layout():
                                     min=0,
                                     max=100,
                                     step=1,
-                                    style={'width': '57%', 'margin': 'auto', 'marginBottom': '20px'},
+                                    style=input_style,
                                     persistence=True,
                                     persistence_type='session',
                                 ),
-                                html.Label("Select language models", style={'textAlign': 'center'}),
-                                dcc.Checklist(
+                                dbc.Checklist(
+                                    id="instruction-checklist",
+                                    options=[
+                                        {"label": "Add instruction", "value": "add_instruction"}
+                                    ],
+                                    value=["add_instruction"],
+                                    switch=True,
+                                    inline=False,
+                                    style={'marginBottom': '25px'},
+                                    inputStyle={'margin-right': '10px'},
+                                    persistence=True,
+                                    persistence_type='session',
+                                ),
+                                html.Div(id='shuffle-checklist-container'),
+                                html.H6("Select language models"),
+                                dbc.Checklist(
                                     id="individual-model-checklist",
                                     options=[
                                         {"label": "GPT-3.5-Turbo", "value": "gpt-3.5-turbo"},
@@ -166,37 +165,34 @@ def answer_option_layout():
                                     ],
                                     value=["gpt-3.5-turbo"],
                                     inline=False,
-                                    style={'width': '60%', 'margin': 'auto', 'marginBottom': '20px', 'lineHeight': '30px'},
+                                    style={'marginBottom': '25px', 'lineHeight': '30px'},
                                     inputStyle={'margin-right': '10px'},
                                     persistence=True,
                                     persistence_type='session',
                                 ),
                                 html.Div(
                                     [
-                                        html.Div(
-                                            [
-                                                html.Label("Select Temperature value", style={'textAlign': 'center'}),
-                                                dcc.Slider(
-                                                    id="individual-temperature",
-                                                    min=0.01,
-                                                    max=2,
-                                                    step=0.01,
-                                                    marks={0.01: '0.01', 1: '1', 2: '2'},
-                                                    value=1,
-                                                    tooltip={'placement': 'top'},
-                                                    persistence=True,
-                                                    persistence_type='session',
-                                                ),
-                                            ],
-                                            style={'width': '65%', 'margin': 'auto', 'marginBottom': '20px'}, 
+                                        html.H6("Select Temperature value"),
+                                        dcc.Slider(
+                                            id="individual-temperature",
+                                            min=0.01,
+                                            max=2,
+                                            step=0.01,
+                                            marks={0.01: '0.01', 1: '1', 2: '2'},
+                                            value=1,
+                                            tooltip={'placement': 'top'},
+                                            persistence=True,
+                                            persistence_type='session',
                                         ),
                                     ],
+                                    style={'width': '100%', 'marginBottom': '40px'}, 
                                 ),
                                 # Add a button to trigger callback
-                                html.Button('Run the experiment', id='individual-update-button', n_clicks=None),
-                                html.Div(id='cost-estimate', style={'margin-top': '20px'})
+                                dbc.Button('Run the experiment', id='individual-update-button', 
+                                            n_clicks=None, style={'marginBottom': '25px', 'width': '100%'}),
+                                html.Div(id='cost-estimate')
                             ],
-                            style={'padding': '20px', 'width': '57%'},
+                            style={'padding': '20px', 'width': '55%', 'marginBottom': '30px'},
                         ),
                     ],
                     style={'display': 'flex', 'flexDirection': 'column', 'alignItems': 'center', 'width': '50%'},
@@ -235,7 +231,7 @@ def answer_option_layout():
 #################### Callbacks ####################
 
 
-# Callback to dynamically generate new scenarios
+# Callback to dynamically generate new scenarios and answer options
 @dash.callback(
     Output('scenarios-container', 'children'),
     [Input('num-scenarios', 'value'),
@@ -270,7 +266,7 @@ def update_num_scenarios(num_scenarios, num_options, instruction):
         ])
         for j in range(num_options):
             container.extend([
-                html.Label(f"Answer option {answer_option_labels[j]}:", style={'textAlign': 'center'}),
+                html.H6(f"Answer option {answer_option_labels[j]}:", style={'marginTop': '10px'}),
                 dcc.Textarea(
                     id={"type": "individual-answer", "index": count},
                     value=placeholder_text[j],
@@ -328,7 +324,10 @@ def update_individual_experiment(n_clicks, prompts, models, iterations, temperat
     if n_clicks is not None:  
         
         if shuffle_checklist is not None:
-            shuffle_option = True
+            if "shuffle_options" in shuffle_checklist:
+                shuffle_option = True
+            else:
+                shuffle_option = False
         else:
             shuffle_option = False
         
@@ -500,7 +499,8 @@ def update_preset(selected_preset):
     [
         Output({"type": "individual-prompt", "index": ALL}, "value"),
         Output({"type": "individual-answer", "index": ALL}, "value"),
-        Output({"type": "instruction-text", "index": ALL}, "value")
+        Output({"type": "instruction-text", "index": ALL}, "value"),
+        Output("shuffle-checklist", "value")
     ],
     [   
         Input("preset-dropdown", "value")
@@ -515,6 +515,7 @@ def update_preset(selected_preset):
         preset_values["prompts"],
         preset_values["answer_texts"],
         preset_values["instruction_text"],
+        preset_values["shuffle-checklist"],
     )
     
     
@@ -528,15 +529,17 @@ def update_preset(selected_preset):
         Input({"type": "individual-answer", "index": ALL}, "value"),
         Input("individual-iterations", "value"),
         Input("individual-model-checklist", "value"),
+        Input("shuffle-checklist", "value"),
     ]
 )
-def update_cost_estimate(prompts, answers, iterations, models):
+def update_cost_estimate(prompts, answers, iterations, models, shuffle_checklist):
     # Function to count words in a list of sentences
     def count_words(sentences_list):
         word_count = sum(len(sentence.split()) for sentence in sentences_list)
         return word_count
     
-    total_tokens = (count_words(prompts) + count_words(answers)) * iterations
+    multiplier = 3 if "shuffle_options" in shuffle_checklist else 1
+    total_tokens = (count_words(prompts) + count_words(answers)) * iterations * multiplier
     
     estimated_cost = 0
     if "gpt-3.5-turbo" in models:
@@ -562,14 +565,15 @@ def update_cost_estimate(prompts, answers, iterations, models):
 )
 def update_shuffle_checklist(num_scenarios):
     if num_scenarios == 1:
-        return [dcc.Checklist(
+        return [dbc.Checklist(
                     id="shuffle-checklist",
                     options=[
                         {"label": "Shuffle answer options", "value": "shuffle_options"}
                     ],
                     inline=False,
-                    style={'width': '57%', 'margin': 'auto', 'marginBottom': '20px', 'textAlign': 'center'},
+                    style={'marginBottom': '20px'},
                     inputStyle={'margin-right': '10px'},
+                    switch=True,
                     persistence=True,
                     persistence_type='session',
                 )]
