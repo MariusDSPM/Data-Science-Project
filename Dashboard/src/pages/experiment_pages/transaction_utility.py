@@ -110,40 +110,46 @@ def TU_plot_results(initial_costs, orientation_price, buyer, model, temperature,
 # Function to plot results of second experiment
 # This function is coded rather complicated. However, not converting the answers to strings has the advantage using the Histogram w/o bins.
 def TU2_plot_results(place, income, model, temperature, df):
+    
     # Select requested subset of results
     df = df[(df["Model"] == model) & (df["Temperature"] == temperature) & (df["Place"] == place) & (df["Income"] == income)]
     # Transpose for plotting
     df = df.transpose()
-    # Apply literal_eval to convert string to list
-    answers = df.loc["Answers"].apply(literal_eval).iloc[0]
-    # Get number of observations 
-    n_observations = df.loc["Obs."].iloc[0] 
-    # Get stated WTP
-    prices = extract_dollar_amounts(answers)
     # Get temperature value 
     temperature = temperature
+    # Get number of observations 
+    n_observations = df.loc["Obs."].iloc[0] 
     # Get place
     place = place
     # Adjust name of place for plot title
     if place == "grocery":
         place = "grocery store"
-    # Compute median of WTP and align format with actual median value
-    median_value = np.median([float(price) for price in prices])
-    decimal_places = 0 if median_value.is_integer() else 2  # Determine the number of decimal places
-    median = f"{median_value:.{decimal_places}f}" 
-    # Order prices ascendingly
-    prices.sort(key=float)
-    
-    
-    # Plot histogram
+
+    # Apply literal_eval to work with list of strings
+    answers = df.loc["Answers"].apply(literal_eval).iloc[0]
+    # Get stated WTP
+    prices = extract_dollar_amounts(answers)
+    # Convert to float
+    prices = [float(price) for price in prices]
+    # Get max, mean and median
+    median = np.median(prices)
+    mean = np.mean(prices)
+    max = np.max(prices)
+
+    # Adjust prices so that every value above 30 is set to 30, deals with outliers
+    prices = [30.00 if price > 30 else price for price in prices]
+
+    # Create the histogram using custom bins
     fig = go.Figure(data=[
-        go.Histogram(
-            x=prices,
-            name="Model answers",
-            customdata = [n_observations] * len(prices), # * len(prices) so it is displayed at every bar
-            hovertemplate = "Value: %{x}<br>Number of observations: %{y}<br>Number of total observations: %{customdata}<extra></extra>",
-            marker_color = "rgb(55, 83, 109)"
-        ),
+    go.Bar(
+        x = list(Counter(prices).keys()),
+        y = list(Counter(prices).values()),
+        name="Model answers",
+        customdata=[n_observations] * len(prices),
+        hovertemplate="Value: %{x}<br>Number of observations: %{y}<br>Number of total observations: %{customdata}<extra></extra>",
+        marker_color="rgb(55, 83, 109)",
+        width=0.4 ,  # Adjust the width of the bars if needed
+    ),
     # Add vertical line for median
     go.Scatter(
         x = [median, median], #start and enf of x
@@ -152,10 +158,17 @@ def TU2_plot_results(place, income, model, temperature, df):
         name="Median",
         line=dict(color="red", width=4, dash="dash"),
         hovertemplate = "Median: %{x}<extra></extra>",
-        
+),
+    # Add vertical line for mean
+    go.Scatter(
+        x = [mean, mean], #start and enf of x
+        y = [0, Counter(prices).most_common(1)[0][1]], # count of most common price
+        mode="lines",
+        name="Mean",
+        line=dict(color="green", width=4, dash="dash"),
+        hovertemplate = "Mean: %{x}<extra></extra>",
     )
-    ]
-    )
+])
 
 
     # Layout
@@ -164,7 +177,7 @@ def TU2_plot_results(place, income, model, temperature, df):
         title = "Willingness to pay (USD)",
         titlefont_size = 18,
         tickfont_size = 16,
-        tickformat=".2f"
+        tickformat=".2f",
     ),
     yaxis = dict(
         title = "Frequency",
@@ -188,9 +201,17 @@ def TU2_plot_results(place, income, model, temperature, df):
     width = 1000,
     margin=dict(t=60)
     )
+    # Adjust x-axis labels to show 30+ to symbolize aggregation
+    fig.update_xaxes(
+    tickvals = sorted(fig.data[0].x),
+    ticktext=["$30+" if tick_value == 30.0 else tick_value for tick_value in sorted(set(fig.data[0].x))],
+)
 
+    print(f"The maximum WTP stated by {model} for beer at the {place} for temperature {temperature} is ${max}.")
     # Show the plot
-    return fig 
+    return fig
+
+# Also return max(price)
 
 # Prompts used in the first experiment
 with open("Output/TU_prompts.pkl", "rb") as file:
@@ -330,10 +351,10 @@ layout = [
                             html.Label("Select Temperature value"),             
                             dcc.Slider(
                                 id="tu1-temperature-slider",
-                                min=0.5,
-                                max=1.5,
-                                step=0.5,
-                                marks={0.5: '0.5', 1: '1', 1.5: '1.5'},
+                                min=0.01,
+                                max=2,
+                                marks={0.01: '0.01', 0.5: '0.5', 1: '1', 1.5: '1.5', 2: '2'},
+                                step = None, # To only allow values as specified in marks
                                 value=0.5,
                                 tooltip={'placement': 'top'},
                             ),
@@ -401,8 +422,8 @@ layout = [
                                 id="tu2-temperature-slider",
                                 min=0.01,
                                 max=2,
-                                step=0.5,
                                 marks={0.01: '0.01', 0.5: '0.5', 1: '1', 1.5: '1.5', 2: '2'},
+                                step = None,
                                 value=0.5,
                                 tooltip={'placement': 'top'},
                             ),
