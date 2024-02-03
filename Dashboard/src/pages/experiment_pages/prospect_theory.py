@@ -4,6 +4,7 @@ import dash
 from dash import Input, Output, dcc, html
 import plotly.graph_objects as go
 from PIL import Image
+from ast import literal_eval
 
 
 dash.register_page(__name__, path='/prospect-theory', name='Prospect Theory', location='experiments')
@@ -17,58 +18,47 @@ PT_og_scenario3 = Image.open("Output/PT_og_scenario3.png")
 PT_og_scenario4 = Image.open("Output/PT_og_scenario4.png")
 
 # Second Prospect Theory experiment
-PT2_probs = pd.read_csv("Output/PT2_probs.csv", index_col = 0)
+PT2_probs = pd.read_csv("Output/PT2_probs.csv")
 
 
-# Function for plotting results of decoy effect/prospect theory experiments
-def plot_results(model, priming, df, scenario):
+def PT_plot_results(model, priming, temperature, df, scenario):
     
     # Get dataframe as specified by user (subset of df)
-    df = df[(df['Model'] == model) & (df['Priming'] == priming) & (df['Scenario'] == scenario)]
+    df = df[(df['Model'] == model) & (df['Priming'] == priming) & (df["Temp"] == temperature) & (df['Scenario'] == scenario)]
     # Transpose for plotting
     df = df.transpose()
-    
+    # Get temperature value
+    temperature = temperature
     # Get number of observations per temperature value
-    n_observations = df.loc["Obs."]
-    
-    # Get temperature values
-    temperature = df.loc["Temp"]
+    n_observations = df.loc["Obs."].iloc[0]
+    # Get original answer probabilities
+    og_answers = df.loc["Original"].apply(literal_eval).iloc[0]
+    # Get number of original answers
+    n_original = df.loc["Original_count"].iloc[0]
 
     fig = go.Figure(data=[
         go.Bar(
-            name="p(A)", 
-            x=temperature, 
-            y=df.loc["p(A)"],
-            customdata = n_observations,
-            hovertemplate="Temperature: %{x}<br>Probability: %{y:.2f}%<br>Observations: %{customdata}<extra></extra>",
-            marker=dict(color="#e9724d"),
+            name = "Model answers",
+            x = ["p(A)", "p(B)", "p(C)"],
+            y = [df.loc["p(A)"].iloc[0], df.loc["p(B)"].iloc[0], df.loc["p(C)"].iloc[0]],
+            customdata = [n_observations, n_observations, n_observations], 
+            hovertemplate = "Percentage: %{y:.2f}%<br>Number of observations: %{customdata}<extra></extra>",
+            marker_color = "rgb(55, 83, 109)"
         ),
         go.Bar(
-            name="p(B)", 
-            x=temperature, 
-            y=df.loc["p(B)"],
-            customdata = n_observations,
-            hovertemplate="Temperature: %{x}<br>Probability: %{y:.2f}%<br> Observations: %{customdata}<extra></extra>",
-            marker=dict(color="#868686"),
-            
-        ),
-        go.Bar(
-            name="p(C)", 
-            x=temperature, 
-            y=df.loc["p(C)"],
-            customdata = n_observations,
-            hovertemplate="Temperature: %{x}<br>Probability: %{y:.2f}%<br> Observations: %{customdata}<extra></extra>",
-            marker=dict(color="#92cad1"),
+            name = "Original answers",
+            x = ["p(A)","p(B)", "p(C)"],
+            y = [og_answers[0], og_answers[1], og_answers[2]],
+            customdata = [n_original, n_original, n_original],
+            hovertemplate = "Percentage: %{y:.2f}%<br>Number of observations: %{customdata}<extra></extra>",
+            marker_color = "rgb(26, 118, 255)"
         )
     ])
 
     fig.update_layout(
     barmode = 'group',
     xaxis = dict(
-        tickmode = 'array',
-        tickvals = temperature,
-        ticktext = temperature,
-        title = "Temperature",  
+        title = "Answer options",  
         title_font=dict(size=18),  
     ),
     yaxis = dict(
@@ -76,7 +66,31 @@ def plot_results(model, priming, df, scenario):
         title_font=dict(size=18), 
     ),
     title = dict(
-        text="Distribution of answers per temperature value",
+        text=f"Distribution of answers for temperature {temperature} using model {model}",
+        x = 0.5, # Center alignment horizontally
+        y = 0.87,  # Vertical alignment
+        font=dict(size=22),  
+    ),
+    legend = dict(
+        title = dict(text="Probabilities"),
+    ),
+    bargap = 0.3  # Gap between temperature values
+)
+    
+    return fig
+
+    fig.update_layout(
+    barmode = 'group',
+    xaxis = dict(
+        title = "Answer options",  
+        title_font=dict(size=18),  
+    ),
+    yaxis = dict(
+        title="Probability (%)",  
+        title_font=dict(size=18), 
+    ),
+    title = dict(
+        text=f"Distribution of answers for temperature {temperature}, using model {model}",
         x = 0.5, # Center alignment horizontally
         y = 0.87,  # Vertical alignment
         font=dict(size=22),  
@@ -148,12 +162,6 @@ PT_prompt_8 = """You are a market researcher and focus on Prospect Theory and Me
          Which option would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
 
 
-# Original results for Prospect Theory Experiments
-PT_p_scenario1 = [f"p(A): {round((56/(56+16+15)*100), 2)}%", f"p(B): {round((16/(56+16+15)*100), 2)}%", f"p(C): {round((15/(56+16+15)*100), 2)}%"]
-PT_p_scenario2 = [f"p(A): {round((66/(66+14+7)*100), 2)}%", f"p(B): {round((14/(66+14+7)*100), 2)}%", f"p(C): {round((7/(66+14+7)*100), 2)}%"]
-PT_p_scenario3 = [f"p(A): {round((22/(22+61+4)*100), 2)}%", f"p(B): {round((61/(22+61+4)*100), 2)}%", f"p(C): {round((4/(22+61+4)*100), 2)}%"]
-PT_p_scenario4 = [f"p(A): {round((19/(19+63+5)*100), 2)}%", f"p(B): {round((63/(19+63+5)*100), 2)}%", f"p(C): {round((5/(19+63+5)*100), 2)}%"]
-
 # Dictionary that returns the literal prompt for a given experiment id (used in function call). key: experiment_id, value: prompt
 PT_experiment_prompts_dict = {
     "PT_1_1": PT_prompt_1,
@@ -182,478 +190,6 @@ PT_experiment_prompts_dict = {
     "PT_3_8": PT_prompt_8,
 }
 
-# It returns the variable name of the prompt that was used in the experiment. key: experiment_id, value: prompt_name
-PT_prompt_ids_dict = {
-    "PT_1_1": "PT_prompt_1",
-    "PT_1_2": "PT_prompt_2",
-    "PT_1_3": "PT_prompt_3",
-    "PT_1_4": "PT_prompt_4",
-    "PT_1_5": "PT_prompt_5",
-    "PT_1_6": "PT_prompt_6",
-    "PT_1_7": "PT_prompt_7",
-    "PT_1_8": "PT_prompt_8",
-    "PT_2_1": "PT_prompt_1",
-    "PT_2_2": "PT_prompt_2",
-    "PT_2_3": "PT_prompt_3",
-    "PT_2_4": "PT_prompt_4",
-    "PT_2_5": "PT_prompt_5",
-    "PT_2_6": "PT_prompt_6",
-    "PT_2_7": "PT_prompt_7",
-    "PT_2_8": "PT_prompt_8",
-    "PT_3_1": "PT_prompt_1",
-    "PT_3_2": "PT_prompt_2",
-    "PT_3_3": "PT_prompt_3",
-    "PT_3_4": "PT_prompt_4",
-    "PT_3_5": "PT_prompt_5",
-    "PT_3_6": "PT_prompt_6",
-    "PT_3_7": "PT_prompt_7",
-    "PT_3_8": "PT_prompt_8",
-}
-
-# Dictionary to look up which model to use for a given experiment id (used in function call). key: experiment id, value: model name
-PT_model_dict = {
-    "PT_1_1": "gpt-3.5-turbo",
-    "PT_1_2": "gpt-3.5-turbo",
-    "PT_1_3": "gpt-3.5-turbo",
-    "PT_1_4": "gpt-3.5-turbo",
-    "PT_1_5": "gpt-3.5-turbo",
-    "PT_1_6": "gpt-3.5-turbo",
-    "PT_1_7": "gpt-3.5-turbo",
-    "PT_1_8": "gpt-3.5-turbo",
-    "PT_2_1": "gpt-4-1106-preview",
-    "PT_2_2": "gpt-4-1106-preview",
-    "PT_2_3": "gpt-4-1106-preview",
-    "PT_2_4": "gpt-4-1106-preview",
-    "PT_2_5": "gpt-4-1106-preview",
-    "PT_2_6": "gpt-4-1106-preview",
-    "PT_2_7": "gpt-4-1106-preview",
-    "PT_2_8": "gpt-4-1106-preview",
-    "PT_3_1": 'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3',
-    "PT_3_2": 'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3',
-    "PT_3_3": 'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3',
-    "PT_3_4": 'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3',
-    "PT_3_5": 'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3',
-    "PT_3_6": 'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3',
-    "PT_3_7": 'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3',
-    "PT_3_8": 'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3',
-    }
-
-# Dictionary to look up the original results of the experiments. key: experiment id, value: original result
-PT_results_dict = {
-    "PT_1_1": PT_p_scenario1,
-    "PT_1_2": PT_p_scenario2,
-    "PT_1_3": PT_p_scenario3,
-    "PT_1_4": PT_p_scenario4,
-    "PT_1_5": PT_p_scenario1,
-    "PT_1_6": PT_p_scenario2,
-    "PT_1_7": PT_p_scenario3,
-    "PT_1_8": PT_p_scenario4,
-    "PT_2_1": PT_p_scenario1,
-    "PT_2_2": PT_p_scenario2,
-    "PT_2_3": PT_p_scenario3,
-    "PT_2_4": PT_p_scenario4,
-    "PT_2_5": PT_p_scenario1,
-    "PT_2_6": PT_p_scenario2,
-    "PT_2_7": PT_p_scenario3,
-    "PT_2_8": PT_p_scenario4,
-    "PT_3_1": PT_p_scenario1,
-    "PT_3_2": PT_p_scenario2,
-    "PT_3_3": PT_p_scenario3,
-    "PT_3_4": PT_p_scenario4,
-    "PT_3_5": PT_p_scenario1,
-    "PT_3_6": PT_p_scenario2,
-    "PT_3_7": PT_p_scenario3,
-    "PT_3_8": PT_p_scenario4,
-}
-
-# Dictionary to look up the scenario number of a given experiment ID. key: experiment id, value: scenario number
-PT_scenario_dict = {
-    "PT_1_1": 1,
-    "PT_1_2": 2,
-    "PT_1_3": 3,
-    "PT_1_4": 4,
-    "PT_1_5": 1,
-    "PT_1_6": 2,
-    "PT_1_7": 3,
-    "PT_1_8": 4,
-    "PT_2_1": 1,
-    "PT_2_2": 2,
-    "PT_2_3": 3,
-    "PT_2_4": 4,
-    "PT_2_5": 1,
-    "PT_2_6": 2,
-    "PT_2_7": 3,
-    "PT_2_8": 4,
-    "PT_3_1": 1,
-    "PT_3_2": 2,
-    "PT_3_3": 3,
-    "PT_3_4": 4,
-    "PT_3_5": 1,
-    "PT_3_6": 2,
-    "PT_3_7": 3,
-    "PT_3_8": 4,
-}   
-
-# Dictionary to look up, whether an experiment used a primed or unprimed prompt. key: experiment id, value: 1 if primed, 0 if unprimed
-PT_priming_dict = {
-    "PT_1_1": 0,
-    "PT_1_2": 0,
-    "PT_1_3": 0,
-    "PT_1_4": 0,
-    "PT_1_5": 1,
-    "PT_1_6": 1,
-    "PT_1_7": 1,
-    "PT_1_8": 1,
-    "PT_2_1": 0,
-    "PT_2_2": 0,
-    "PT_2_3": 0,
-    "PT_2_4": 0,
-    "PT_2_5": 1,
-    "PT_2_6": 1,
-    "PT_2_7": 1,
-    "PT_2_8": 1,
-    "PT_3_1": 0,
-    "PT_3_2": 0,
-    "PT_3_3": 0,
-    "PT_3_4": 0,
-    "PT_3_5": 1,
-    "PT_3_6": 1,
-    "PT_3_7": 1,
-    "PT_3_8": 1,
-}
-
-# Dictionary to look up original results of the Prospect Theory experiments. Key: experiment id, value: original results
-PT_results_dict = {
-    "PT_1_1": PT_p_scenario1,
-    "PT_1_2": PT_p_scenario2,
-    "PT_1_3": PT_p_scenario3,
-    "PT_1_4": PT_p_scenario4,
-    "PT_1_5": PT_p_scenario1,
-    "PT_1_6": PT_p_scenario2,
-    "PT_1_7": PT_p_scenario3,
-    "PT_1_8": PT_p_scenario4,
-    "PT_2_1": PT_p_scenario1,
-    "PT_2_2": PT_p_scenario2,
-    "PT_2_3": PT_p_scenario3,
-    "PT_2_4": PT_p_scenario4,
-    "PT_2_5": PT_p_scenario1,
-    "PT_2_6": PT_p_scenario2,
-    "PT_2_7": PT_p_scenario3,
-    "PT_2_8": PT_p_scenario4,
-    "PT_3_1": PT_p_scenario1,
-    "PT_3_2": PT_p_scenario2,
-    "PT_3_3": PT_p_scenario3,
-    "PT_3_4": PT_p_scenario4,
-    "PT_3_5": PT_p_scenario1,
-    "PT_3_6": PT_p_scenario2,
-    "PT_3_7": PT_p_scenario3,
-    "PT_3_8": PT_p_scenario4,
-    }
-
-
-# Dictionary to look up the original results for a given experiment id. key: experiment id, value: original answer probabilities
-PT2_results_dict = {
-    "PT2_1_1_1": PT_p_scenario1,
-    "PT2_1_1_2": PT_p_scenario1,
-    "PT2_1_1_3": PT_p_scenario1,
-    "PT2_1_1_4": PT_p_scenario1,
-    "PT2_1_1_5": PT_p_scenario1,
-    "PT2_1_1_6": PT_p_scenario1,
-    "PT2_2_1_1": PT_p_scenario2,
-    "PT2_2_1_2": PT_p_scenario2,
-    "PT2_2_1_3": PT_p_scenario2,
-    "PT2_2_1_4": PT_p_scenario2,
-    "PT2_2_1_5": PT_p_scenario2,
-    "PT2_2_1_6": PT_p_scenario2,
-    "PT2_3_1_1": PT_p_scenario3,
-    "PT2_3_1_2": PT_p_scenario3,
-    "PT2_3_1_3": PT_p_scenario3,
-    "PT2_3_1_4": PT_p_scenario3,
-    "PT2_3_1_5": PT_p_scenario3,
-    "PT2_3_1_6": PT_p_scenario3,
-    "PT2_4_1_1": PT_p_scenario4,
-    "PT2_4_1_2": PT_p_scenario4,
-    "PT2_4_1_3": PT_p_scenario4,
-    "PT2_4_1_4": PT_p_scenario4,
-    "PT2_4_1_5": PT_p_scenario4,
-    "PT2_4_1_6": PT_p_scenario4,
-    "PT2_1_2_1": PT_p_scenario1,
-    "PT2_1_2_2": PT_p_scenario1,
-    "PT2_1_2_3": PT_p_scenario1,
-    "PT2_1_2_4": PT_p_scenario1,
-    "PT2_1_2_5": PT_p_scenario1,
-    "PT2_1_2_6": PT_p_scenario1,
-    "PT2_2_2_1": PT_p_scenario2,
-    "PT2_2_2_2": PT_p_scenario2,
-    "PT2_2_2_3": PT_p_scenario2,
-    "PT2_2_2_4": PT_p_scenario2,
-    "PT2_2_2_5": PT_p_scenario2,
-    "PT2_2_2_6": PT_p_scenario2,
-    "PT2_3_2_1": PT_p_scenario3,
-    "PT2_3_2_2": PT_p_scenario3,
-    "PT2_3_2_3": PT_p_scenario3,
-    "PT2_3_2_4": PT_p_scenario3,
-    "PT2_3_2_5": PT_p_scenario3,
-    "PT2_3_2_6": PT_p_scenario3,
-    "PT2_4_2_1": PT_p_scenario4,
-    "PT2_4_2_2": PT_p_scenario4,
-    "PT2_4_2_3": PT_p_scenario4,
-    "PT2_4_2_4": PT_p_scenario4,
-    "PT2_4_2_5": PT_p_scenario4,
-    "PT2_4_2_6": PT_p_scenario4,
-    "PT2_1_3_1": PT_p_scenario1,
-    "PT2_1_3_2": PT_p_scenario1,
-    "PT2_1_3_3": PT_p_scenario1,
-    "PT2_1_3_4": PT_p_scenario1,   
-    "PT2_1_3_5": PT_p_scenario1,
-    "PT2_1_3_6": PT_p_scenario1,
-    "PT2_2_3_1": PT_p_scenario2,
-    "PT2_2_3_2": PT_p_scenario2,
-    "PT2_2_3_3": PT_p_scenario2,
-    "PT2_2_3_4": PT_p_scenario2,
-    "PT2_2_3_5": PT_p_scenario2,
-    "PT2_2_3_6": PT_p_scenario2,
-    "PT2_3_3_1": PT_p_scenario3,
-    "PT2_3_3_2": PT_p_scenario3,
-    "PT2_3_3_3": PT_p_scenario3,
-    "PT2_3_3_4": PT_p_scenario3,
-    "PT2_3_3_5": PT_p_scenario3,
-    "PT2_3_3_6": PT_p_scenario3,
-    "PT2_4_3_1": PT_p_scenario4,
-    "PT2_4_3_2": PT_p_scenario4,
-    "PT2_4_3_3": PT_p_scenario4,
-    "PT2_4_3_4": PT_p_scenario4,
-    "PT2_4_3_5": PT_p_scenario4,
-    "PT2_4_3_6": PT_p_scenario4,
-}
-
-# Dictionary to look up which model to use for a given experiment id. key: experiment id, value: model name
-PT2_model_dict = {
-    "PT2_1_1_1": "gpt-3.5-turbo",  
-    "PT2_1_1_2": "gpt-3.5-turbo",
-    "PT2_1_1_3": "gpt-3.5-turbo",
-    "PT2_1_1_4": "gpt-3.5-turbo",
-    "PT2_1_1_5": "gpt-3.5-turbo",
-    "PT2_1_1_6": "gpt-3.5-turbo",
-    "PT2_2_1_1": "gpt-3.5-turbo",
-    "PT2_2_1_2": "gpt-3.5-turbo",
-    "PT2_2_1_3": "gpt-3.5-turbo",
-    "PT2_2_1_4": "gpt-3.5-turbo",
-    "PT2_2_1_5": "gpt-3.5-turbo",
-    "PT2_2_1_6": "gpt-3.5-turbo",
-    "PT2_3_1_1": "gpt-3.5-turbo",
-    "PT2_3_1_2": "gpt-3.5-turbo",
-    "PT2_3_1_3": "gpt-3.5-turbo",
-    "PT2_3_1_4": "gpt-3.5-turbo",
-    "PT2_3_1_5": "gpt-3.5-turbo",
-    "PT2_3_1_6": "gpt-3.5-turbo",
-    "PT2_4_1_1": "gpt-3.5-turbo",
-    "PT2_4_1_2": "gpt-3.5-turbo",
-    "PT2_4_1_3": "gpt-3.5-turbo",
-    "PT2_4_1_4": "gpt-3.5-turbo",
-    "PT2_4_1_5": "gpt-3.5-turbo",
-    "PT2_4_1_6": "gpt-3.5-turbo",
-    "PT2_1_2_1": "gpt-4-1106-preview",
-    "PT2_1_2_2": "gpt-4-1106-preview",
-    "PT2_1_2_3": "gpt-4-1106-preview",
-    "PT2_1_2_4": "gpt-4-1106-preview",
-    "PT2_1_2_5": "gpt-4-1106-preview",
-    "PT2_1_2_6": "gpt-4-1106-preview",
-    "PT2_2_2_1": "gpt-4-1106-preview",
-    "PT2_2_2_2": "gpt-4-1106-preview",
-    "PT2_2_2_3": "gpt-4-1106-preview",
-    "PT2_2_2_4": "gpt-4-1106-preview",
-    "PT2_2_2_5": "gpt-4-1106-preview",
-    "PT2_2_2_6": "gpt-4-1106-preview",
-    "PT2_3_2_1": "gpt-4-1106-preview",
-    "PT2_3_2_2": "gpt-4-1106-preview",
-    "PT2_3_2_3": "gpt-4-1106-preview",
-    "PT2_3_2_4": "gpt-4-1106-preview",
-    "PT2_3_2_5": "gpt-4-1106-preview",
-    "PT2_3_2_6": "gpt-4-1106-preview",
-    "PT2_4_2_1": "gpt-4-1106-preview",
-    "PT2_4_2_2": "gpt-4-1106-preview",
-    "PT2_4_2_3": "gpt-4-1106-preview",
-    "PT2_4_2_4": "gpt-4-1106-preview",
-    "PT2_4_2_5": "gpt-4-1106-preview",
-    "PT2_4_2_6": "gpt-4-1106-preview",
-    "PT2_1_3_1": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
-    "PT2_1_3_2": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
-    "PT2_1_3_3": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
-    "PT2_1_3_4": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
-    "PT2_1_3_5": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
-    "PT2_1_3_6": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
-    "PT2_2_3_1": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
-    "PT2_2_3_2": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
-    "PT2_2_3_3": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
-    "PT2_2_3_4": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
-    "PT2_2_3_5": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
-    "PT2_2_3_6": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
-    "PT2_3_3_1": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
-    "PT2_3_3_2": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
-    "PT2_3_3_3": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
-    "PT2_3_3_4": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
-    "PT2_3_3_5": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
-    "PT2_3_3_6": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
-    "PT2_4_3_1": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
-    "PT2_4_3_2": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
-    "PT2_4_3_3": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
-    "PT2_4_3_4": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
-    "PT2_4_3_5": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
-    "PT2_4_3_6": "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3"
-    }
-
-# Dictionary to look up scenario number for a given experiment id. key: experiment id, value: scenario number
-PT2_scenario_dict = {
-    "PT2_1_1_1": 1,
-    "PT2_1_1_2": 1,
-    "PT2_1_1_3": 1,
-    "PT2_1_1_4": 1,
-    "PT2_1_1_5": 1,
-    "PT2_1_1_6": 1,
-    "PT2_2_1_1": 2,
-    "PT2_2_1_2": 2,
-    "PT2_2_1_3": 2,
-    "PT2_2_1_4": 2,
-    "PT2_2_1_5": 2,
-    "PT2_2_1_6": 2,
-    "PT2_3_1_1": 3,
-    "PT2_3_1_2": 3,
-    "PT2_3_1_3": 3,
-    "PT2_3_1_4": 3,
-    "PT2_3_1_5": 3,
-    "PT2_3_1_6": 3,
-    "PT2_4_1_1": 4,
-    "PT2_4_1_2": 4,
-    "PT2_4_1_3": 4,
-    "PT2_4_1_4": 4,
-    "PT2_4_1_5": 4,
-    "PT2_4_1_6": 4,
-    "PT2_1_2_1": 1,
-    "PT2_1_2_2": 1,
-    "PT2_1_2_3": 1,
-    "PT2_1_2_4": 1,
-    "PT2_1_2_5": 1,
-    "PT2_1_2_6": 1,
-    "PT2_2_2_1": 2,
-    "PT2_2_2_2": 2, 
-    "PT2_2_2_3": 2,
-    "PT2_2_2_4": 2,
-    "PT2_2_2_5": 2,
-    "PT2_2_2_6": 2,
-    "PT2_3_2_1": 3,
-    "PT2_3_2_2": 3,
-    "PT2_3_2_3": 3,
-    "PT2_3_2_4": 3,
-    "PT2_3_2_5": 3,
-    "PT2_3_2_6": 3,
-    "PT2_4_2_1": 4,
-    "PT2_4_2_2": 4,
-    "PT2_4_2_3": 4,
-    "PT2_4_2_4": 4,
-    "PT2_4_2_5": 4,
-    "PT2_4_2_6": 4,
-    "PT2_1_3_1": 1,
-    "PT2_1_3_2": 1,
-    "PT2_1_3_3": 1,
-    "PT2_1_3_4": 1,
-    "PT2_1_3_5": 1,
-    "PT2_1_3_6": 1,
-    "PT2_2_3_1": 2,
-    "PT2_2_3_2": 2,
-    "PT2_2_3_3": 2,
-    "PT2_2_3_4": 2,
-    "PT2_2_3_5": 2,
-    "PT2_2_3_6": 2,
-    "PT2_3_3_1": 3,
-    "PT2_3_3_2": 3,
-    "PT2_3_3_3": 3,
-    "PT2_3_3_4": 3,
-    "PT2_3_3_5": 3,
-    "PT2_3_3_6": 3,
-    "PT2_4_3_1": 4,
-    "PT2_4_3_2": 4,
-    "PT2_4_3_3": 4,
-    "PT2_4_3_4": 4,
-    "PT2_4_3_5": 4,
-    "PT2_4_3_6": 4,
-}
-
-# Dictionary to look up scenario configuration based on experiment id. key: experiment id, value: scenario configuration
-PT2_configuration_dict = {
-    "PT2_1_1_1": 1,
-    "PT2_1_1_2": 2,
-    "PT2_1_1_3": 3,
-    "PT2_1_1_4": 4,
-    "PT2_1_1_5": 5,
-    "PT2_1_1_6": 6,
-    "PT2_2_1_1": 1,
-    "PT2_2_1_2": 2,
-    "PT2_2_1_3": 3,
-    "PT2_2_1_4": 4,
-    "PT2_2_1_5": 5,
-    "PT2_2_1_6": 6,
-    "PT2_3_1_1": 1,
-    "PT2_3_1_2": 2,
-    "PT2_3_1_3": 3,
-    "PT2_3_1_4": 4,
-    "PT2_3_1_5": 5,
-    "PT2_3_1_6": 6,
-    "PT2_4_1_1": 1,
-    "PT2_4_1_2": 2,
-    "PT2_4_1_3": 3,
-    "PT2_4_1_4": 4,
-    "PT2_4_1_5": 5,
-    "PT2_4_1_6": 6,
-    "PT2_1_2_1": 1,
-    "PT2_1_2_2": 2,
-    "PT2_1_2_3": 3,
-    "PT2_1_2_4": 4,
-    "PT2_1_2_5": 5,
-    "PT2_1_2_6": 6,
-    "PT2_2_2_1": 1,
-    "PT2_2_2_2": 2,
-    "PT2_2_2_3": 3,
-    "PT2_2_2_4": 4,
-    "PT2_2_2_5": 5,
-    "PT2_2_2_6": 6,
-    "PT2_3_2_1": 1,
-    "PT2_3_2_2": 2,
-    "PT2_3_2_3": 3,
-    "PT2_3_2_4": 4,
-    "PT2_3_2_5": 5,
-    "PT2_3_2_6": 6,
-    "PT2_4_2_1": 1,
-    "PT2_4_2_2": 2,
-    "PT2_4_2_3": 3,
-    "PT2_4_2_4": 4,
-    "PT2_4_2_5": 5,
-    "PT2_4_2_6": 6,
-    "PT2_1_3_1": 1,
-    "PT2_1_3_2": 2,
-    "PT2_1_3_3": 3,
-    "PT2_1_3_4": 4,
-    "PT2_1_3_5": 5,
-    "PT2_1_3_6": 6,
-    "PT2_2_3_1": 1,
-    "PT2_2_3_2": 2,
-    "PT2_2_3_3": 3,
-    "PT2_2_3_4": 4,
-    "PT2_2_3_5": 5,
-    "PT2_2_3_6": 6,
-    "PT2_3_3_1": 1,
-    "PT2_3_3_2": 2,
-    "PT2_3_3_3": 3,
-    "PT2_3_3_4": 4,
-    "PT2_3_3_5": 5,
-    "PT2_3_3_6": 6,
-    "PT2_4_3_1": 1,
-    "PT2_4_3_2": 2,
-    "PT2_4_3_3": 3,
-    "PT2_4_3_4": 4,
-    "PT2_4_3_5": 5,
-    "PT2_4_3_6": 6,
-}
 
 
 # Prospect Page
@@ -722,34 +258,41 @@ html.Div(
     children=[
         html.Div(
             children=[
-                html.H5("Select experiment design:"),
-                dcc.RadioItems(
-                    id="prospect-scenario1-radio1",
+                html.Label("Select prompt design:"),
+                dcc.Dropdown(
+                    id="prospect-scenario1-priming-dropdown",
                     options=[
                         {"label": "Unprimed", "value": 0},
                         {"label": "Primed", "value": 1},
                     ],
                     value=0,
-                    inputStyle={"margin-right": "10px"},
-                    labelStyle={
-                        "display": "inline-block",
-                        "margin-right": "20px",
-                    },
+                    style={'width': '75%', 'margin': 'auto'},
                 ),
-                dcc.RadioItems(
-                    id="prospect-scenario1-radio2",
+                html.Label("Select language model:"),
+                dcc.Dropdown(
+                    id="prospect-scenario1-model-dropdown",
                     options=[
                         {"label": "GPT-3.5-Turbo", "value": "gpt-3.5-turbo"},
                         {"label": "GPT-4-1106-Preview", "value": "gpt-4-1106-preview"},
                         {"label": "LLama-2-70b", "value": "llama-2-70b"},
                     ],
                     value="gpt-3.5-turbo",
-                    inputStyle={"margin-right": "10px"},
-                    labelStyle={
-                        "display": "inline-block",
-                        "margin-right": "20px",
-                    },
+                    style={'width': '75%', 'margin': 'auto'}
                 ),
+                html.Div(
+                    [
+                        html.Label("Select Temperature value"),             
+                        dcc.Slider(
+                        id="prospect-scenario1-temperature-slider",
+                            min=0.00,
+                            max=2,
+                            marks={0.00: '0.01', 0.01: '0.01', 0.5: '0.5', 1: '1', 1.5: '1.5', 2: '2'},
+                            step = None,
+                            value=0.5,
+                            tooltip={'placement': 'top'},
+                            ),
+                        ],
+                    ),
             ],
             style={'display': 'flex', 'flexDirection': 'column', 'align-items': 'center', 'width': '50%', 'align-self': 'center'},
         ),
@@ -1061,12 +604,13 @@ html.P(["""The Prospect Theory value function explains why individuals tend to a
 # Scenario 1
 @dash.callback(
      Output("prospect-plot1", "figure"),
-     [Input("prospect-scenario1-radio1", "value"), # priming
-        Input("prospect-scenario1-radio2", "value")] # model
+     [Input("prospect-scenario1-priming-dropdown", "value"), 
+      Input("prospect-scenario1-model-dropdown", "value"),
+      Input("prospect-scenario1-temperature-slider", "value")] 
 
 )
-def update_prospect_plot1(selected_priming, selected_model):
-        return plot_results(model = selected_model, priming = selected_priming, df = PT_probs, scenario = 1) 
+def update_prospect_plot1(selected_priming, selected_model, selected_temperature):
+        return PT_plot_results(priming = selected_priming, model = selected_model, temperature = selected_temperature, df = PT_probs, scenario = 1) 
 
 # Scenario 2
 @dash.callback(
