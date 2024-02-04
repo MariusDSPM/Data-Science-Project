@@ -836,8 +836,44 @@ html.Div(
     id='prospect2-prompt',
     style={'textAlign': 'center', 'margin': '20px', 'margin': 'auto'},
     ),
+    html.Hr(),
     # Display of original results
-    dcc.Graph(id = "prospect2-og-plot", style={'width': '70%', 'height': '60vh', 'margin':'auto'})
+    html.Div( 
+    children=[
+        html.Br(),
+        html.H4("Comparison to original study", style={'margin-bottom': '0px'}),
+        html.Div(
+            style={'display': 'flex', 'align-items': 'center'},  
+            children=[
+            html.P(
+                [
+                    html.Br(),
+                    html.Br(),
+                    """In Experiment 2: Odd numbers and unfair scenarios, we purposely deviated from the original study design. Although this helps research to what 
+                    extent the models' answers may somehow be influenced by the original study,  we do not observe a ground truth, i.e. original results. """,
+                    html.Br(),
+                    """Therefore, the graph on the right helps compare the models' answers to the original results. However, we have to keep in mind, that 
+                    this can merely serve as some from of orientation, because the actual questions asked in the original experiments were, in terms of absolute values,
+                    not identical to our prompts.""",
+                    html.Br(),
+                    html.Br(),
+                    "Along the x-axis, the different scenarios are listed, being:",
+                    html.Br(),
+                    "Scenario 1: Segregation of gains",
+                    html.Br(),
+                    "Scenario 2: Integration of losses",
+                    html.Br(),
+                    "Scenario 3: Cancellation of losses against larger gains",
+                    html.Br(),
+                    "Scenario 4: Segregation of silver linings",
+                ],
+                style={'width': '30%', 'margin-bottom': '50px'}
+            ),  # plot with original results 
+                dcc.Graph(id="prospect2-og-plot", style={'width': '70%', 'height': '60vh', 'margin': 'auto'}),
+            ]
+        ),
+    ]
+)
 ]
 
 
@@ -935,5 +971,5 @@ def update_prospect_two(selected_scenario, selected_configuration, selected_mode
     experiment_id = df["Experiment_id"].iloc[0]
     prompt = PT2_experiment_prompts_dict[experiment_id]
     prompt = html.P(f"The prompt used in this experiment is: {prompt}")
-    og_plot = PT_plot_og_results(PT_og_results)
+    og_plot = PT_plot_og_results(PT_og_results) # Also being replotted for every new input right now. Not optimal, but no big issue. 
     return PT2_plot_results(df), prompt, og_plot 
