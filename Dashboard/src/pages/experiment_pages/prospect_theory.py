@@ -5,30 +5,116 @@ from dash import Input, Output, dcc, html
 import plotly.graph_objects as go
 from PIL import Image
 from ast import literal_eval
+import pickle
 
 
 dash.register_page(__name__, path='/prospect-theory', name='Prospect Theory', location='experiments')
 
 
 # Load in results and graphs of Prospect Theory experiments
-PT_probs = pd.read_csv("Output/PT_probs.csv", index_col = 0)
-PT_og_scenario1 = Image.open("Output/PT_og_scenario1.png")
-PT_og_scenario2 = Image.open("Output/PT_og_scenario2.png")
-PT_og_scenario3 = Image.open("Output/PT_og_scenario3.png")
-PT_og_scenario4 = Image.open("Output/PT_og_scenario4.png")
+PT_probs = pd.read_csv("Output/PT_probs.csv")
 
 # Second Prospect Theory experiment
 PT2_probs = pd.read_csv("Output/PT2_probs.csv")
+PT_og_results = pd.read_csv("Output/PT_og_results.csv")
 
 
-def PT_plot_results(model, priming, temperature, df, scenario):
-    
-    # Get dataframe as specified by user (subset of df)
-    df = df[(df['Model'] == model) & (df['Priming'] == priming) & (df["Temp"] == temperature) & (df['Scenario'] == scenario)]
+
+### Prospect Theory 1 ###
+PT_prompt_1 = """Mr. A was given tickets involving the World Series. He won 50$ in one lottery and $25 in the other. 
+          Mr. B was given a ticket to a single, larger World Series lottery. He won $75. Based solely on this information, Who was happier? 
+          A: Mister A
+          B: Mister B
+          C: No difference.         
+          Which option would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
+PT_prompt_2 = """Mr. A received a letter from the IRS saying that he made a minor arithmetical mistake on his tax return and owed $100. 
+         He received a similar letter the same day from his state income tax authority saying he owed $50. There were no other repercussions from either mistake. 
+         Mr. B received a letter from the IRS saying that he made a minor arithmetical mistake on his tax return and owed $150. There were no other repercussions from his mistake. 
+         Based solely on this information, who was more upset? 
+         A: Mister A
+         B: Mister B
+         C: No difference.
+         Which option would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
+PT_prompt_3 = """Mr. A bought his first New York State lottery ticket and won $100. Also, in a freak accident, he damaged the rug in his apartment and had to pay the landlord $80.
+         Mr. B bought his first New York State lottery ticket and won $20. Based solely on this information, who was happier? 
+         A: Mister A
+         B: Mister B
+         C: No difference.
+         Which option would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
+PT_prompt_4 = """Mr. A's car was damaged in a parking lot. He had to spend $200 to repair the damage. The same day the car was damaged, he won $25 in the office football pool.
+         Mr. B's car was damaged in a parking lot. He had to spend $175 to repair the damage. Based solely on this information, who was more upset?
+         A: Mister A
+         B: Mister B
+         C: No difference.
+         Which option would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
+PT_prompt_5 = """You are a market researcher and focus on Prospect Theory and Mental Accounting. In a survey you are presented the following situation: 
+          Mr. A was given tickets involving the World Series. He won 50$ in one lottery and 25$ in the other. 
+          Mr. B was given a ticket to a single, larger World Series lottery. He won 75$. Based solely on this information, who was happier?
+          A: Mister A
+          B: Mister B
+          C: No difference.
+          Which option would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
+PT_prompt_6 = """You are a market researcher and focus on Prospect Theory and Mental Accounting. In a survey you are presented the following situation:
+         Mr. A received a letter from the IRS saying that he made a minor arithmetical mistake on his tax return and owed $100. 
+         He received a similar letter the same day from his state income tax authority saying he owed $50. There were no other repercussions from either mistake. 
+         Mr. B received a letter from the IRS saying that he made a minor arithmetical mistake on his tax return and owed $150. There were no other repercussions from his mistake. 
+         Based solely on this information, who was more upset? 
+         A: Mister A
+         B: Mister B
+         C: No difference.
+         Which option would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
+PT_prompt_7 = """You are a market researcher and focus on Prospect Theory and Mental Accounting. In a survey you are presented the following situation:
+         Mr. A bought his first New York State lottery ticket and won $100. Also, in a freak accident, he damaged the rug in his apartment and had to pay the landlord $80.
+         Mr. B bought his first New York State lottery ticket and won $20? Based solely on this information, who was happier?
+         A: Mister A
+         B: Mister B
+         C: No difference.
+         Which option would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
+PT_prompt_8 = """You are a market researcher and focus on Prospect Theory and Mental Accounting. In a survey you are presented the following situation:
+         Mr. A's car was damaged in a parking lot. He had to spend $200 to repair the damage. The same day the car was damaged, he won $25 in the office football pool.
+         Mr. B's car was damaged in a parking lot. He had to spend $175 to repair the damage. Based solely on this information, who was more upset?
+         A: Mister A
+         B: Mister B
+         C: No difference.
+         Which option would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
+
+# Dictionary to look up prompt for a given PT experiment id. key: experiment_id, value: prompt
+PT_experiment_prompts_dict = {
+    "PT_1_1": PT_prompt_1,
+    "PT_1_2": PT_prompt_2,
+    "PT_1_3": PT_prompt_3,
+    "PT_1_4": PT_prompt_4,
+    "PT_1_5": PT_prompt_5,
+    "PT_1_6": PT_prompt_6,
+    "PT_1_7": PT_prompt_7,
+    "PT_1_8": PT_prompt_8,
+    "PT_2_1": PT_prompt_1,
+    "PT_2_2": PT_prompt_2,
+    "PT_2_3": PT_prompt_3,
+    "PT_2_4": PT_prompt_4,
+    "PT_2_5": PT_prompt_5,
+    "PT_2_6": PT_prompt_6,
+    "PT_2_7": PT_prompt_7,
+    "PT_2_8": PT_prompt_8,
+    "PT_3_1": PT_prompt_1,
+    "PT_3_2": PT_prompt_2,
+    "PT_3_3": PT_prompt_3,
+    "PT_3_4": PT_prompt_4,
+    "PT_3_5": PT_prompt_5,
+    "PT_3_6": PT_prompt_6,
+    "PT_3_7": PT_prompt_7,
+    "PT_3_8": PT_prompt_8,
+}
+
+# Function to plot results of PT experiments
+def PT_plot_results(df):
+
     # Transpose for plotting
-    df = df.transpose()
+    df = df.transpose()  
+    # Get language model name
+    model = df.loc["Model"].iloc[0]
     # Get temperature value
-    temperature = temperature
+    temperature = df.loc["Temp"].iloc[0]
     # Get number of observations per temperature value
     n_observations = df.loc["Obs."].iloc[0]
     # Get original answer probabilities
@@ -66,21 +152,140 @@ def PT_plot_results(model, priming, temperature, df, scenario):
         title_font=dict(size=18), 
     ),
     title = dict(
-        text=f"Distribution of answers for temperature {temperature} using model {model}",
+        text=f"Distribution of answers for temperature {temperature}, using model {model}",
         x = 0.5, # Center alignment horizontally
         y = 0.87,  # Vertical alignment
         font=dict(size=22),  
     ),
-    legend = dict(
-        title = dict(text="Probabilities"),
+    legend=dict(
+        x=1.01,  
+        y=0.9,
+        font=dict(family='Arial', size=12, color='black'),
+        bordercolor='black', 
+        borderwidth=2,  
     ),
-    bargap = 0.3  # Gap between temperature values
 )
-    
     return fig
 
+### Prospect Theory 2 ###
+# Scenario 1
+with open("Output/PT2_prompts_1.pkl", "rb") as file:
+    PT2_prompts_1 = pickle.load(file)
+
+# Scenario 2
+with open("Output/PT2_prompts_2.pkl", "rb") as file:
+    PT2_prompts_2 = pickle.load(file)
+
+# Scenario 3
+with open("Output/PT2_prompts_3.pkl", "rb") as file:
+    PT2_prompts_3 = pickle.load(file)
+
+# Scenario 4
+with open("Output/PT2_prompts_4.pkl", "rb") as file:
+    PT2_prompts_4 = pickle.load(file)
+
+# Dictionary to look up prompt for a given PT2 experiment id. key: experiment id, value: prompt
+PT2_experiment_prompts_dict = {
+    "PT2_1_1_1": PT2_prompts_1[0],
+    "PT2_1_1_2": PT2_prompts_1[1],
+    "PT2_1_1_3": PT2_prompts_1[2],
+    "PT2_1_1_4": PT2_prompts_1[3],
+    "PT2_1_1_5": PT2_prompts_1[4],
+    "PT2_1_1_6": PT2_prompts_1[5],
+    "PT2_2_1_1": PT2_prompts_2[0],
+    "PT2_2_1_2": PT2_prompts_2[1],
+    "PT2_2_1_3": PT2_prompts_2[2],
+    "PT2_2_1_4": PT2_prompts_2[3],
+    "PT2_2_1_5": PT2_prompts_2[4],
+    "PT2_2_1_6": PT2_prompts_2[5],
+    "PT2_3_1_1": PT2_prompts_3[0],
+    "PT2_3_1_2": PT2_prompts_3[1],
+    "PT2_3_1_3": PT2_prompts_3[2],
+    "PT2_3_1_4": PT2_prompts_3[3],
+    "PT2_3_1_5": PT2_prompts_3[4],
+    "PT2_3_1_6": PT2_prompts_3[5],
+    "PT2_4_1_1": PT2_prompts_4[0],
+    "PT2_4_1_2": PT2_prompts_4[1],
+    "PT2_4_1_3": PT2_prompts_4[2],
+    "PT2_4_1_4": PT2_prompts_4[3],
+    "PT2_4_1_5": PT2_prompts_4[4],
+    "PT2_4_1_6": PT2_prompts_4[5],
+    "PT2_1_2_1": PT2_prompts_1[0],
+    "PT2_1_2_2": PT2_prompts_1[1],
+    "PT2_1_2_3": PT2_prompts_1[2],
+    "PT2_1_2_4": PT2_prompts_1[3],
+    "PT2_1_2_5": PT2_prompts_1[4],
+    "PT2_1_2_6": PT2_prompts_1[5],
+    "PT2_2_2_1": PT2_prompts_2[0],
+    "PT2_2_2_2": PT2_prompts_2[1],
+    "PT2_2_2_3": PT2_prompts_2[2],
+    "PT2_2_2_4": PT2_prompts_2[3],
+    "PT2_2_2_5": PT2_prompts_2[4],
+    "PT2_2_2_6": PT2_prompts_2[5],
+    "PT2_3_2_1": PT2_prompts_3[0],
+    "PT2_3_2_2": PT2_prompts_3[1],
+    "PT2_3_2_3": PT2_prompts_3[2],
+    "PT2_3_2_4": PT2_prompts_3[3],
+    "PT2_3_2_5": PT2_prompts_3[4],
+    "PT2_3_2_6": PT2_prompts_3[5],
+    "PT2_4_2_1": PT2_prompts_4[0],
+    "PT2_4_2_2": PT2_prompts_4[1],
+    "PT2_4_2_3": PT2_prompts_4[2],
+    "PT2_4_2_4": PT2_prompts_4[3],
+    "PT2_4_2_5": PT2_prompts_4[4],
+    "PT2_4_2_6": PT2_prompts_4[5],
+    "PT2_1_3_1": PT2_prompts_1[0],
+    "PT2_1_3_2": PT2_prompts_1[1],
+    "PT2_1_3_3": PT2_prompts_1[2],
+    "PT2_1_3_4": PT2_prompts_1[3],
+    "PT2_1_3_5": PT2_prompts_1[4],
+    "PT2_1_3_6": PT2_prompts_1[5],
+    "PT2_2_3_1": PT2_prompts_2[0],
+    "PT2_2_3_2": PT2_prompts_2[1],
+    "PT2_2_3_3": PT2_prompts_2[2],
+    "PT2_2_3_4": PT2_prompts_2[3],
+    "PT2_2_3_5": PT2_prompts_2[4],
+    "PT2_2_3_6": PT2_prompts_2[5],
+    "PT2_3_3_1": PT2_prompts_3[0],
+    "PT2_3_3_2": PT2_prompts_3[1],
+    "PT2_3_3_3": PT2_prompts_3[2],
+    "PT2_3_3_4": PT2_prompts_3[3],
+    "PT2_3_3_5": PT2_prompts_3[4],
+    "PT2_3_3_6": PT2_prompts_3[5],
+    "PT2_4_3_1": PT2_prompts_4[0],
+    "PT2_4_3_2": PT2_prompts_4[1],
+    "PT2_4_3_3": PT2_prompts_4[2],
+    "PT2_4_3_4": PT2_prompts_4[3],
+    "PT2_4_3_5": PT2_prompts_4[4],
+    "PT2_4_3_6": PT2_prompts_4[5],
+}
+
+# Function to plot results of PT2 experiments (no ground truth present)
+def PT2_plot_results(df):
+    # Grab experiment id
+    experiment_id = df["Experiment_id"].iloc[0]
+    # Transpose for plotting
+    df = df.transpose()  
+    # Get language model name
+    model = df.loc["Model"].iloc[0]
+    # Get temperature value
+    temperature = df.loc["Temp"].iloc[0]
+    # Get number of observations per temperature value
+    n_observations = df.loc["Obs."].iloc[0]
+
+    fig = go.Figure(data=[
+        go.Bar(
+            name = "Model answers",
+            x = ["p(A)", "p(B)", "p(C)"],
+            y = [df.loc["p(A)"].iloc[0], df.loc["p(B)"].iloc[0], df.loc["p(C)"].iloc[0]],
+            customdata = [n_observations, n_observations, n_observations], 
+            hovertemplate = "Percentage: %{y:.2f}%<br>Number of observations: %{customdata}<extra></extra>",
+            marker_color = "rgb(55, 83, 109)",
+            showlegend = True,
+        ),
+    ])
+
     fig.update_layout(
-    barmode = 'group',
     xaxis = dict(
         title = "Answer options",  
         title_font=dict(size=18),  
@@ -95,102 +300,84 @@ def PT_plot_results(model, priming, temperature, df, scenario):
         y = 0.87,  # Vertical alignment
         font=dict(size=22),  
     ),
-    legend = dict(
-        title = dict(text="Probabilities"),
+    legend=dict(
+        x=1.01,  
+        y=0.9,
+        font=dict(family='Arial', size=12, color='black'),
+        bordercolor='black', 
+        borderwidth=2,  
+        
     ),
-    bargap = 0.3  # Gap between temperature values
 )
     return fig
 
+# Function to plot original results with hovertemplate
+def PT_plot_og_results(df):
+    n_original = df["Obs."]  # number of answer options 
+    fig = go.Figure(data=[
+        go.Bar(
+                name = "p(A)",
+                x = [0.1, 0.3, 0.5, 0.7],
+                y = [df["p(A)"][0], df["p(A)"][1], df["p(A)"][2], df["p(A)"][3]],
+                customdata = n_original,
+                hovertemplate = "Percentage: %{y:.2f}%<br>Number of observations: %{customdata}<extra></extra>",
+                marker_color="black",
+            ),
+        go.Bar(
+                name = "p(B)",
+                x = [0.15, 0.35, 0.55, 0.75],
+                y = [df["p(B)"][0], df["p(B)"][1], df["p(B)"][2], df["p(B)"][3]],
+                customdata = n_original,
+                hovertemplate = "Percentage: %{y:.2f}%<br>Number of observations: %{customdata}<extra></extra>",
+                marker_color="rgb(55, 83, 109)",
 
-### Prospect Theory ###
-PT_prompt_1 = """Mr. A was given tickets involving the World Series. He won 50$ in one lottery and $25 in the other. 
-          Mr. B was given a ticket to a single, larger World Series lottery. He won $75. Based solely on this information, Who is happier? 
-          A: Mister A
-          B: Mister B
-          C: No difference.         
-          Which option would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
-PT_prompt_2 = """Mr. A received a letter from the IRS saying that he made a minor arithmetical mistake on his tax return and owed $100. 
-         He received a similar letter the same day from his state income tax authority saying he owed $50. There were no other repercussions from either mistake. 
-         Mr. B received a letter from the IRS saying that he made a minor arithmetical mistake on his tax return and owed $150. There were no other repercussions from his mistake. 
-         Based solely on this information, who was more upset? 
-         A: Mister A
-         B: Mister B
-         C: No difference.
-         Which option would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
-PT_prompt_3 = """Mr. A bought his first New York State lottery ticket and won $100. Also, in a freak accident, he damaged the rug in his apartment and had to pay the landlord $80.
-         Mr. B bought his first New York State lottery ticket and won $20. Based solely on this information, who is happier? 
-         A: Mister A
-         B: Mister B
-         C: No difference.
-         Which option would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
-PT_prompt_4 = """Mr. A's car was damaged in a parking lot. He had to spend $200 to repair the damage. The same day the car was damaged, he won $25 in the office football pool.
-         Mr. B's car was damaged in a parking lot. He had to spend $175 to repair the damage. Based solely on this information, who is more upset?
-         A: Mister A
-         B: Mister B
-         C: No difference.
-         Which option would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
-PT_prompt_5 = """You are a market researcher and focus on Prospect Theory and Mental Accounting. In a survey you are presented the following situation: 
-          Mr. A was given tickets involving the World Series. He won 50$ in one lottery and 25$ in the other. 
-          Mr. B was given a ticket to a single, larger World Series lottery. He won 75$. Based solely on this information, who is happier?
-          A: Mister A
-          B: Mister B
-          C: No difference.
-          Which option would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
-PT_prompt_6 = """You are a market researcher and focus on Prospect Theory and Mental Accounting. In a survey you are presented the following situation:
-         Mr. A received a letter from the IRS saying that he made a minor arithmetical mistake on his tax return and owed $100. 
-         He received a similar letter the same day from his state income tax authority saying he owed $50. There were no other repercussions from either mistake. 
-         Mr. B received a letter from the IRS saying that he made a minor arithmetical mistake on his tax return and owed $150. There were no other repercussions from his mistake. 
-         Based solely on this information, who was more upset? 
-         A: Mister A
-         B: Mister B
-         C: No difference.
-         Which option would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
-PT_prompt_7 = """You are a market researcher and focus on Prospect Theory and Mental Accounting. In a survey you are presented the following situation:
-         Mr. A bought his first New York State lottery ticket and won $100. Also, in a freak accident, he damaged the rug in his apartment and had to pay the landlord $80.
-         Mr. B bought his first New York State lottery ticket and won $20? Based solely on this information, who is happier?
-         A: Mister A
-         B: Mister B
-         C: No difference.
-         Which option would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
-PT_prompt_8 = """You are a market researcher and focus on Prospect Theory and Mental Accounting. In a survey you are presented the following situation:
-         Mr. A's car was damaged in a parking lot. He had to spend $200 to repair the damage. The same day the car was damaged, he won $25 in the office football pool.
-         Mr. B's car was damaged in a parking lot. He had to spend $175 to repair the damage. Based solely on this information, who is more upset?
-         A: Mister A
-         B: Mister B
-         C: No difference.
-         Which option would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
+            ),
+        go.Bar(
+                name = "p(C)",
+                x = [0.2, 0.4, 0.6, 0.8],
+                y = [df["p(C)"][0], df["p(C)"][1], df["p(C)"][2], df["p(C)"][3]],
+                customdata = n_original,
+                hovertemplate = "Percentage: %{y:.2f}%<br>Number of observations: %{customdata}<extra></extra>",
+                marker_color="rgb(26, 118, 255)",
+        )
+    ])
+  
 
-
-# Dictionary that returns the literal prompt for a given experiment id (used in function call). key: experiment_id, value: prompt
-PT_experiment_prompts_dict = {
-    "PT_1_1": PT_prompt_1,
-    "PT_1_2": PT_prompt_2,
-    "PT_1_3": PT_prompt_3,
-    "PT_1_4": PT_prompt_4,
-    "PT_1_5": PT_prompt_5,
-    "PT_1_6": PT_prompt_6,
-    "PT_1_7": PT_prompt_7,
-    "PT_1_8": PT_prompt_8,
-    "PT_2_1": PT_prompt_1,
-    "PT_2_2": PT_prompt_2,
-    "PT_2_3": PT_prompt_3,
-    "PT_2_4": PT_prompt_4,
-    "PT_2_5": PT_prompt_5,
-    "PT_2_6": PT_prompt_6,
-    "PT_2_7": PT_prompt_7,
-    "PT_2_8": PT_prompt_8,
-    "PT_3_1": PT_prompt_1,
-    "PT_3_2": PT_prompt_2,
-    "PT_3_3": PT_prompt_3,
-    "PT_3_4": PT_prompt_4,
-    "PT_3_5": PT_prompt_5,
-    "PT_3_6": PT_prompt_6,
-    "PT_3_7": PT_prompt_7,
-    "PT_3_8": PT_prompt_8,
-}
-
-
+    fig.update_layout(
+    barmode = 'group',
+    xaxis = dict(
+        title = "Scenarios",  
+        title_font=dict(size=18),
+        tickfont=dict(size=16),  
+    ),
+    yaxis = dict(
+        title="Probability (%)",  
+        title_font=dict(size=18), 
+    ),
+    title = dict(
+        text=f"Distribution of original answers per scenario",
+        x = 0.5, 
+        y = 0.87,  
+        font=dict(size=22),  
+    ),
+    width = 1000,
+    margin=dict(t=100),
+    legend=dict(
+        x=1.01,  
+        y=0.9,
+        font=dict(family='Arial', size=12, color='black'),
+        bordercolor='black', 
+        borderwidth=2,  
+    ),
+    
+)
+    # Adjust x-axis labels to show 30+ to symbolize aggregation
+    fig.update_xaxes(
+    tickvals =[0.15, 0.35, 0.55, 0.75],
+    ticktext=["Scenario 1", "Scenario 2", "Scenario 3", "Scenario 4"],
+)
+    return fig
+    
 
 # Prospect Page
 layout = [
@@ -236,23 +423,17 @@ html.Div(
                         html.Br(),
                         "The original phrasing, used in the experiment by Thaler, is as follows:",
                         html.Br(),
-                        "Mr. A was given tickets to lotteries involving the World Series. He won $50 in one lottery and $25 in the other.",
-                        html.Br(),
+                        "Mr. A was given tickets to lotteries involving the World Series. He won $50 in one lottery and $25 in the other. ",
                         "Mr. B was given a ticket to a single, larger World Series lottery. He won $75. Who was happier?",
-                        html.Br(),
                         html.Br(),
                         "A: Mister A",
                         html.Br(),
                         "B: Mister B",
                         html.Br(),
                         "C: No difference",
-                    ]
+                    ],
                 ),
-                html.Img(src=PT_og_scenario1, style={'max-width': '100%', 'max-height': '300px', 'margin-left': '60px', 'margin-top': '20px'}),
-
-
             ],
-            style={'display': 'flex', 'flexDirection': 'row'},
         ),
 html.Div(
     children=[
@@ -266,7 +447,7 @@ html.Div(
                         {"label": "Primed", "value": 1},
                     ],
                     value=0,
-                    style={'width': '75%', 'margin': 'auto'},
+                    style={'width': '75%', 'margin': 'auto', 'margin-bottom': '5px'},
                 ),
                 html.Label("Select language model:"),
                 dcc.Dropdown(
@@ -277,7 +458,7 @@ html.Div(
                         {"label": "LLama-2-70b", "value": "llama-2-70b"},
                     ],
                     value="gpt-3.5-turbo",
-                    style={'width': '75%', 'margin': 'auto'}
+                    style={'width': '75%', 'margin': 'auto', 'margin-bottom': '5px'}
                 ),
                 html.Div(
                     [
@@ -294,12 +475,17 @@ html.Div(
                         ],
                     ),
             ],
-            style={'display': 'flex', 'flexDirection': 'column', 'align-items': 'center', 'width': '50%', 'align-self': 'center'},
+            style={'display': 'flex', 'flexDirection': 'column', 'align-items': 'center', 'width': '50%', 'align-self': 'center', 'margin': 'auto'},
         ),
         dcc.Graph(id="prospect-plot1", style={'width': '70%', 'height': '60vh'}),
     ],
     style={'display': 'flex', 'flexDirection': 'row'},
-)]),
+),
+    # Display of prompt
+    html.Div(
+    id='prospect-scenario1-prompt',
+    style={'textAlign': 'center', 'margin': '20px', 'margin': 'auto'},
+    )]),
 
     
 # Scenario 2: Integration of losses
@@ -321,7 +507,6 @@ html.Div(
                         """Mr. B received a letter from the IRS saying that he made a minor arithmetical mistake on his tax
                         return and owed $150. There were no other repercussions from his mistake. Who was more upset?""",
                         html.Br(),
-                        html.Br(),
                         "A: Mister A",
                         html.Br(),
                         "B: Mister B",
@@ -329,7 +514,7 @@ html.Div(
                         "C: No difference",
                     ]
                 ),
-                html.Img(src=PT_og_scenario2, style={'max-width': '100%', 'max-height': '300px', 'margin-left': '60px', 'margin-top': '20px'}),
+               
 
 
             ],
@@ -339,41 +524,53 @@ html.Div(
     children=[
         html.Div(
             children=[
-                html.H5("Select experiment design:"),
-                dcc.RadioItems(
-                    id="prospect-scenario2-radio1",
+                html.Label("Select prompt design:"),
+                dcc.Dropdown(
+                    id="prospect-scenario2-priming-dropdown",
                     options=[
                         {"label": "Unprimed", "value": 0},
                         {"label": "Primed", "value": 1},
                     ],
                     value=0,
-                    inputStyle={"margin-right": "10px"},
-                    labelStyle={
-                        "display": "inline-block",
-                        "margin-right": "20px",
-                    },
+                    style={'width': '75%', 'margin': 'auto', 'margin-bottom': '5px'},
                 ),
-                dcc.RadioItems(
-                    id="prospect-scenario2-radio2",
+                html.Label("Select language model:"),
+                dcc.Dropdown(
+                    id="prospect-scenario2-model-dropdown",
                     options=[
                         {"label": "GPT-3.5-Turbo", "value": "gpt-3.5-turbo"},
                         {"label": "GPT-4-1106-Preview", "value": "gpt-4-1106-preview"},
                         {"label": "LLama-2-70b", "value": "llama-2-70b"},
                     ],
                     value="gpt-3.5-turbo",
-                    inputStyle={"margin-right": "10px"},
-                    labelStyle={
-                        "display": "inline-block",
-                        "margin-right": "20px",
-                    },
+                    style={'width': '75%', 'margin': 'auto', 'margin-bottom': '5px'}
                 ),
+                html.Div(
+                    [
+                        html.Label("Select Temperature value"),             
+                        dcc.Slider(
+                        id="prospect-scenario2-temperature-slider",
+                            min=0.00,
+                            max=2,
+                            marks={0.00: '0.01', 0.01: '0.01', 0.5: '0.5', 1: '1', 1.5: '1.5', 2: '2'},
+                            step = None,
+                            value=0.5,
+                            tooltip={'placement': 'top'},
+                            ),
+                        ],
+                    ),
             ],
-            style={'display': 'flex', 'flexDirection': 'column', 'align-items': 'center', 'width': '50%', 'align-self': 'center'},
+            style={'display': 'flex', 'flexDirection': 'column', 'align-items': 'center', 'width': '50%', 'align-self': 'center', 'margin': 'auto'},
         ),
         dcc.Graph(id="prospect-plot2", style={'width': '70%', 'height': '60vh'}),
     ],
     style={'display': 'flex', 'flexDirection': 'row'},
-)]),
+),
+    # Display of prompt
+    html.Div(
+    id='prospect-scenario2-prompt',
+    style={'textAlign': 'center', 'margin': '20px', 'margin': 'auto'},
+    )]),
 
     
 # Scenario 3: Cancellation of losses against larger gains
@@ -393,7 +590,6 @@ html.Div(
                         html.Br(),
                         "Mr. B bought his first New York State lottery ticket and won $20. Who was happier",
                         html.Br(),
-                        html.Br(),
                         "A: Mister A",
                         html.Br(),
                         "B: Mister B",
@@ -401,9 +597,7 @@ html.Div(
                         "C: No difference",
                     ]
                 ),
-                html.Img(src=PT_og_scenario3, style={'max-width': '100%', 'max-height': '300px', 'margin-left': '60px', 'margin-top': '20px'}),
-
-
+                
             ],
             style={'display': 'flex', 'flexDirection': 'row'},
         ),
@@ -411,41 +605,53 @@ html.Div(
     children=[
         html.Div(
             children=[
-                html.H5("Select experiment design:"),
-                dcc.RadioItems(
-                    id="prospect-scenario3-radio1",
+                html.Label("Select prompt design:"),
+                dcc.Dropdown(
+                    id="prospect-scenario3-priming-dropdown",
                     options=[
                         {"label": "Unprimed", "value": 0},
                         {"label": "Primed", "value": 1},
                     ],
                     value=0,
-                    inputStyle={"margin-right": "10px"},
-                    labelStyle={
-                        "display": "inline-block",
-                        "margin-right": "20px",
-                    },
+                    style={'width': '75%', 'margin': 'auto', 'margin-bottom': '5px'},
                 ),
-                dcc.RadioItems(
-                    id="prospect-scenario3-radio2",
+                html.Label("Select language model:"),
+                dcc.Dropdown(
+                    id="prospect-scenario3-model-dropdown",
                     options=[
                         {"label": "GPT-3.5-Turbo", "value": "gpt-3.5-turbo"},
                         {"label": "GPT-4-1106-Preview", "value": "gpt-4-1106-preview"},
                         {"label": "LLama-2-70b", "value": "llama-2-70b"},
                     ],
                     value="gpt-3.5-turbo",
-                    inputStyle={"margin-right": "10px"},
-                    labelStyle={
-                        "display": "inline-block",
-                        "margin-right": "20px",
-                    },
+                    style={'width': '75%', 'margin': 'auto', 'margin-bottom': '5px'}
                 ),
+                html.Div(
+                    [
+                        html.Label("Select Temperature value"),             
+                        dcc.Slider(
+                        id="prospect-scenario3-temperature-slider",
+                            min=0.00,
+                            max=2,
+                            marks={0.00: '0.01', 0.01: '0.01', 0.5: '0.5', 1: '1', 1.5: '1.5', 2: '2'},
+                            step = None,
+                            value=0.5,
+                            tooltip={'placement': 'top'},
+                            ),
+                        ],
+                    ),
             ],
-            style={'display': 'flex', 'flexDirection': 'column', 'align-items': 'center', 'width': '50%', 'align-self': 'center'},
+            style={'display': 'flex', 'flexDirection': 'column', 'align-items': 'center', 'width': '50%', 'align-self': 'center', 'margin': 'auto'},
         ),
         dcc.Graph(id="prospect-plot3", style={'width': '70%', 'height': '60vh'}),
     ],
     style={'display': 'flex', 'flexDirection': 'row'},
-)]),
+),
+    # Display of prompt
+    html.Div(
+    id='prospect-scenario3-prompt',
+    style={'textAlign': 'center', 'margin': '20px', 'margin': 'auto'},
+    )]),
 
 # Scenario 4: Segregation of silver linings
 html.Div(
@@ -464,7 +670,6 @@ html.Div(
                         html.Br(),
                         "Mr. B's car was damaged in a parking lot. He had to spend $175 to repairthe damage. Who was more upset?",
                         html.Br(),
-                        html.Br(),
                         "A: Mister A",
                         html.Br(),
                         "B: Mister B",
@@ -472,7 +677,7 @@ html.Div(
                         "C: No difference",
                     ]
                 ),
-                html.Img(src=PT_og_scenario4, style={'max-width': '100%', 'max-height': '300px', 'margin-left': '60px', 'margin-top': '20px'}),
+            
 
 
             ],
@@ -482,41 +687,54 @@ html.Div(
     children=[
         html.Div(
             children=[
-                html.H5("Select experiment design:"),
-                dcc.RadioItems(
-                    id="prospect-scenario4-radio1",
+                html.Label("Select prompt design:"),
+                dcc.Dropdown(
+                    id="prospect-scenario4-priming-dropdown",
                     options=[
                         {"label": "Unprimed", "value": 0},
                         {"label": "Primed", "value": 1},
                     ],
                     value=0,
-                    inputStyle={"margin-right": "10px"},
-                    labelStyle={
-                        "display": "inline-block",
-                        "margin-right": "20px",
-                    },
+                    style={'width': '75%', 'margin': 'auto', 'margin-bottom': '5px'},
                 ),
-                dcc.RadioItems(
-                    id="prospect-scenario4-radio2",
+                html.Label("Select language model:"),
+                dcc.Dropdown(
+                    id="prospect-scenario4-model-dropdown",
                     options=[
                         {"label": "GPT-3.5-Turbo", "value": "gpt-3.5-turbo"},
                         {"label": "GPT-4-1106-Preview", "value": "gpt-4-1106-preview"},
                         {"label": "LLama-2-70b", "value": "llama-2-70b"},
                     ],
                     value="gpt-3.5-turbo",
-                    inputStyle={"margin-right": "10px"},
-                    labelStyle={
-                        "display": "inline-block",
-                        "margin-right": "20px",
-                    },
+                    style={'width': '75%', 'margin': 'auto', 'margin-bottom': '5px'}
                 ),
+                html.Div(
+                    [
+                        html.Label("Select Temperature value"),             
+                        dcc.Slider(
+                        id="prospect-scenario4-temperature-slider",
+                            min=0.00,
+                            max=2,
+                            marks={0.00: '0.01', 0.01: '0.01', 0.5: '0.5', 1: '1', 1.5: '1.5', 2: '2'},
+                            step = None,
+                            value=0.5,
+                            tooltip={'placement': 'top'},
+                            ),
+                        ],
+                    ),
             ],
-            style={'display': 'flex', 'flexDirection': 'column', 'align-items': 'center', 'width': '50%', 'align-self': 'center'},
+            style={'display': 'flex', 'flexDirection': 'column', 'align-items': 'center', 'width': '50%', 'align-self': 'center', 'margin': 'auto'},
         ),
         dcc.Graph(id="prospect-plot4", style={'width': '70%', 'height': '60vh'}),
     ],
     style={'display': 'flex', 'flexDirection': 'row'},
-)]),
+),
+    # Display of prompt
+    html.Div(
+    id='prospect-scenario4-prompt',
+    style={'textAlign': 'center', 'margin': '20px', 'margin': 'auto'},
+    )]),
+
 html.Br(),
 html.Hr(),
 
@@ -550,11 +768,11 @@ html.P(["""The Prospect Theory value function explains why individuals tend to a
         html.Br(),
         "- Configuration 6: B is better off by 50$",
         html.Br()]),
-    html.Div(
+html.Div(
         children = [
             html.Div(
                 children = [
-                    html.H5("Select experiment design:", style = {'margin-left': '-75px'}),
+                    html.Label("Select scenario", style={'margin': 'auto'}),
                     dcc.Dropdown(
                         id = "prospect2-scenario-dropdown",
                         options = [
@@ -564,8 +782,9 @@ html.P(["""The Prospect Theory value function explains why individuals tend to a
                             {"label": "Scenario 4: Segregation of silver linings", "value": 4},
                         ],
                         value = 1,
-                        style = {'width': '75%'},
+                    style={'width': '75%', 'margin': 'auto'},
                     ),
+                    html.Label("Select configuration", style={'margin': 'auto', 'margin-bottom': '5px'}),
                     dcc.Dropdown(
                          id = "prospect2-configuration-dropdown",
                             options = [
@@ -577,24 +796,49 @@ html.P(["""The Prospect Theory value function explains why individuals tend to a
                                 {"label": "Configuration 6: B is better off by 50$", "value": 6},
                                 ],
                                 value = 1,
-                                style = {'width': '75%'},
+                                style = {'width': '75%', 'margin': 'auto', 'margin-bottom': '5px'},
                     ),
+                    html.Label("Select language model", style={'margin': 'auto'}),
                     dcc.Dropdown(
                          id = "prospect2-model-dropdown",
                          options = [
-                              {"label": "GPT-3.5-Turbo", "value": "gpt-3.5-turbo"},
+                                {"label": "GPT-3.5-Turbo", "value": "gpt-3.5-turbo"},
                                 {"label": "GPT-4-1106-Preview", "value": "gpt-4-1106-preview"},
                                 {"label": "LLama-2-70b", "value": "llama-2-70b"},
                             ],
                             value = "gpt-3.5-turbo",
-                            style = {'width': '75%'},
-                    )],                 
+                            style = {'width': '75%', 'margin': 'auto', 'margin-bottom': '5px'},
+                    ),
+                        html.Div(
+                    [
+                        html.Label("Select Temperature value"),             
+                        dcc.Slider(
+                        id="prospect2-temperature-slider",
+                            min=0.5,
+                            max=1.5,
+                            marks={0.5: '0.5', 1: '1', 1.5: '1.5'},
+                            step = None,
+                            value=0.5,
+                            tooltip={'placement': 'top'},
+                            ),
+                        ],
+                    ),
+                    ],                 
     
-                style = {'display': 'flex', 'flexDirection': 'column', 'align-items': 'center', 'width': '50%', 'align-self': 'center'},
+            style={'display': 'flex', 'flexDirection': 'column', 'align-items': 'center', 'width': '50%', 'align-self': 'center', 'margin': 'auto'},
             ),
             dcc.Graph(id = "prospect2-plot", style={'width': '70%', 'height': '60vh'}),
-        ],
-        style={'display': 'flex', 'flexDirection': 'row'})]
+    ],
+    style={'display': 'flex', 'flexDirection': 'row'},
+),
+    # Display of prompt
+    html.Div(
+    id='prospect2-prompt',
+    style={'textAlign': 'center', 'margin': '20px', 'margin': 'auto'},
+    ),
+    # Display of original results
+    dcc.Graph(id = "prospect2-og-plot", style={'width': '70%', 'height': '60vh', 'margin':'auto'})
+]
 
 
 
@@ -603,51 +847,93 @@ html.P(["""The Prospect Theory value function explains why individuals tend to a
 ## Experiment 1
 # Scenario 1
 @dash.callback(
-     Output("prospect-plot1", "figure"),
+     [Output("prospect-plot1", "figure"),
+      Output("prospect-scenario1-prompt", "children")],
      [Input("prospect-scenario1-priming-dropdown", "value"), 
       Input("prospect-scenario1-model-dropdown", "value"),
       Input("prospect-scenario1-temperature-slider", "value")] 
 
 )
-def update_prospect_plot1(selected_priming, selected_model, selected_temperature):
-        return PT_plot_results(priming = selected_priming, model = selected_model, temperature = selected_temperature, df = PT_probs, scenario = 1) 
+def update_prospect1(selected_priming, selected_model, selected_temperature):
+    df = PT_probs[(PT_probs["Priming"] == selected_priming) & (PT_probs["Model"] == selected_model) &
+                   (PT_probs["Temp"] == selected_temperature) & (PT_probs["Scenario"] == 1)] # select scenario manually!!! 
+    # Grab experiment id to look up prompt
+    experiment_id = df["Experiment_id"].iloc[0]
+    prompt = PT_experiment_prompts_dict[experiment_id]
+    prompt = html.P(f"The prompt used in this experiment is: {prompt}")
+    return PT_plot_results(df), prompt 
 
 # Scenario 2
 @dash.callback(
-        Output("prospect-plot2", "figure"),
-        [Input("prospect-scenario2-radio1", "value"), # priming
-        Input("prospect-scenario2-radio2", "value")] #  model
+        [Output("prospect-plot2", "figure"),
+         Output("prospect-scenario2-prompt", "children")],
+        [Input("prospect-scenario2-priming-dropdown", "value"), 
+        Input("prospect-scenario2-model-dropdown", "value"),
+        Input("prospect-scenario2-temperature-slider", "value")] 
 
 )
-def update_prospect_plot2(selected_priming, selected_model):
-        return plot_results(model = selected_model, priming = selected_priming, df = PT_probs, scenario = 2) 
-
+def update_prospect2(selected_priming, selected_model, selected_temperature):
+    df = PT_probs[(PT_probs["Priming"] == selected_priming) & (PT_probs["Model"] == selected_model) &
+                   (PT_probs["Temp"] == selected_temperature) & (PT_probs["Scenario"] == 2)] # select scenario manually!!! 
+    # Grab experiment id to look up prompt
+    experiment_id = df["Experiment_id"].iloc[0]
+    prompt = PT_experiment_prompts_dict[experiment_id]
+    prompt = html.P(f"The prompt used in this experiment is: {prompt}")
+    return PT_plot_results(df), prompt 
 
 # Scenario 3
 @dash.callback(
-        Output("prospect-plot3", "figure"),
-        [Input("prospect-scenario3-radio1", "value"), # priming
-        Input("prospect-scenario3-radio2", "value")] # model
-)  
-def update_prospect_plot3(selected_priming, selected_model):    
-        return plot_results(model = selected_model, priming = selected_priming, df = PT_probs, scenario = 3)
-    
+        [Output("prospect-plot3", "figure"),
+         Output("prospect-scenario3-prompt", "children")],
+        [Input("prospect-scenario3-priming-dropdown", "value"), 
+        Input("prospect-scenario3-model-dropdown", "value"),
+        Input("prospect-scenario3-temperature-slider", "value")] 
+
+)
+def update_prospect2(selected_priming, selected_model, selected_temperature):
+    df = PT_probs[(PT_probs["Priming"] == selected_priming) & (PT_probs["Model"] == selected_model) &
+                   (PT_probs["Temp"] == selected_temperature) & (PT_probs["Scenario"] == 3)] # select scenario manually!!! 
+    # Grab experiment id to look up prompt
+    experiment_id = df["Experiment_id"].iloc[0]
+    prompt = PT_experiment_prompts_dict[experiment_id]
+    prompt = html.P(f"The prompt used in this experiment is: {prompt}")
+    return PT_plot_results(df), prompt 
+
 # Scenario 4
 @dash.callback(
-        Output("prospect-plot4", "figure"),
-        [Input("prospect-scenario4-radio1", "value"), #  priming
-        Input("prospect-scenario4-radio2", "value")] #  model
+        [Output("prospect-plot4", "figure"),
+         Output("prospect-scenario4-prompt", "children")],
+        [Input("prospect-scenario4-priming-dropdown", "value"), 
+        Input("prospect-scenario4-model-dropdown", "value"),
+        Input("prospect-scenario4-temperature-slider", "value")] 
+
 )
-def update_prospect_plot4(selected_priming, selected_model):
-        return plot_results(model = selected_model, priming = selected_priming, df = PT_probs, scenario = 4)
+def update_prospect2(selected_priming, selected_model, selected_temperature):
+    df = PT_probs[(PT_probs["Priming"] == selected_priming) & (PT_probs["Model"] == selected_model) &
+                   (PT_probs["Temp"] == selected_temperature) & (PT_probs["Scenario"] == 4)] # select scenario manually!!! 
+    # Grab experiment id to look up prompt
+    experiment_id = df["Experiment_id"].iloc[0]
+    prompt = PT_experiment_prompts_dict[experiment_id]
+    prompt = html.P(f"The prompt used in this experiment is: {prompt}")
+    return PT_plot_results(df), prompt 
 
 ## Experiment 2
 @dash.callback(
-     Output("prospect2-plot", "figure"),
-     [Input("prospect2-scenario-dropdown", "value"),
-      Input("prospect2-configuration-dropdown", "value"),
-      Input("prospect2-model-dropdown", "value")]
+        [Output("prospect2-plot", "figure"),
+         Output("prospect2-prompt", "children"),
+         Output("prospect2-og-plot", "figure")],
+        [Input("prospect2-scenario-dropdown", "value"), 
+        Input("prospect2-configuration-dropdown", "value"),
+        Input("prospect2-model-dropdown", "value"),
+        Input("prospect2-temperature-slider", "value")] 
+
 )
-def update_prospect2_plot(selected_scenario, selected_configuration, selected_model):
-    df = PT2_probs[PT2_probs["Configuration"] == selected_configuration]
-    return plot_results(model = selected_model, df = df, scenario = selected_scenario, priming = 0) # all experiments are unprimed
+def update_prospect_two(selected_scenario, selected_configuration, selected_model, selected_temperature):
+    df = PT2_probs[(PT2_probs["Scenario"] == selected_scenario) & (PT2_probs["Configuration"] == selected_configuration) &
+                   (PT2_probs["Model"] == selected_model) & (PT2_probs["Temp"] == selected_temperature)] # select scenario manually!!! 
+    # Grab experiment id to look up prompt
+    experiment_id = df["Experiment_id"].iloc[0]
+    prompt = PT2_experiment_prompts_dict[experiment_id]
+    prompt = html.P(f"The prompt used in this experiment is: {prompt}")
+    og_plot = PT_plot_og_results(PT_og_results)
+    return PT2_plot_results(df), prompt, og_plot 
