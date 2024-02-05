@@ -115,8 +115,6 @@ def numeric_layout():
         html.Hr(),
         # Additional text section
         html.Div(id='experiment-prompt-numeric'),
-        html.Div(id="download-dataframe-csv-container-numeric"),
-        dcc.Download(id="download-dataframe-csv-numeric"),
         html.Div(
             style={'display': 'flex'},
             children=[
@@ -238,13 +236,14 @@ def update_individual_experiment(n_clicks, prompts, models, iterations, temperat
             id='output-table',
             columns=[{'name': col, 'id': col} for col in experiment.results_df.columns],
             data=experiment.results_df.to_dict('records'),
-            style_table={'margin-top': '50px', 'margin-bottom': '30px'},
+            style_table={'margin-top': '10px', 'margin-bottom': '30px'},
+            export_format='csv'
         )
 
         results = (
             [html.H2("Results:", style={'margin-top': '50px', 'margin-bottom': '30px'})] +
-            [output_table] +
-            [html.Button("Download CSV", id="btn_csv")]
+            [html.Br()] +
+            [output_table]
         )
         
         loading = html.H6('The experiment finished running. Please check the results below.')

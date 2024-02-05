@@ -204,8 +204,6 @@ def answer_option_layout():
         html.Hr(),
         # Additional text section
         html.Div(id='experiment_prompt'),
-        html.Div(id="download-dataframe-csv-container"),
-        dcc.Download(id="download-dataframe-csv"),
         html.Div(
             style={'display': 'flex'},
             children=[
@@ -357,7 +355,8 @@ def update_individual_experiment(n_clicks, prompts, models, iterations, temperat
             id='output-table',
             columns=[{'name': col, 'id': col} for col in experiment.results_df.columns],
             data=experiment.results_df.to_dict('records'),
-            style_table={'margin-top': '50px', 'margin-bottom': '30px'},
+            style_table={'margin-top': '10px', 'margin-bottom': '30px'},
+            export_format='csv'
         )
 
         results = (
@@ -370,8 +369,8 @@ def update_individual_experiment(n_clicks, prompts, models, iterations, temperat
                 )
                 for i, experiment_prompt in enumerate(experiment.experiment_prompts)
             ] +
-            [output_table] +
-            [html.Button("Download CSV", id="btn_csv")]
+            [html.Br()] +
+            [output_table]
         )
         
         graph_settings = html.Div(
