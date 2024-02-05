@@ -12,98 +12,47 @@ dash.register_page(__name__, path='/prospect-theory', name='Prospect Theory', lo
 
 
 # Load in results and graphs of Prospect Theory experiments
-PT_probs = pd.read_csv("Output/PT_probs.csv")
+PT_probs = pd.read_csv("data/Output/PT_probs.csv")
 
 # Second Prospect Theory experiment
-PT2_probs = pd.read_csv("Output/PT2_probs.csv")
-PT_og_results = pd.read_csv("Output/PT_og_results.csv")
+PT2_probs = pd.read_csv("data/Output/PT2_probs.csv")
+PT_og_results = pd.read_csv("data/Output/PT_og_results.csv")
 
 
 
 ### Prospect Theory 1 ###
-PT_prompt_1 = """Mr. A was given tickets involving the World Series. He won 50$ in one lottery and $25 in the other. 
-          Mr. B was given a ticket to a single, larger World Series lottery. He won $75. Based solely on this information, Who was happier? 
-          A: Mister A
-          B: Mister B
-          C: No difference.         
-          Which option would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
-PT_prompt_2 = """Mr. A received a letter from the IRS saying that he made a minor arithmetical mistake on his tax return and owed $100. 
-         He received a similar letter the same day from his state income tax authority saying he owed $50. There were no other repercussions from either mistake. 
-         Mr. B received a letter from the IRS saying that he made a minor arithmetical mistake on his tax return and owed $150. There were no other repercussions from his mistake. 
-         Based solely on this information, who was more upset? 
-         A: Mister A
-         B: Mister B
-         C: No difference.
-         Which option would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
-PT_prompt_3 = """Mr. A bought his first New York State lottery ticket and won $100. Also, in a freak accident, he damaged the rug in his apartment and had to pay the landlord $80.
-         Mr. B bought his first New York State lottery ticket and won $20. Based solely on this information, who was happier? 
-         A: Mister A
-         B: Mister B
-         C: No difference.
-         Which option would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
-PT_prompt_4 = """Mr. A's car was damaged in a parking lot. He had to spend $200 to repair the damage. The same day the car was damaged, he won $25 in the office football pool.
-         Mr. B's car was damaged in a parking lot. He had to spend $175 to repair the damage. Based solely on this information, who was more upset?
-         A: Mister A
-         B: Mister B
-         C: No difference.
-         Which option would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
-PT_prompt_5 = """You are a market researcher and focus on Prospect Theory and Mental Accounting. In a survey you are presented the following situation: 
-          Mr. A was given tickets involving the World Series. He won 50$ in one lottery and 25$ in the other. 
-          Mr. B was given a ticket to a single, larger World Series lottery. He won 75$. Based solely on this information, who was happier?
-          A: Mister A
-          B: Mister B
-          C: No difference.
-          Which option would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
-PT_prompt_6 = """You are a market researcher and focus on Prospect Theory and Mental Accounting. In a survey you are presented the following situation:
-         Mr. A received a letter from the IRS saying that he made a minor arithmetical mistake on his tax return and owed $100. 
-         He received a similar letter the same day from his state income tax authority saying he owed $50. There were no other repercussions from either mistake. 
-         Mr. B received a letter from the IRS saying that he made a minor arithmetical mistake on his tax return and owed $150. There were no other repercussions from his mistake. 
-         Based solely on this information, who was more upset? 
-         A: Mister A
-         B: Mister B
-         C: No difference.
-         Which option would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
-PT_prompt_7 = """You are a market researcher and focus on Prospect Theory and Mental Accounting. In a survey you are presented the following situation:
-         Mr. A bought his first New York State lottery ticket and won $100. Also, in a freak accident, he damaged the rug in his apartment and had to pay the landlord $80.
-         Mr. B bought his first New York State lottery ticket and won $20? Based solely on this information, who was happier?
-         A: Mister A
-         B: Mister B
-         C: No difference.
-         Which option would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
-PT_prompt_8 = """You are a market researcher and focus on Prospect Theory and Mental Accounting. In a survey you are presented the following situation:
-         Mr. A's car was damaged in a parking lot. He had to spend $200 to repair the damage. The same day the car was damaged, he won $25 in the office football pool.
-         Mr. B's car was damaged in a parking lot. He had to spend $175 to repair the damage. Based solely on this information, who was more upset?
-         A: Mister A
-         B: Mister B
-         C: No difference.
-         Which option would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
+
+# Prompts for PT experiments
+with open ("data/Input/PT_prompts.pkl", "rb") as file:
+    PT_prompts = pickle.load(file)
+
 
 # Dictionary to look up prompt for a given PT experiment id. key: experiment_id, value: prompt
 PT_experiment_prompts_dict = {
-    "PT_1_1": PT_prompt_1,
-    "PT_1_2": PT_prompt_2,
-    "PT_1_3": PT_prompt_3,
-    "PT_1_4": PT_prompt_4,
-    "PT_1_5": PT_prompt_5,
-    "PT_1_6": PT_prompt_6,
-    "PT_1_7": PT_prompt_7,
-    "PT_1_8": PT_prompt_8,
-    "PT_2_1": PT_prompt_1,
-    "PT_2_2": PT_prompt_2,
-    "PT_2_3": PT_prompt_3,
-    "PT_2_4": PT_prompt_4,
-    "PT_2_5": PT_prompt_5,
-    "PT_2_6": PT_prompt_6,
-    "PT_2_7": PT_prompt_7,
-    "PT_2_8": PT_prompt_8,
-    "PT_3_1": PT_prompt_1,
-    "PT_3_2": PT_prompt_2,
-    "PT_3_3": PT_prompt_3,
-    "PT_3_4": PT_prompt_4,
-    "PT_3_5": PT_prompt_5,
-    "PT_3_6": PT_prompt_6,
-    "PT_3_7": PT_prompt_7,
-    "PT_3_8": PT_prompt_8,
+    "PT_1_1": PT_prompts[0],
+    "PT_1_2": PT_prompts[1],
+    "PT_1_3": PT_prompts[2],
+    "PT_1_4": PT_prompts[3],
+    "PT_1_5": PT_prompts[4],
+    "PT_1_6": PT_prompts[5],
+    "PT_1_7": PT_prompts[6],
+    "PT_1_8": PT_prompts[7],
+    "PT_2_1": PT_prompts[0],
+    "PT_2_2": PT_prompts[1],
+    "PT_2_3": PT_prompts[2],
+    "PT_2_4": PT_prompts[3],
+    "PT_2_5": PT_prompts[4],
+    "PT_2_6": PT_prompts[5],
+    "PT_2_7": PT_prompts[6],
+    "PT_2_8": PT_prompts[7],
+    "PT_3_1": PT_prompts[0],
+    "PT_3_2": PT_prompts[1],
+    "PT_3_3": PT_prompts[2],
+    "PT_3_4": PT_prompts[3],
+    "PT_3_5": PT_prompts[4],
+    "PT_3_6": PT_prompts[5],
+    "PT_3_7": PT_prompts[6],
+    "PT_3_8": PT_prompts[7],
 }
 
 # Function to plot results of PT experiments
@@ -169,19 +118,19 @@ def PT_plot_results(df):
 
 ### Prospect Theory 2 ###
 # Scenario 1
-with open("Output/PT2_prompts_1.pkl", "rb") as file:
+with open("data/Input/PT2_prompts_1.pkl", "rb") as file:
     PT2_prompts_1 = pickle.load(file)
 
 # Scenario 2
-with open("Output/PT2_prompts_2.pkl", "rb") as file:
+with open("data/Input/PT2_prompts_2.pkl", "rb") as file:
     PT2_prompts_2 = pickle.load(file)
 
 # Scenario 3
-with open("Output/PT2_prompts_3.pkl", "rb") as file:
+with open("data/Input/PT2_prompts_3.pkl", "rb") as file:
     PT2_prompts_3 = pickle.load(file)
 
 # Scenario 4
-with open("Output/PT2_prompts_4.pkl", "rb") as file:
+with open("data/Input/PT2_prompts_4.pkl", "rb") as file:
     PT2_prompts_4 = pickle.load(file)
 
 # Dictionary to look up prompt for a given PT2 experiment id. key: experiment id, value: prompt
@@ -926,7 +875,7 @@ def update_prospect2(selected_priming, selected_model, selected_temperature):
         Input("prospect-scenario3-temperature-slider", "value")] 
 
 )
-def update_prospect2(selected_priming, selected_model, selected_temperature):
+def update_prospect3(selected_priming, selected_model, selected_temperature):
     df = PT_probs[(PT_probs["Priming"] == selected_priming) & (PT_probs["Model"] == selected_model) &
                    (PT_probs["Temp"] == selected_temperature) & (PT_probs["Scenario"] == 3)] # select scenario manually!!! 
     # Grab experiment id to look up prompt
@@ -944,7 +893,7 @@ def update_prospect2(selected_priming, selected_model, selected_temperature):
         Input("prospect-scenario4-temperature-slider", "value")] 
 
 )
-def update_prospect2(selected_priming, selected_model, selected_temperature):
+def update_prospect4(selected_priming, selected_model, selected_temperature):
     df = PT_probs[(PT_probs["Priming"] == selected_priming) & (PT_probs["Model"] == selected_model) &
                    (PT_probs["Temp"] == selected_temperature) & (PT_probs["Scenario"] == 4)] # select scenario manually!!! 
     # Grab experiment id to look up prompt

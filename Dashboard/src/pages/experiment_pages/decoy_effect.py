@@ -3,64 +3,91 @@ import pandas as pd
 import dash
 from dash import Input, Output, dcc, html
 import plotly.graph_objects as go
+import pickle
+from ast import literal_eval
 
 
 dash.register_page(__name__, path='/decoy-effect', name='Decoy Effect', location='experiments')
 
 
-# Load in results of Decoy Effect experiments
-DE_probs = pd.read_csv("Output/DE_probs.csv", index_col = 0)
+### Decoy Effect ###
+
+# Load Decoy Effect experiment results
+DE_probs = pd.read_csv("data/Output/DE_probs.csv")
+
+# Prompts for Decoy Effect experiments
+with open ("data/Input/DE_prompts.pkl", "rb") as file:
+    DE_prompts = pickle.load(file)
+
+# Dictionary that returns the prompt for a given experiment
+DE_experiment_prompts_dict = {
+    "DE_1_1": DE_prompts[0],
+    "DE_1_2": DE_prompts[1],
+    "DE_1_3": DE_prompts[2],
+    "DE_1_4": DE_prompts[3],
+    "DE_1_5": DE_prompts[4],
+    "DE_1_6": DE_prompts[5],
+    "DE_1_7": DE_prompts[6],
+    "DE_1_8": DE_prompts[7],
+    "DE_2_1": DE_prompts[0],
+    "DE_2_2": DE_prompts[1],
+    "DE_2_3": DE_prompts[2],
+    "DE_2_4": DE_prompts[3],
+    "DE_2_5": DE_prompts[4],
+    "DE_2_6": DE_prompts[5],
+    "DE_2_7": DE_prompts[6],
+    "DE_2_8": DE_prompts[7],
+    "DE_3_1": DE_prompts[0],
+    "DE_3_2": DE_prompts[1],
+    "DE_3_3": DE_prompts[2],
+    "DE_3_4": DE_prompts[3],
+    "DE_3_5": DE_prompts[4],
+    "DE_3_6": DE_prompts[5],
+    "DE_3_7": DE_prompts[6],
+    "DE_3_8": DE_prompts[7],
+}
+
 
 
 # Function for plotting results of decoy effect/prospect theory experiments
-def plot_results(model, priming, df, scenario):
-    
-    # Get dataframe as specified by user (subset of df)
-    df = df[(df['Model'] == model) & (df['Priming'] == priming) & (df['Scenario'] == scenario)]
+def DE_plot_results(df):
+
     # Transpose for plotting
-    df = df.transpose()
-    
+    df = df.transpose()  
+    # Get language model name
+    model = df.loc["Model"].iloc[0]
+    # Get temperature value
+    temperature = df.loc["Temp"].iloc[0]
     # Get number of observations per temperature value
-    n_observations = df.loc["Obs."]
-    
-    # Get temperature values
-    temperature = df.loc["Temp"]
+    n_observations = df.loc["Obs."].iloc[0]
+    # Get original answer probabilities
+    og_answers = df.loc["Original"].apply(literal_eval).iloc[0]
+    # Get number of original answers
+    n_original = df.loc["Original_count"].iloc[0]
 
     fig = go.Figure(data=[
         go.Bar(
-            name="p(A)", 
-            x=temperature, 
-            y=df.loc["p(A)"],
-            customdata = n_observations,
-            hovertemplate="Temperature: %{x}<br>Probability: %{y:.2f}%<br>Observations: %{customdata}<extra></extra>",
-            marker=dict(color="#e9724d"),
+            name = "Model answers",
+            x = ["p(A)", "p(B)", "p(C)"],
+            y = [df.loc["p(A)"].iloc[0], df.loc["p(B)"].iloc[0], df.loc["p(C)"].iloc[0]],
+            customdata = [n_observations, n_observations, n_observations], 
+            hovertemplate = "Percentage: %{y:.2f}%<br>Number of observations: %{customdata}<extra></extra>",
+            marker_color = "rgb(55, 83, 109)"
         ),
         go.Bar(
-            name="p(B)", 
-            x=temperature, 
-            y=df.loc["p(B)"],
-            customdata = n_observations,
-            hovertemplate="Temperature: %{x}<br>Probability: %{y:.2f}%<br> Observations: %{customdata}<extra></extra>",
-            marker=dict(color="#868686"),
-            
-        ),
-        go.Bar(
-            name="p(C)", 
-            x=temperature, 
-            y=df.loc["p(C)"],
-            customdata = n_observations,
-            hovertemplate="Temperature: %{x}<br>Probability: %{y:.2f}%<br> Observations: %{customdata}<extra></extra>",
-            marker=dict(color="#92cad1"),
+            name = "Original answers",
+            x = ["p(A)","p(B)", "p(C)"],
+            y = [og_answers[0], og_answers[1], og_answers[2]],
+            customdata = [n_original, n_original, n_original],
+            hovertemplate = "Percentage: %{y:.2f}%<br>Number of observations: %{customdata}<extra></extra>",
+            marker_color = "rgb(26, 118, 255)"
         )
     ])
 
     fig.update_layout(
     barmode = 'group',
     xaxis = dict(
-        tickmode = 'array',
-        tickvals = temperature,
-        ticktext = temperature,
-        title = "Temperature",  
+        title = "Answer options",  
         title_font=dict(size=18),  
     ),
     yaxis = dict(
@@ -68,260 +95,24 @@ def plot_results(model, priming, df, scenario):
         title_font=dict(size=18), 
     ),
     title = dict(
-        text="Distribution of answers per temperature value",
+        text=f"Distribution of answers for temperature {temperature}, using model {model}",
         x = 0.5, # Center alignment horizontally
         y = 0.87,  # Vertical alignment
         font=dict(size=22),  
     ),
-    legend = dict(
-        title = dict(text="Probabilities"),
+    legend=dict(
+        x=1.01,  
+        y=0.9,
+        font=dict(family='Arial', size=12, color='black'),
+        bordercolor='black',  
+        borderwidth=2,  
     ),
     bargap = 0.3  # Gap between temperature values
 )
     return fig
 
 
-# Decoy Effect prompts
-DE_prompt_1 = """You are presented with the following subscription alternatives for the "The Economist" magazine:
-        A: One-year subscription to Economist.com. Includes online access to all articles from The Economist since 1997, priced at 59$.
-        B: One-year subscription to the print edition of The Economist, priced at 125$.
-        C: One-year subscription to the print edition of The Economist and online access to all articles from The Economist since 1997, priced at 125$.
-        Which alternative would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
-DE_prompt_2 = """You are presented with the following subscription alternatives for the "The Economist" magazine:
-        A: One-year subscription to Economist.com. Includes online access to all articles from The Economist since 1997, priced at 59$.
-        B: One-year subscription to the print edition of The Economist and online access to all articles from The Economist since 1997, priced at 125$. 
-        Which alternative would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
-DE_prompt_3 = """You are a market researcher that knows about the Decoy Effect in pricing. 
-        You are presented with the following subscription alternatives for the "The Economist" magazine:
-        A: One-year subscription to Economist.com. Includes online access to all articles from The Economist since 1997, priced at 59$.
-        B: One-year subscription to the print edition of The Economist, priced at 125$.
-        C: One-year subscription to the print edition of The Economist and online access to all articles from The Economist since 1997, priced at 125$.
-        Which alternative would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
-DE_prompt_4 = """You are a market researcher that knows about the Decoy Effect in pricing. 
-         You are presented with the following subscription alternatives for the "The Economist" magazine:
-         A: One-year subscription to Economist.com. Includes online access to all articles from The Economist since 1997, priced at 59$.
-         B: One-year subscription to the print edition of The Economist and online access to all articles from The Economist since 1997, priced at 125$.
-         Which alternative would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
-DE_prompt_5 = """You are presented with the following subscription alternatives for the "The Economist" magazine:
-         Q: One-year subscription to the print edition of The Economist, priced at 125$.
-         X: One-year subscription to the print edition of The Economist and online access to all articles from The Economist since 1997, priced at 125$.
-         Y: One-year subscription to Economist.com. Includes online access to all articles from The Economist since 1997, priced at 59$. 
-         Which alternative would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
-DE_prompt_6 = """You are presented with the following subscription alternatives for the "The Economist" magazine:
-         X: One-year subscription to the print edition of The Economist and online access to all articles from The Economist since 1997, priced at 125$.
-         Y: One-year subscription to Economist.com. Includes online access to all articles from The Economist since 1997, priced at 59$. 
-         Which alternative would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
-DE_prompt_7 = """You are a market researcher that knows about the Decoy Effect in pricing. 
-         You are presented with the following subscription alternatives for the "The Economist" magazine:
-         Q: One-year subscription to the print edition of The Economist, priced at 125$.
-         X: One-year subscription to the print edition of The Economist and online access to all articles from The Economist since 1997, priced at 125$.
-         Y: One-year subscription to Economist.com. Includes online access to all articles from The Economist since 1997, priced at 59$. 
-         Which alternative would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
-DE_prompt_8 = """You are a market researcher that knows about the Decoy Effect in pricing. 
-         You are presented with the following subscription alternatives for the "The Economist" magazine:
-         X: One-year subscription to the print edition of The Economist and online access to all articles from The Economist since 1997, priced at 125$.
-         Y: One-year subscription to Economist.com. Includes online access to all articles from The Economist since 1997, priced at 59$. 
-         Which alternative would you choose? Please answer by only giving the letter of the alternative you would choose without any reasoning."""
-
-
-# Dictionary that returns the literal prompt for a given experiment id (used in function call). key: experiment_id, value: prompt
-DE_experiment_prompts_dict = {
-    "DE_1_1": DE_prompt_1,
-    "DE_1_2": DE_prompt_2,
-    "DE_1_3": DE_prompt_3,
-    "DE_1_4": DE_prompt_4,
-    "DE_1_5": DE_prompt_5,
-    "DE_1_6": DE_prompt_6,
-    "DE_1_7": DE_prompt_7,
-    "DE_1_8": DE_prompt_8,
-    "DE_2_1": DE_prompt_1,
-    "DE_2_2": DE_prompt_2,
-    "DE_2_3": DE_prompt_3,
-    "DE_2_4": DE_prompt_4,
-    "DE_2_5": DE_prompt_5,
-    "DE_2_6": DE_prompt_6,
-    "DE_2_7": DE_prompt_7,
-    "DE_2_8": DE_prompt_8,
-    "DE_3_1": DE_prompt_1,
-    "DE_3_2": DE_prompt_2,
-    "DE_3_3": DE_prompt_3,
-    "DE_3_4": DE_prompt_4,
-    "DE_3_5": DE_prompt_5,
-    "DE_3_6": DE_prompt_6,
-    "DE_3_7": DE_prompt_7,
-    "DE_3_8": DE_prompt_8,
-}
-
-# It returns the variable name of the prompt that was used in the experiment. key: experiment_id, value: prompt_name
-DE_prompt_ids_dict = {
-    "DE_1_1": "DE_prompt_1",
-    "DE_1_2": "DE_prompt_2",
-    "DE_1_3": "DE_prompt_3",
-    "DE_1_4": "DE_prompt_4",
-    "DE_1_5": "DE_prompt_5",
-    "DE_1_6": "DE_prompt_6",
-    "DE_1_7": "DE_prompt_7",
-    "DE_1_8": "DE_prompt_8",
-    "DE_2_1": "DE_prompt_1",
-    "DE_2_2": "DE_prompt_2",
-    "DE_2_3": "DE_prompt_3",
-    "DE_2_4": "DE_prompt_4",
-    "DE_2_5": "DE_prompt_5",
-    "DE_2_6": "DE_prompt_6",
-    "DE_2_7": "DE_prompt_7",
-    "DE_2_8": "DE_prompt_8",
-    "DE_3_1": "DE_prompt_1",
-    "DE_3_2": "DE_prompt_2",
-    "DE_3_3": "DE_prompt_3",
-    "DE_3_4": "DE_prompt_4",
-    "DE_3_5": "DE_prompt_5",
-    "DE_3_6": "DE_prompt_6",
-    "DE_3_7": "DE_prompt_7",
-    "DE_3_8": "DE_prompt_8",
-}
-
-# Dictionary to look up which model to use for a given experiment id (used in function call). key: experiment id, value: model name
-DE_model_dict = {
-    "DE_1_1": "gpt-3.5-turbo",
-    "DE_1_2": "gpt-3.5-turbo",
-    "DE_1_3": "gpt-3.5-turbo",
-    "DE_1_4": "gpt-3.5-turbo",
-    "DE_1_5": "gpt-3.5-turbo",
-    "DE_1_6": "gpt-3.5-turbo",
-    "DE_1_7": "gpt-3.5-turbo",
-    "DE_1_8": "gpt-3.5-turbo",
-    "DE_2_1": "gpt-4-1106-preview",
-    "DE_2_2": "gpt-4-1106-preview",
-    "DE_2_3": "gpt-4-1106-preview",
-    "DE_2_4": "gpt-4-1106-preview",
-    "DE_2_5": "gpt-4-1106-preview",
-    "DE_2_6": "gpt-4-1106-preview",
-    "DE_2_7": "gpt-4-1106-preview",
-    "DE_2_8": "gpt-4-1106-preview",
-    "DE_3_1": 'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3',
-    "DE_3_2": 'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3',
-    "DE_3_3": 'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3',
-    "DE_3_4": 'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3',
-    "DE_3_5": 'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3',
-    "DE_3_6": 'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3',
-    "DE_3_7": 'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3',
-    "DE_3_8": 'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3',
-    }
-
-# Dictionary to look up the original results of the experiments. key: experiment id, value: original result
-DE_results_dict = {
-    "DE_1_1": "A: 16%, B: 0%, C: 84%",
-    "DE_1_2": "A: 68%, B: 0%, C: 32%",
-    "DE_1_3": "A: 16%, B: 0%, C: 84%",
-    "DE_1_4": "A: 68%, B: 0%, C: 32%",
-    "DE_1_5": "A: 16%, B: 0%, C: 84%",
-    "DE_1_6": "A: 68%, B: 0%, C: 32%",
-    "DE_1_7": "A: 16%, B: 0%, C: 84%",
-    "DE_1_8": "A: 68%, B: 0%, C: 32%",
-    "DE_2_1": "A: 16%, B: 0%, C: 84%",
-    "DE_2_2": "A: 68%, B: 0%, C: 32%",
-    "DE_2_3": "A: 16%, B: 0%, C: 84%",
-    "DE_2_4": "A: 68%, B: 0%, C: 32%",
-    "DE_2_5": "A: 16%, B: 0%, C: 84%",
-    "DE_2_6": "A: 68%, B: 0%, C: 32%",
-    "DE_2_7": "A: 16%, B: 0%, C: 84%",
-    "DE_2_8": "A: 68%, B: 0%, C: 32%",
-    "DE_3_1": "A: 16%, B: 0%, C: 84%",
-    "DE_3_2": "A: 68%, B: 0%, C: 32%",
-    "DE_3_3": "A: 16%, B: 0%, C: 84%",
-    "DE_3_4": "A: 68%, B: 0%, C: 32%",
-    "DE_3_5": "A: 16%, B: 0%, C: 84%",
-    "DE_3_6": "A: 68%, B: 0%, C: 32%",
-    "DE_3_7": "A: 16%, B: 0%, C: 84%",
-    "DE_3_8": "A: 68%, B: 0%, C: 32%",
-}
-
-# Dictionary to look up the scenario of each experiment. key: experiment id, value: scenario (1: With Decoy, 2: Without Decoy)
-DE_scenario_dict = {
-    "DE_1_1": 1,
-    "DE_1_2": 2,
-    "DE_1_3": 1,
-    "DE_1_4": 2,
-    "DE_1_5": 1,
-    "DE_1_6": 2,
-    "DE_1_7": 1,
-    "DE_1_8": 2,
-    "DE_2_1": 1,
-    "DE_2_2": 2,
-    "DE_2_3": 1,
-    "DE_2_4": 2,
-    "DE_2_5": 1,
-    "DE_2_6": 2,
-    "DE_2_7": 1,
-    "DE_2_8": 2,
-    "DE_3_1": 1,
-    "DE_3_2": 2,
-    "DE_3_3": 1,
-    "DE_3_4": 2,
-    "DE_3_5": 1,
-    "DE_3_6": 2,
-    "DE_3_7": 1,
-    "DE_3_8": 2,
-}
-
-# Dictionary to look up, whether the experiment was primed or not. key: experiment id, value: priming (1: Primed, 0: Unprimed)
-DE_priming_dict = {
-    "DE_1_1": 0,
-    "DE_1_2": 0,
-    "DE_1_3": 1,
-    "DE_1_4": 1,
-    "DE_1_5": 0,
-    "DE_1_6": 0,
-    "DE_1_7": 1,
-    "DE_1_8": 1,
-    "DE_2_1": 0,
-    "DE_2_2": 0,
-    "DE_2_3": 1,
-    "DE_2_4": 1,
-    "DE_2_5": 0,
-    "DE_2_6": 0,
-    "DE_2_7": 1,
-    "DE_2_8": 1,
-    "DE_3_1": 0,
-    "DE_3_2": 0,
-    "DE_3_3": 1,
-    "DE_3_4": 1,
-    "DE_3_5": 0,
-    "DE_3_6": 0,
-    "DE_3_7": 1,
-    "DE_3_8": 1,
-}
-
-# Dictionary to look up, whether answers were renamed and reordered or not. key: experiment id, value: indicator (1: Renamed and reordered, 0: Not renamed and reordered)
-DE_reorder_dict = {
-    "DE_1_1": 0,
-    "DE_1_2": 0,
-    "DE_1_3": 0,
-    "DE_1_4": 0,
-    "DE_1_5": 1,
-    "DE_1_6": 1,
-    "DE_1_7": 1,
-    "DE_1_8": 1,
-    "DE_2_1": 0,
-    "DE_2_2": 0,
-    "DE_2_3": 0,
-    "DE_2_4": 0,
-    "DE_2_5": 1,
-    "DE_2_6": 1,
-    "DE_2_7": 1,
-    "DE_2_8": 1,
-    "DE_3_1": 0,
-    "DE_3_2": 0,
-    "DE_3_3": 0,
-    "DE_3_4": 0,
-    "DE_3_5": 1,
-    "DE_3_6": 1,
-    "DE_3_7": 1,
-    "DE_3_8": 1,
-}
-
-
-# Decoy Page
+# Layout
 layout = [
     html.H1("Decoy Effect Experiment", className="page-heading"), 
     html.Hr(),
@@ -353,38 +144,45 @@ layout = [
             temperature values using either primed or unprimed prompts. On top of that, we investigated to what extent the models' responses change, when we rename and reorder the 
             answer options. In the case of primed prompts, we instructed the model to be a market researcher, who knows about the Decoy Effect in product pricing."""]),
             html.Br(),
+            html.B("Note: "), """For both openAI models, setting a temperature of 0 is possible. However, for the Llama model, a temperature of 0 is not a valid input parameter.
+            The minimum temperature value for the Llama model is 0.01. Therefore, although it is possible to select both values for every model, 0 only works for the
+            openAI models, while 0.01 only works for the Llama model.""",
             html.Br(),
     html.Div(
         children=[
             html.Div(
                 children=[
+                    html.Label("Select scenario"),
                     dcc.Dropdown(
                          id = "decoy-scenario-dropdown",
                          options = [
                               {"label": "Scenario 1: All options present", "value": 1},
                               {"label": "Scenario 2: Decoy option removed", "value": 2},
                          ],
-                         value = 1,
-                         style={'width': '75%'},
+                    value=1,
+                    style={'width': '75%', 'margin': 'auto', 'margin-bottom': '5px'},
                     ),
+                    html.Label("Select prompt design"),
                     dcc.Dropdown(
                          id = "decoy-priming-dropdown",
                          options = [
-                              {"label": "Unprimed prompt", "value": 0},
-                              {"label": "Primed prompt", "value": 1},
+                              {"label": "Unprimed", "value": 0},
+                              {"label": "Primed", "value": 1},
                             ],
-                            value = 0,
-                            style={'width': '75%'},
+                    value=0,
+                    style={'width': '75%', 'margin': 'auto', 'margin-bottom': '5px'},
                     ),
+                    html.Label("Select answer ordering"),
                     dcc.Dropdown(
                          id = "decoy-reordering-dropdown",
                          options = [
                               {"label": "Original order", "value": 0},
                               {"label": "Answer options reordered", "value": 1},
                             ],
-                            value = 0,
-                            style={'width': '75%'},
+                      value=0,
+                    style={'width': '75%', 'margin': 'auto', 'margin-bottom': '5px'},
                     ),
+                    html.Label("Select language model"),
                     dcc.Dropdown(
                          id = "decoy-model-dropdown",
                          options = [
@@ -392,27 +190,52 @@ layout = [
                               {"label": "GPT-4-1106-Preview", "value": "gpt-4-1106-preview"},
                               {"label": "LLama-2-70b", "value": "llama-2-70b"},
                             ],
-                            value = "gpt-3.5-turbo",
-                            style={'width': '75%'},
+                      value="gpt-3.5-turbo",
+                    style={'width': '75%', 'margin': 'auto', 'margin-bottom': '5px'},
+                    ),
+                html.Div(
+                    [
+                        html.Label("Select Temperature value"),             
+                        dcc.Slider(
+                        id="DE-temperature-slider",
+                            min=0.00,
+                            max=2,
+                            marks={0.00: '0.01', 0.01: '0.01', 0.5: '0.5', 1: '1', 1.5: '1.5', 2: '2'},
+                            step = None,
+                            value=0.5,
+                            tooltip={'placement': 'top'},
+                            ),
+                        ],
                     ),
                          ],
             style={'display': 'flex', 'flexDirection': 'column', 'align-items': 'center', 'width': '50%', 'align-self': 'center'},
             ),
             dcc.Graph(id="decoy-plot-output", style={'width': '70%', 'height': '60vh'}),
+
         ],
-        
-        style={'display': 'flex', 'flexDirection': 'row'})]
+        style={'display': 'flex', 'flexDirection': 'row'}),
+            # Display of prompt
+        html.Div(
+        id='DE-prompt',
+        style={'textAlign': 'center', 'margin': '20px', 'margin': 'auto'},
+    )]
 
 
 # Callback for decoy page
 @dash.callback(
-    Output("decoy-plot-output", "figure"),
+    [Output("decoy-plot-output", "figure"),
+     Output("DE-prompt", "children")],
     [Input("decoy-scenario-dropdown", "value"),
      Input("decoy-priming-dropdown", "value"),
      Input("decoy-reordering-dropdown", "value"),
-     Input("decoy-model-dropdown", "value")]
+     Input("decoy-model-dropdown", "value"),
+     Input("DE-temperature-slider", "value")]
      )
-def update_decoy_plot(selected_scenario, selected_priming, selected_reordering, selected_model):
-    # Pre-select dataframe (plot_results disregards reordering option)
-    df = DE_probs[DE_probs["Reorder"] == selected_reordering]
-    return plot_results(scenario = selected_scenario, priming = selected_priming, model = selected_model, df = df)
+def update_decoy_plot(selected_scenario, selected_priming, selected_reordering, selected_model, selected_temperature):
+    df = DE_probs[(DE_probs["Scenario"] == selected_scenario) & (DE_probs["Priming"] == selected_priming) &
+                   (DE_probs["Reorder"] == selected_reordering) & (DE_probs["Model"] == selected_model) & (DE_probs["Temp"] == selected_temperature)] 
+    # Grab experiment id to look up prompt
+    experiment_id = df["Experiment_id"].iloc[0]
+    prompt = DE_experiment_prompts_dict[experiment_id]
+    prompt = html.P(f"The prompt used in this experiment is: {prompt}")
+    return DE_plot_results(df), prompt 

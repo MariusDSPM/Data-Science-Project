@@ -214,10 +214,10 @@ def TU2_plot_results(place, income, model, temperature, df):
 # Also return max(price)
 
 # Prompts used in the first experiment
-with open("Output/TU_prompts.pkl", "rb") as file:
+with open("data/Input/TU_prompts.pkl", "rb") as file:
     TU_prompts = pickle.load(file)
 # Prompts used in the second experiment
-with open("Output/TU2_prompts.pkl", "rb") as file:
+with open("data/Input/TU2_prompts.pkl", "rb") as file:
     TU2_prompts = pickle.load(file)
 
 # Dictionary of prompts used in first experiment
