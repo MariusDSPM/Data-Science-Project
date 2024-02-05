@@ -16,7 +16,7 @@ PT_probs = pd.read_csv("data/Output/PT_probs.csv")
 
 # Second Prospect Theory experiment
 PT2_probs = pd.read_csv("data/Output/PT2_probs.csv")
-PT_og_results = pd.read_csv("data/Output/PT_og_results.csv")
+PT_og_results = pd.read_csv("data/Input/PT_og_results.csv")
 
 
 

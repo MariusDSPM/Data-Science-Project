@@ -43,11 +43,11 @@ layout = dbc.Container(
                                     placeholder="Will robots take over the world?",
                                 ),
                             ],
-                            style={"marginBottom": "15px"},
+                            style={"marginBottom": "15px", 'margin-top': '20px'},
                         ),
                         html.Div(
                             [
-                                html.Div("Enter instructions:"),
+                                html.Div("Enter instructions"),
                                 dbc.Textarea(
                                     id="instruction-input",
                                     size="sm",
@@ -134,14 +134,20 @@ layout = dbc.Container(
                 ),
             ]
         ),
-        dbc.Row(
-            dbc.Col(
-                html.Div(
-                    id="chatbot-output",
-                    style={'textAlign': 'center', 'margin': '20px', 'margin': 'auto'}
-                )
-            )
+    dbc.Col(
+        dbc.Card(
+            [
+                dbc.CardHeader("Response", style={'textAlign': 'left'}),
+                dbc.CardBody(
+                    html.Div(
+                        id="chatbot-output",
+                        style={'textAlign': 'center', 'margin': '20px'}
+                    )
+                ),
+            ],
+            style={'margin': '20px', 'margin': 'auto', 'margin-top': '40px'}
         )
+    )
     ],
     fluid=True
 )
@@ -163,12 +169,6 @@ layout = dbc.Container(
 
 
 def update_chatbot_output(n_clicks, text_input, instruction_input, selected_model, selected_max_tokens, selected_temperature):
-    print(f"Text input: {text_input}")
-    print(f"Instruction input: {instruction_input}")
-    print(f"Model: {selected_model}")
-    print(f"Max tokens: {selected_max_tokens}")
-    print(f"Temperature: {selected_temperature}")
-
     output = ""
     if n_clicks is not None:
         if selected_model == "llama-2-70b":
@@ -182,7 +182,8 @@ def update_chatbot_output(n_clicks, text_input, instruction_input, selected_mode
                             })
             answer = ""
             for item in response:
-                output = answer + item
+                answer += item
+            output = answer
         else: 
             response = client.chat.completions.create(
                     model = "gpt-3.5-turbo", 
