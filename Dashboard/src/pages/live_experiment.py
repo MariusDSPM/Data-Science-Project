@@ -20,16 +20,26 @@ layout = [
     html.Br(),
     html.Div(
         [
-            dbc.Input(id='input-openai-key', placeholder="OpenAI API Key", type="text"),
+            dbc.Input(
+                id='input-openai-key', 
+                placeholder="OpenAI API Key", 
+                type="password", persistence=True, 
+                persistence_type='session', 
+                style={'width': '30%'}),
             dbc.FormText("You'll need an OpenAI API key to use GPT-3.5-Turbo and GPT-4-1106-Preview. You can get one from the OpenAI website (https://platform.openai.com)."),
-        ]
+        ],
     ),
     html.Br(),
     html.Div(
         [
-            dbc.Input(id='input-repliate-key', placeholder="Replicate API Key", type="text"),
+            dbc.Input(
+                id='input-repliate-key', 
+                placeholder="Replicate API Key", 
+                type="password", persistence=True, 
+                persistence_type='session', 
+                style={'width': '30%'}),
             dbc.FormText("You'll need a Replicate API key to use Llama-2-70b. You can get one from the Replicate website (https://replicate.com)."),
-        ]
+        ],
     ),
     dcc.Store(id='user-api-keys'),
     html.Hr(),

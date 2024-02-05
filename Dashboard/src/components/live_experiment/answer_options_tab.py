@@ -190,7 +190,8 @@ def answer_option_layout():
                                 # Add a button to trigger callback
                                 dbc.Button('Run the experiment', id='individual-update-button', 
                                             n_clicks=None, style={'marginBottom': '25px', 'width': '100%'}),
-                                html.Div(id='cost-estimate')
+                                html.Div(id='cost-estimate'),
+                                dbc.Spinner(html.Div(id="loading-output", style={'textAlign': 'center'})),
                             ],
                             style={'padding': '20px', 'width': '55%', 'marginBottom': '30px'},
                         ),
@@ -298,6 +299,7 @@ def update_num_scenarios(num_scenarios, num_options, instruction):
 # Callback to run individual live experiment
 @dash.callback(
     [
+        Output("loading-output", "children"),
         Output("experiment_prompt", "children"),
         Output("graph_settings", "children")
     ],
@@ -392,8 +394,10 @@ def update_individual_experiment(n_clicks, prompts, models, iterations, temperat
                 html.Div(id="graph_groupby_container"),
             ]
         )
+        
+        loading = html.H6('The experiment finished running. Please check the results below.')
 
-        return results, graph_settings
+        return loading, results, graph_settings
     
 
 # Callback to display graph settings
@@ -549,7 +553,7 @@ def update_cost_estimate(prompts, answers, iterations, models, shuffle_checklist
     
     
     cost_estimate = html.P(f"Estimated cost for OpenAI models: {estimated_cost:.2f} USD",
-                           style={'text-align': 'center'})
+                           style={'text-align': 'center', 'marginBottom': '25px'})
     
     return [cost_estimate]
 
