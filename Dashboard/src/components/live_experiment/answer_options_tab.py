@@ -117,6 +117,10 @@ def answer_option_layout():
                                     persistence=True,
                                     persistence_type='session',
                                 ),
+                                dbc.Tooltip(
+                                    "Each scenario with the corresponding answer options will presented to the selected models",
+                                    target="num-scenarios",
+                                ),
                                 html.H6("Select number of answer options"),
                                 dbc.Input(
                                     id="num-answer-options",
@@ -128,6 +132,10 @@ def answer_option_layout():
                                     style=input_style,
                                     persistence=True,
                                     persistence_type='session',
+                                ),
+                                dbc.Tooltip(
+                                    "Choose the number of answer options (A, B, C etc.) for each scenario.",
+                                    target="num-answer-options",
                                 ),
                                 html.H6("Select number of requests"),
                                 dbc.Input(
@@ -141,6 +149,10 @@ def answer_option_layout():
                                     persistence=True,
                                     persistence_type='session',
                                 ),
+                                dbc.Tooltip(
+                                    "This is how often the LLMs will answer the questions. The more iterations, the more accurate the answer distribution will be. However, the experiment will also be more expensive.",
+                                    target="individual-iterations",
+                                ),
                                 dbc.Checklist(
                                     id="instruction-checklist",
                                     options=[
@@ -153,6 +165,10 @@ def answer_option_layout():
                                     inputStyle={'margin-right': '10px'},
                                     persistence=True,
                                     persistence_type='session',
+                                ),
+                                dbc.Tooltip(
+                                    "The instruction role is to guide the LLMs to answer the questions in a specific way. For example, to only answer with the letter of the answer options.",
+                                    target="instruction-checklist",
                                 ),
                                 html.Div(id='shuffle-checklist-container'),
                                 html.H6("Select language models"),
@@ -186,6 +202,10 @@ def answer_option_layout():
                                         ),
                                     ],
                                     style={'width': '100%', 'marginBottom': '40px'}, 
+                                ),
+                                dbc.Tooltip(
+                                    "The temperature value controls the randomness of the models' responses. A higher temperature value will result in more random answers, while a lower temperature value will result in more deterministic responses.",
+                                    target="individual-temperature",
                                 ),
                                 # Add a button to trigger callback
                                 dbc.Button('Run the experiment', id='individual-update-button', 
@@ -570,7 +590,7 @@ def update_cost_estimate(prompts, answers, iterations, models, shuffle_checklist
 )
 def update_shuffle_checklist(num_scenarios):
     if num_scenarios == 1:
-        return [dbc.Checklist(
+        return [[dbc.Checklist(
                     id="shuffle-checklist",
                     options=[
                         {"label": "Shuffle answer options", "value": "shuffle_options"}
@@ -581,6 +601,11 @@ def update_shuffle_checklist(num_scenarios):
                     switch=True,
                     persistence=True,
                     persistence_type='session',
-                )]
+                ),
+                dbc.Tooltip(
+                    "The order of the answer options will be shuffled two times. This is to determine whether the order of the answer options has an influence on the answers of the models.",
+                    target="shuffle-checklist",
+                )
+                ]]
     else:
         return [html.Div(id="shuffle-checklist")]
