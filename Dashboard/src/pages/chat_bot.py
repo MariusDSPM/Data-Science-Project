@@ -19,9 +19,6 @@ client = OpenAI()
 dash.register_page(__name__, path='/chat-bot', name='Chat Bot', location='sidebar')
 
 
-
-
-
 layout = dbc.Container(
     children=[
         html.H1("Chatbot", className="page-heading"),
