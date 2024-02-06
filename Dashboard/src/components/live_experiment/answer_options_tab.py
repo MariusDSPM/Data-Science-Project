@@ -314,12 +314,13 @@ def update_num_scenarios(num_scenarios, num_options, instruction):
         State("instruction-checklist", "value"),
         State({"type": "instruction-text", "index": ALL}, "value"),
         State("shuffle-checklist", "value"),
+        State("user-api-keys", "data")
     ],
     prevent_initial_call=True
 )
 def update_individual_experiment(n_clicks, prompts, models, iterations, temperature, 
                                  num_options, answer_values, instruction_checklist, 
-                                 instruction_text, shuffle_checklist):
+                                 instruction_text, shuffle_checklist, api_keys):
     # Check if button was clicked
     if n_clicks is not None:  
         
@@ -333,6 +334,7 @@ def update_individual_experiment(n_clicks, prompts, models, iterations, temperat
         
         # Create experiment object
         experiment = Experiment(
+            api_keys=api_keys,
             experiment_type='answer_options',
             prompts=prompts,
             answers=answer_values,
