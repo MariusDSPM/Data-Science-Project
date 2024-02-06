@@ -6,24 +6,25 @@ import plotly.graph_objects as go
 from PIL import Image
 from ast import literal_eval
 import pickle
+import os 
 
 
 dash.register_page(__name__, path='/prospect-theory', name='Prospect Theory', location='experiments')
 
 
 # Load in results and graphs of Prospect Theory experiments
-PT_probs = pd.read_csv("data/Output/PT_probs.csv")
+PT_probs = pd.read_csv("src/data/Output/PT_probs.csv")
 
 # Second Prospect Theory experiment
-PT2_probs = pd.read_csv("data/Output/PT2_probs.csv")
-PT_og_results = pd.read_csv("data/Input/PT_og_results.csv")
+PT2_probs = pd.read_csv("src/data/Output/PT2_probs.csv")
+PT_og_results = pd.read_csv("src/data/Input/PT_og_results.csv")
 
 
 
 ### Prospect Theory 1 ###
 
 # Prompts for PT experiments
-with open ("data/Input/PT_prompts.pkl", "rb") as file:
+with open ("src/data/Input/PT_prompts.pkl", "rb") as file:
     PT_prompts = pickle.load(file)
 
 
@@ -118,19 +119,19 @@ def PT_plot_results(df):
 
 ### Prospect Theory 2 ###
 # Scenario 1
-with open("data/Input/PT2_prompts_1.pkl", "rb") as file:
+with open("src/data/Input/PT2_prompts_1.pkl", "rb") as file:
     PT2_prompts_1 = pickle.load(file)
 
 # Scenario 2
-with open("data/Input/PT2_prompts_2.pkl", "rb") as file:
+with open("src/data/Input/PT2_prompts_2.pkl", "rb") as file:
     PT2_prompts_2 = pickle.load(file)
 
 # Scenario 3
-with open("data/Input/PT2_prompts_3.pkl", "rb") as file:
+with open("src/data/Input/PT2_prompts_3.pkl", "rb") as file:
     PT2_prompts_3 = pickle.load(file)
 
 # Scenario 4
-with open("data/Input/PT2_prompts_4.pkl", "rb") as file:
+with open("src/data/Input/PT2_prompts_4.pkl", "rb") as file:
     PT2_prompts_4 = pickle.load(file)
 
 # Dictionary to look up prompt for a given PT2 experiment id. key: experiment id, value: prompt
@@ -846,6 +847,7 @@ def update_prospect1(selected_priming, selected_model, selected_temperature):
     experiment_id = df["Experiment_id"].iloc[0]
     prompt = PT_experiment_prompts_dict[experiment_id]
     prompt = html.P(f"The prompt used in this experiment is: {prompt}")
+    print(os.getcwd())
     return PT_plot_results(df), prompt 
 
 # Scenario 2

@@ -14,8 +14,8 @@ dash.register_page(__name__, path='/transaction-utility', name='Transaction Util
 
 ### Setup ###
 
-TU_results = pd.read_csv('Output/TU_results.csv')
-TU_resullts2 = pd.read_csv('Output/TU2_results.csv')
+TU_results = pd.read_csv('src/data/Output/TU_results.csv')
+TU_resullts2 = pd.read_csv('src/data/Output/TU2_results.csv')
 
 
 # Function to extract the dollar amount of the answer from LLMs
@@ -214,10 +214,10 @@ def TU2_plot_results(place, income, model, temperature, df):
 # Also return max(price)
 
 # Prompts used in the first experiment
-with open("data/Input/TU_prompts.pkl", "rb") as file:
+with open("src/data/Input/TU_prompts.pkl", "rb") as file:
     TU_prompts = pickle.load(file)
 # Prompts used in the second experiment
-with open("data/Input/TU2_prompts.pkl", "rb") as file:
+with open("src/data/Input/TU2_prompts.pkl", "rb") as file:
     TU2_prompts = pickle.load(file)
 
 # Dictionary of prompts used in first experiment
