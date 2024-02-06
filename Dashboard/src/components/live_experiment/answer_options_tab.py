@@ -191,7 +191,7 @@ def answer_option_layout():
                                 dbc.Button('Run the experiment', id='individual-update-button', 
                                             n_clicks=None, style={'marginBottom': '25px', 'width': '100%'}),
                                 html.Div(id='cost-estimate'),
-                                dbc.Spinner(html.Div(id="loading-output", style={'textAlign': 'center'})),
+                                dbc.Spinner(html.Div(id="loading-output", style={'textAlign': 'center'}), color="primary"),
                             ],
                             style={'padding': '20px', 'width': '55%', 'marginBottom': '30px'},
                         ),
@@ -252,7 +252,7 @@ def update_num_scenarios(num_scenarios, num_options, instruction):
             html.Div(
                 children=[
                     html.Label(f"Scenario {i+1}:", style={'textAlign': 'center', 'font-size': '18px', 'font-weight': 'bold'}),
-                    dcc.Textarea(
+                    dbc.Textarea(
                         id={"type": "individual-prompt", "index": i},
                         value="You are a random pedestrian being chosen for a survey. The question is: Would you rather:",
                         style={'width': '100%', 'height': 100},
@@ -266,7 +266,7 @@ def update_num_scenarios(num_scenarios, num_options, instruction):
         for j in range(num_options):
             container.extend([
                 html.H6(f"Answer option {answer_option_labels[j]}:", style={'marginTop': '10px'}),
-                dcc.Textarea(
+                dbc.Textarea(
                     id={"type": "individual-answer", "index": count},
                     value=placeholder_text[j],
                     style=answer_textarea_style,
@@ -279,7 +279,7 @@ def update_num_scenarios(num_scenarios, num_options, instruction):
         if "add_instruction" in instruction:
             container.extend([
                 html.Label(f"Instruction:", style={'textAlign': 'center', 'marginTop': '20px'}),
-                dcc.Textarea(
+                dbc.Textarea(
                     id={"type": "instruction-text", "index": i},
                     value='Only answer with the letter of the alternative you would choose without any reasoning.',
                     style=answer_textarea_style, 
