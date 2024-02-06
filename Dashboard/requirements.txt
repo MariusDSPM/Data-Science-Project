@@ -1,0 +1,14 @@
+dash==2.14.2
+dash_bootstrap_components==1.5.0
+dash_core_components==2.0.0
+dash_html_components==2.0.0
+matplotlib==3.8.2
+numpy==1.26.3
+openai==1.11.0
+pandas==2.2.0
+Pillow==10.2.0
+plotly==5.18.0
+replicate==0.22.0
+tqdm==4.66.1
+gunicorn
+dash-tools
