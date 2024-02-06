@@ -134,20 +134,21 @@ layout = dbc.Container(
                 ),
             ]
         ),
-    dbc.Col(
-        dbc.Card(
-            [
-                dbc.CardHeader("Response", style={'textAlign': 'left'}),
-                dbc.CardBody(
-                    html.Div(
-                        id="chatbot-output",
-                        style={'textAlign': 'center', 'margin': '20px'}
-                    )
-                ),
-            ],
-            style={'margin': '20px', 'margin': 'auto', 'margin-top': '40px'}
-        )
+    dbc.Card(
+        [
+            dbc.CardHeader("Response", style={'textAlign': 'left'}),
+            dbc.CardBody(
+                html.Div(
+                        dcc.Loading(
+                            children = [html.Div(id="chatbot-output")],
+                    style={'textAlign': 'center', 'margin': '20px'}
+                )
+            ),
+            )
+        ],
+        style={'margin': '20px', 'margin': 'auto', 'margin-top': '40px'}
     )
+
     ],
     fluid=True
 )
@@ -169,6 +170,7 @@ layout = dbc.Container(
 
 
 def update_chatbot_output(n_clicks, text_input, instruction_input, selected_model, selected_max_tokens, selected_temperature):
+
     output = ""
     if n_clicks is not None:
         if selected_model == "llama-2-70b":
@@ -194,6 +196,6 @@ def update_chatbot_output(n_clicks, text_input, instruction_input, selected_mode
                     {"role": "user", "content": f"{text_input}"},
                         ])
             output = response.choices[0].message.content
-        n_clicks = None
-    return output
         
+    return output
+
