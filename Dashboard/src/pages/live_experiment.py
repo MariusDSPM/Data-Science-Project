@@ -2,8 +2,6 @@
 import dash
 import dash_bootstrap_components as dbc
 from dash import Input, Output, ALL, dcc, html
-from replicate.client import Client
-from openai import OpenAI
 
 # Local imports
 from components.live_experiment.answer_options_tab import answer_option_layout

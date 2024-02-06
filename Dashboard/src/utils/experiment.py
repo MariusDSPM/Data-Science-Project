@@ -1,14 +1,10 @@
 # Import required libraries 
 import numpy as np
 import pandas as pd
-import plotly.graph_objects as go
 import random
 import time
 from openai import OpenAI
-import openai
-import replicate
 from replicate.client import Client
-import os
 
 class Experiment:
     
