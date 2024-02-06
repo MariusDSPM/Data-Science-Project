@@ -190,7 +190,8 @@ def answer_option_layout():
                                 # Add a button to trigger callback
                                 dbc.Button('Run the experiment', id='individual-update-button', 
                                             n_clicks=None, style={'marginBottom': '25px', 'width': '100%'}),
-                                html.Div(id='cost-estimate')
+                                html.Div(id='cost-estimate'),
+                                dbc.Spinner(html.Div(id="loading-output", style={'textAlign': 'center'})),
                             ],
                             style={'padding': '20px', 'width': '55%', 'marginBottom': '30px'},
                         ),
@@ -203,8 +204,6 @@ def answer_option_layout():
         html.Hr(),
         # Additional text section
         html.Div(id='experiment_prompt'),
-        html.Div(id="download-dataframe-csv-container"),
-        dcc.Download(id="download-dataframe-csv"),
         html.Div(
             style={'display': 'flex'},
             children=[
@@ -298,6 +297,7 @@ def update_num_scenarios(num_scenarios, num_options, instruction):
 # Callback to run individual live experiment
 @dash.callback(
     [
+        Output("loading-output", "children"),
         Output("experiment_prompt", "children"),
         Output("graph_settings", "children")
     ],
@@ -314,12 +314,13 @@ def update_num_scenarios(num_scenarios, num_options, instruction):
         State("instruction-checklist", "value"),
         State({"type": "instruction-text", "index": ALL}, "value"),
         State("shuffle-checklist", "value"),
+        State("user-api-keys", "data")
     ],
     prevent_initial_call=True
 )
 def update_individual_experiment(n_clicks, prompts, models, iterations, temperature, 
                                  num_options, answer_values, instruction_checklist, 
-                                 instruction_text, shuffle_checklist):
+                                 instruction_text, shuffle_checklist, api_keys):
     # Check if button was clicked
     if n_clicks is not None:  
         
@@ -333,6 +334,7 @@ def update_individual_experiment(n_clicks, prompts, models, iterations, temperat
         
         # Create experiment object
         experiment = Experiment(
+            api_keys=api_keys,
             experiment_type='answer_options',
             prompts=prompts,
             answers=answer_values,
@@ -355,7 +357,8 @@ def update_individual_experiment(n_clicks, prompts, models, iterations, temperat
             id='output-table',
             columns=[{'name': col, 'id': col} for col in experiment.results_df.columns],
             data=experiment.results_df.to_dict('records'),
-            style_table={'margin-top': '50px', 'margin-bottom': '30px'},
+            style_table={'margin-top': '10px', 'margin-bottom': '30px'},
+            export_format='csv'
         )
 
         results = (
@@ -368,8 +371,8 @@ def update_individual_experiment(n_clicks, prompts, models, iterations, temperat
                 )
                 for i, experiment_prompt in enumerate(experiment.experiment_prompts)
             ] +
-            [output_table] +
-            [html.Button("Download CSV", id="btn_csv")]
+            [html.Br()] +
+            [output_table]
         )
         
         graph_settings = html.Div(
@@ -392,8 +395,10 @@ def update_individual_experiment(n_clicks, prompts, models, iterations, temperat
                 html.Div(id="graph_groupby_container"),
             ]
         )
+        
+        loading = html.H6('The experiment finished running. Please check the results below.')
 
-        return results, graph_settings
+        return loading, results, graph_settings
     
 
 # Callback to display graph settings
@@ -549,7 +554,7 @@ def update_cost_estimate(prompts, answers, iterations, models, shuffle_checklist
     
     
     cost_estimate = html.P(f"Estimated cost for OpenAI models: {estimated_cost:.2f} USD",
-                           style={'text-align': 'center'})
+                           style={'text-align': 'center', 'marginBottom': '25px'})
     
     return [cost_estimate]
 

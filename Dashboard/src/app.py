@@ -7,7 +7,7 @@ from dash import html
 # Initialize the app
 app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP],
                 use_pages=True)
-
+server = app.server
 
 # Optics of sidebar
 SIDEBAR_STYLE = {

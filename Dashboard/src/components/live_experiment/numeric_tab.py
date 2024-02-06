@@ -99,9 +99,10 @@ def numeric_layout():
                                     style={'width': '100%', 'marginBottom': '40px'}, 
                                 ),
                                 # Add a button to trigger callback
-                                html.Button('Run the experiment', id='individual-update-button-numeric', 
+                               dbc.Button('Run the experiment', id='individual-update-button-numeric', 
                                             n_clicks=None, style={'marginBottom': '25px', 'width': '100%'}),
-                                html.Div(id='cost-estimate-numeric')
+                                html.Div(id='cost-estimate-numeric'),
+                                dbc.Spinner(html.Div(id="loading-output-numeric", style={'textAlign': 'center'})),
                             ],
                             style={'padding': '20px', 'width': '55%', 'marginBottom': '30px'},
                         ),
@@ -113,9 +114,7 @@ def numeric_layout():
         ),  
         html.Hr(),
         # Additional text section
-        html.Div(id='experiment_prompt-numeric'),
-        html.Div(id="download-dataframe-csv-container-numeric"),
-        dcc.Download(id="download-dataframe-csv-numeric"),
+        html.Div(id='experiment-prompt-numeric'),
         html.Div(
             style={'display': 'flex'},
             children=[
@@ -192,7 +191,8 @@ def update_num_scenarios(num_scenarios, instruction):
 # Callback to run individual live experiment
 @dash.callback(
     [
-        Output("experiment_prompt-numeric", "children"),
+        Output("loading-output-numeric", "children"),
+        Output("experiment-prompt-numeric", "children"),
         Output("experiment-data-numeric", "data")
     ],
     [
@@ -205,16 +205,18 @@ def update_num_scenarios(num_scenarios, instruction):
         State("individual-temperature-numeric", "value"),
         State("instruction-checklist-numeric", "value"),
         State({"type": "instruction-text-numeric", "index": ALL}, "value"),
+        State("user-api-keys", "data")
     ],
     prevent_initial_call=True
 )
 def update_individual_experiment(n_clicks, prompts, models, iterations, temperature, 
-                                 instruction_checklist, instruction_text):
+                                 instruction_checklist, instruction_text, api_keys):
     # Check if button was clicked
     if n_clicks is not None:  
         
         # Create experiment object
         experiment = Experiment(
+            api_keys=api_keys,
             experiment_type='numeric',
             prompts=prompts,
             answers=None,
@@ -236,16 +238,19 @@ def update_individual_experiment(n_clicks, prompts, models, iterations, temperat
             id='output-table',
             columns=[{'name': col, 'id': col} for col in experiment.results_df.columns],
             data=experiment.results_df.to_dict('records'),
-            style_table={'margin-top': '50px', 'margin-bottom': '30px'},
+            style_table={'margin-top': '10px', 'margin-bottom': '30px'},
+            export_format='csv'
         )
 
         results = (
             [html.H2("Results:", style={'margin-top': '50px', 'margin-bottom': '30px'})] +
-            [output_table] +
-            [html.Button("Download CSV", id="btn_csv")]
+            [html.Br()] +
+            [output_table]
         )
+        
+        loading = html.H6('The experiment finished running. Please check the results below.')
 
-        return [results, experiment.model_answers_dict]
+        return [loading, results, experiment.model_answers_dict]
     
     
 @dash.callback(
@@ -256,9 +261,41 @@ def update_individual_experiment(n_clicks, prompts, models, iterations, temperat
         Input("experiment-data-numeric", "data"),
     ]
 )
-def test(data):
+def plot_results(data):
     df = pd.DataFrame(data)
     
     figure = plot_results_numeric(df)
     
     return [figure]
+
+
+# Callback for cost estimate
+@dash.callback(
+    [
+        Output("cost-estimate-numeric", "children"),
+    ],
+    [
+        Input({"type": "individual-prompt-numeric", "index": ALL}, "value"),
+        Input("individual-iterations-numeric", "value"),
+        Input("individual-model-checklist-numeric", "value"),
+    ]
+)
+def update_cost_estimate(prompts, iterations, models):
+    # Function to count words in a list of sentences
+    def count_words(sentences_list):
+        word_count = sum(len(sentence.split()) for sentence in sentences_list)
+        return word_count
+    
+    total_tokens = count_words(prompts) * iterations
+    
+    estimated_cost = 0
+    if "gpt-3.5-turbo" in models:
+        estimated_cost += 0.001 * (total_tokens / 1000) + 0.002 * (5/1000)
+    if "gpt-4-1106-preview" in models:
+        estimated_cost += 0.01 * (total_tokens / 1000) + 0.03 * (5/1000)
+    
+    
+    cost_estimate = html.P(f"Estimated cost for OpenAI models: {estimated_cost:.2f} USD",
+                           style={'text-align': 'center', 'marginBottom': '25px'})
+    
+    return [cost_estimate]

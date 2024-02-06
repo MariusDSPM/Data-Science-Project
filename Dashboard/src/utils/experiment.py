@@ -1,21 +1,10 @@
 # Import required libraries 
 import numpy as np
 import pandas as pd
-import plotly.graph_objects as go
 import random
 import time
 from openai import OpenAI
-import openai
-import replicate
-import os
-
-
-# Get openAI API key (previously saved as environmental variable)
-openai.api_key = os.environ["OPENAI_API_KEY"]
-
-# Set client
-client = OpenAI()
-
+from replicate.client import Client
 
 class Experiment:
     
@@ -24,8 +13,9 @@ class Experiment:
     LLAMA_DELAY = 1/50
     ANSWER_OPTION_LABELS = ['A', 'B', 'C', 'D', 'E', 'F']
     
-    def __init__(self, experiment_type, prompts, models, iterations, temperature, num_options, 
+    def __init__(self, api_keys, experiment_type, prompts, models, iterations, temperature, num_options, 
                  answers, instruction_checklist, instructions, shuffle_option=False):
+        self.api_keys = api_keys
         self.experiment_type = experiment_type
         self.prompts = prompts
         self.models = models
@@ -36,6 +26,8 @@ class Experiment:
         self.instruction_checklist = instruction_checklist
         self.instructions = instructions
         self.shuffle_options = shuffle_option
+        self.replicate = None
+        self.client = None
         self.max_tokens_openai = 1
         self.max_tokens_llama = 2
         self.model_answers_dict = {}
@@ -44,6 +36,8 @@ class Experiment:
         self.experiment_prompts = []
         
     def run(self):
+        
+        self.set_api_keys()
         
         if self.experiment_type == 'answer_options':
             if self.shuffle_options:
@@ -62,9 +56,9 @@ class Experiment:
         for model in self.models:
             for i, (prompt, instruction) in enumerate(zip(self.experiment_prompts, self.instructions)):
                 if model == 'llama-2-70b':
-                    self.model_answers = self.run_experiment_with_llama(model, prompt, instruction, self.max_tokens_llama)
+                    self.model_answers = self.run_experiment_with_llama(model, prompt, instruction)
                 else:
-                    self.model_answers = self.run_experiment_with_openai(model, prompt, instruction, self.max_tokens_openai)
+                    self.model_answers = self.run_experiment_with_openai(model, prompt, instruction)
                 
                 # Store answers of corresponding model and scenario in a dictionary (for control purposes)
                 # self.model_answers_dict[f'{model} - {i}'] = self.model_answers
@@ -89,12 +83,17 @@ class Experiment:
                 results_list.append(result_dict)
             
         self.results_df = pd.DataFrame(results_list)
+        
+        
+    def set_api_keys(self):
+        self.client = OpenAI(api_key=self.api_keys['openai'])
+        self.replicate = Client(api_token=self.api_keys['replicate'])
                 
                 
-    def run_experiment_with_openai(self, model, prompt, instruction, max_tokens=1):
+    def run_experiment_with_openai(self, model, prompt, instruction):
         answers = []
         for i in range(self.iterations):
-            response = self.openai_api_call(model, prompt, instruction, max_tokens)
+            response = self.openai_api_call(model, prompt, instruction)
 
             # Store the answer in the list
             answer = response.choices[0].message.content
@@ -109,11 +108,11 @@ class Experiment:
         return answers
     
     
-    def run_experiment_with_llama(self, model, prompt, instruction, max_tokens=2):
+    def run_experiment_with_llama(self, model, prompt, instruction):
         model = 'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3'
         answers = []
         for i in range(self.iterations):
-            response = self.replicate_api_call(model, prompt, instruction, max_tokens)
+            response = self.replicate_api_call(model, prompt, instruction)
 
             # Store the answer in the list
             answer = ''
@@ -209,28 +208,28 @@ class Experiment:
         return result_dict
         
             
-    def openai_api_call(self, model, prompt, instruction, max_tokens):
-        response = client.chat.completions.create(
+    def openai_api_call(self, model, prompt, instruction):
+        response = self.client.chat.completions.create(
                 model=model,  
                 messages=[
                     {"role": "system", "content": instruction},
 
                     {"role": "user", "content": prompt}
                 ],
-                max_tokens=max_tokens,
+                max_tokens=self.max_tokens_openai,
                 temperature=self.temperature
             )
         
         return response
     
     
-    def replicate_api_call(self, model, prompt, instruction, max_tokens):
-        response = replicate.run(model,
+    def replicate_api_call(self, model, prompt, instruction):
+        response = self.replicate.run(model,
                                  input = {
                                      "temperature": self.temperature,
                                      "system_prompt": instruction,
                                      "prompt": prompt,
-                                     "max_new_tokens": max_tokens}
+                                     "max_new_tokens": self.max_tokens_llama}
                                  )
         
         return response
