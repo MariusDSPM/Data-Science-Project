@@ -1,115 +1,31 @@
-# Import required libraries 
+### Decoy Effect ###
+
+# Required imports
 import pandas as pd
 import dash
 from dash import Input, Output, dcc, html
 import plotly.graph_objects as go
 import pickle
 from ast import literal_eval
+from utils.plotting_functions import DE_plot_results
 
 
 dash.register_page(__name__, path='/decoy-effect', name='Decoy Effect', location='experiments')
 
 
-### Decoy Effect ###
 
 # Load Decoy Effect experiment results
-DE_probs = pd.read_csv("src/data/Output/DE_probs.csv")
+DE_probs = pd.read_csv("Dashboard/src/data/Output/DE_probs.csv")
 
-# Prompts for Decoy Effect experiments
-with open ("src/data/Input/DE_prompts.pkl", "rb") as file:
+# Load Decoy Effect prompts
+with open ("Dashboard/src/data/Input/DE_prompts.pkl", "rb") as file:
     DE_prompts = pickle.load(file)
 
-# Dictionary that returns the prompt for a given experiment
-DE_experiment_prompts_dict = {
-    "DE_1_1": DE_prompts[0],
-    "DE_1_2": DE_prompts[1],
-    "DE_1_3": DE_prompts[2],
-    "DE_1_4": DE_prompts[3],
-    "DE_1_5": DE_prompts[4],
-    "DE_1_6": DE_prompts[5],
-    "DE_1_7": DE_prompts[6],
-    "DE_1_8": DE_prompts[7],
-    "DE_2_1": DE_prompts[0],
-    "DE_2_2": DE_prompts[1],
-    "DE_2_3": DE_prompts[2],
-    "DE_2_4": DE_prompts[3],
-    "DE_2_5": DE_prompts[4],
-    "DE_2_6": DE_prompts[5],
-    "DE_2_7": DE_prompts[6],
-    "DE_2_8": DE_prompts[7],
-    "DE_3_1": DE_prompts[0],
-    "DE_3_2": DE_prompts[1],
-    "DE_3_3": DE_prompts[2],
-    "DE_3_4": DE_prompts[3],
-    "DE_3_5": DE_prompts[4],
-    "DE_3_6": DE_prompts[5],
-    "DE_3_7": DE_prompts[6],
-    "DE_3_8": DE_prompts[7],
-}
+# Load Decoy Effect prompt dictionary
+with open ("Dashboard/src/data/Input/DE_dictionaries.pkl", "rb") as file:
+    DE_dictionaries = pickle.load(file)
+DE_experiment_prompts_dict = DE_dictionaries[0]
 
-
-
-# Function for plotting results of decoy effect/prospect theory experiments
-def DE_plot_results(df):
-
-    # Transpose for plotting
-    df = df.transpose()  
-    # Get language model name
-    model = df.loc["Model"].iloc[0]
-    # Get temperature value
-    temperature = df.loc["Temp"].iloc[0]
-    # Get number of observations per temperature value
-    n_observations = df.loc["Obs."].iloc[0]
-    # Get original answer probabilities
-    og_answers = df.loc["Original"].apply(literal_eval).iloc[0]
-    # Get number of original answers
-    n_original = df.loc["Original_count"].iloc[0]
-
-    fig = go.Figure(data=[
-        go.Bar(
-            name = "Model answers",
-            x = ["p(A)", "p(B)", "p(C)"],
-            y = [df.loc["p(A)"].iloc[0], df.loc["p(B)"].iloc[0], df.loc["p(C)"].iloc[0]],
-            customdata = [n_observations, n_observations, n_observations], 
-            hovertemplate = "Percentage: %{y:.2f}%<br>Number of observations: %{customdata}<extra></extra>",
-            marker_color = "rgb(55, 83, 109)"
-        ),
-        go.Bar(
-            name = "Original answers",
-            x = ["p(A)","p(B)", "p(C)"],
-            y = [og_answers[0], og_answers[1], og_answers[2]],
-            customdata = [n_original, n_original, n_original],
-            hovertemplate = "Percentage: %{y:.2f}%<br>Number of observations: %{customdata}<extra></extra>",
-            marker_color = "rgb(26, 118, 255)"
-        )
-    ])
-
-    fig.update_layout(
-    barmode = 'group',
-    xaxis = dict(
-        title = "Answer options",  
-        title_font=dict(size=18),  
-    ),
-    yaxis = dict(
-        title="Probability (%)",  
-        title_font=dict(size=18), 
-    ),
-    title = dict(
-        text=f"Distribution of answers for temperature {temperature}, using model {model}",
-        x = 0.5, # Center alignment horizontally
-        y = 0.87,  # Vertical alignment
-        font=dict(size=22),  
-    ),
-    legend=dict(
-        x=1.01,  
-        y=0.9,
-        font=dict(family='Arial', size=12, color='black'),
-        bordercolor='black',  
-        borderwidth=2,  
-    ),
-    bargap = 0.3  # Gap between temperature values
-)
-    return fig
 
 
 # Layout
@@ -232,6 +148,7 @@ layout = [
      Input("DE-temperature-slider", "value")]
      )
 def update_decoy_plot(selected_scenario, selected_priming, selected_reordering, selected_model, selected_temperature):
+    # Filter dataframe
     df = DE_probs[(DE_probs["Scenario"] == selected_scenario) & (DE_probs["Priming"] == selected_priming) &
                    (DE_probs["Reorder"] == selected_reordering) & (DE_probs["Model"] == selected_model) & (DE_probs["Temp"] == selected_temperature)] 
     # Grab experiment id to look up prompt

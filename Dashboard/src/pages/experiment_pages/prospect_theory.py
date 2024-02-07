@@ -7,327 +7,59 @@ from PIL import Image
 from ast import literal_eval
 import pickle
 import os 
+from utils.plotting_functions import PT_plot_results
+from utils.plotting_functions import PT2_plot_results
+from utils.plotting_functions import PT_plot_og_results
 
 
 dash.register_page(__name__, path='/prospect-theory', name='Prospect Theory', location='experiments')
 
 
 # Load in results and graphs of Prospect Theory experiments
-PT_probs = pd.read_csv("src/data/Output/PT_probs.csv")
+PT_probs = pd.read_csv("Dashboard/src/data/Output/PT_probs.csv")
 
 # Second Prospect Theory experiment
-PT2_probs = pd.read_csv("src/data/Output/PT2_probs.csv")
-PT_og_results = pd.read_csv("src/data/Input/PT_og_results.csv")
+PT2_probs = pd.read_csv("Dashboard/src/data/Output/PT2_probs.csv")
+PT_og_results = pd.read_csv("Dashboard/src/data/Input/PT_og_results.csv")
 
 
 
 ### Prospect Theory 1 ###
 
 # Prompts for PT experiments
-with open ("src/data/Input/PT_prompts.pkl", "rb") as file:
+with open ("Dashboard/src/data/Input/PT_prompts.pkl", "rb") as file:
     PT_prompts = pickle.load(file)
 
 
-# Dictionary to look up prompt for a given PT experiment id. key: experiment_id, value: prompt
-PT_experiment_prompts_dict = {
-    "PT_1_1": PT_prompts[0],
-    "PT_1_2": PT_prompts[1],
-    "PT_1_3": PT_prompts[2],
-    "PT_1_4": PT_prompts[3],
-    "PT_1_5": PT_prompts[4],
-    "PT_1_6": PT_prompts[5],
-    "PT_1_7": PT_prompts[6],
-    "PT_1_8": PT_prompts[7],
-    "PT_2_1": PT_prompts[0],
-    "PT_2_2": PT_prompts[1],
-    "PT_2_3": PT_prompts[2],
-    "PT_2_4": PT_prompts[3],
-    "PT_2_5": PT_prompts[4],
-    "PT_2_6": PT_prompts[5],
-    "PT_2_7": PT_prompts[6],
-    "PT_2_8": PT_prompts[7],
-    "PT_3_1": PT_prompts[0],
-    "PT_3_2": PT_prompts[1],
-    "PT_3_3": PT_prompts[2],
-    "PT_3_4": PT_prompts[3],
-    "PT_3_5": PT_prompts[4],
-    "PT_3_6": PT_prompts[5],
-    "PT_3_7": PT_prompts[6],
-    "PT_3_8": PT_prompts[7],
-}
+# Load PT prompt dictionary
+with open ("Dashboard/src/data/Input/PT_dictionaries.pkl", "rb") as file:
+    PT_dictionaries = pickle.load(file)
+PT_experiment_prompts_dict = PT_dictionaries[0]
 
-# Function to plot results of PT experiments
-def PT_plot_results(df):
-
-    # Transpose for plotting
-    df = df.transpose()  
-    # Get language model name
-    model = df.loc["Model"].iloc[0]
-    # Get temperature value
-    temperature = df.loc["Temp"].iloc[0]
-    # Get number of observations per temperature value
-    n_observations = df.loc["Obs."].iloc[0]
-    # Get original answer probabilities
-    og_answers = df.loc["Original"].apply(literal_eval).iloc[0]
-    # Get number of original answers
-    n_original = df.loc["Original_count"].iloc[0]
-
-    fig = go.Figure(data=[
-        go.Bar(
-            name = "Model answers",
-            x = ["p(A)", "p(B)", "p(C)"],
-            y = [df.loc["p(A)"].iloc[0], df.loc["p(B)"].iloc[0], df.loc["p(C)"].iloc[0]],
-            customdata = [n_observations, n_observations, n_observations], 
-            hovertemplate = "Percentage: %{y:.2f}%<br>Number of observations: %{customdata}<extra></extra>",
-            marker_color = "rgb(55, 83, 109)"
-        ),
-        go.Bar(
-            name = "Original answers",
-            x = ["p(A)","p(B)", "p(C)"],
-            y = [og_answers[0], og_answers[1], og_answers[2]],
-            customdata = [n_original, n_original, n_original],
-            hovertemplate = "Percentage: %{y:.2f}%<br>Number of observations: %{customdata}<extra></extra>",
-            marker_color = "rgb(26, 118, 255)"
-        )
-    ])
-
-    fig.update_layout(
-    barmode = 'group',
-    xaxis = dict(
-        title = "Answer options",  
-        title_font=dict(size=18),  
-    ),
-    yaxis = dict(
-        title="Probability (%)",  
-        title_font=dict(size=18), 
-    ),
-    title = dict(
-        text=f"Distribution of answers for temperature {temperature}, using model {model}",
-        x = 0.5, # Center alignment horizontally
-        y = 0.87,  # Vertical alignment
-        font=dict(size=22),  
-    ),
-    legend=dict(
-        x=1.01,  
-        y=0.9,
-        font=dict(family='Arial', size=12, color='black'),
-        bordercolor='black', 
-        borderwidth=2,  
-    ),
-)
-    return fig
 
 ### Prospect Theory 2 ###
+
 # Scenario 1
-with open("src/data/Input/PT2_prompts_1.pkl", "rb") as file:
+with open("Dashboard/src/data/Input/PT2_prompts_1.pkl", "rb") as file:
     PT2_prompts_1 = pickle.load(file)
 
 # Scenario 2
-with open("src/data/Input/PT2_prompts_2.pkl", "rb") as file:
+with open("Dashboard/src/data/Input/PT2_prompts_2.pkl", "rb") as file:
     PT2_prompts_2 = pickle.load(file)
 
 # Scenario 3
-with open("src/data/Input/PT2_prompts_3.pkl", "rb") as file:
+with open("Dashboard/src/data/Input/PT2_prompts_3.pkl", "rb") as file:
     PT2_prompts_3 = pickle.load(file)
 
 # Scenario 4
-with open("src/data/Input/PT2_prompts_4.pkl", "rb") as file:
+with open("Dashboard/src/data/Input/PT2_prompts_4.pkl", "rb") as file:
     PT2_prompts_4 = pickle.load(file)
 
-# Dictionary to look up prompt for a given PT2 experiment id. key: experiment id, value: prompt
-PT2_experiment_prompts_dict = {
-    "PT2_1_1_1": PT2_prompts_1[0],
-    "PT2_1_1_2": PT2_prompts_1[1],
-    "PT2_1_1_3": PT2_prompts_1[2],
-    "PT2_1_1_4": PT2_prompts_1[3],
-    "PT2_1_1_5": PT2_prompts_1[4],
-    "PT2_1_1_6": PT2_prompts_1[5],
-    "PT2_2_1_1": PT2_prompts_2[0],
-    "PT2_2_1_2": PT2_prompts_2[1],
-    "PT2_2_1_3": PT2_prompts_2[2],
-    "PT2_2_1_4": PT2_prompts_2[3],
-    "PT2_2_1_5": PT2_prompts_2[4],
-    "PT2_2_1_6": PT2_prompts_2[5],
-    "PT2_3_1_1": PT2_prompts_3[0],
-    "PT2_3_1_2": PT2_prompts_3[1],
-    "PT2_3_1_3": PT2_prompts_3[2],
-    "PT2_3_1_4": PT2_prompts_3[3],
-    "PT2_3_1_5": PT2_prompts_3[4],
-    "PT2_3_1_6": PT2_prompts_3[5],
-    "PT2_4_1_1": PT2_prompts_4[0],
-    "PT2_4_1_2": PT2_prompts_4[1],
-    "PT2_4_1_3": PT2_prompts_4[2],
-    "PT2_4_1_4": PT2_prompts_4[3],
-    "PT2_4_1_5": PT2_prompts_4[4],
-    "PT2_4_1_6": PT2_prompts_4[5],
-    "PT2_1_2_1": PT2_prompts_1[0],
-    "PT2_1_2_2": PT2_prompts_1[1],
-    "PT2_1_2_3": PT2_prompts_1[2],
-    "PT2_1_2_4": PT2_prompts_1[3],
-    "PT2_1_2_5": PT2_prompts_1[4],
-    "PT2_1_2_6": PT2_prompts_1[5],
-    "PT2_2_2_1": PT2_prompts_2[0],
-    "PT2_2_2_2": PT2_prompts_2[1],
-    "PT2_2_2_3": PT2_prompts_2[2],
-    "PT2_2_2_4": PT2_prompts_2[3],
-    "PT2_2_2_5": PT2_prompts_2[4],
-    "PT2_2_2_6": PT2_prompts_2[5],
-    "PT2_3_2_1": PT2_prompts_3[0],
-    "PT2_3_2_2": PT2_prompts_3[1],
-    "PT2_3_2_3": PT2_prompts_3[2],
-    "PT2_3_2_4": PT2_prompts_3[3],
-    "PT2_3_2_5": PT2_prompts_3[4],
-    "PT2_3_2_6": PT2_prompts_3[5],
-    "PT2_4_2_1": PT2_prompts_4[0],
-    "PT2_4_2_2": PT2_prompts_4[1],
-    "PT2_4_2_3": PT2_prompts_4[2],
-    "PT2_4_2_4": PT2_prompts_4[3],
-    "PT2_4_2_5": PT2_prompts_4[4],
-    "PT2_4_2_6": PT2_prompts_4[5],
-    "PT2_1_3_1": PT2_prompts_1[0],
-    "PT2_1_3_2": PT2_prompts_1[1],
-    "PT2_1_3_3": PT2_prompts_1[2],
-    "PT2_1_3_4": PT2_prompts_1[3],
-    "PT2_1_3_5": PT2_prompts_1[4],
-    "PT2_1_3_6": PT2_prompts_1[5],
-    "PT2_2_3_1": PT2_prompts_2[0],
-    "PT2_2_3_2": PT2_prompts_2[1],
-    "PT2_2_3_3": PT2_prompts_2[2],
-    "PT2_2_3_4": PT2_prompts_2[3],
-    "PT2_2_3_5": PT2_prompts_2[4],
-    "PT2_2_3_6": PT2_prompts_2[5],
-    "PT2_3_3_1": PT2_prompts_3[0],
-    "PT2_3_3_2": PT2_prompts_3[1],
-    "PT2_3_3_3": PT2_prompts_3[2],
-    "PT2_3_3_4": PT2_prompts_3[3],
-    "PT2_3_3_5": PT2_prompts_3[4],
-    "PT2_3_3_6": PT2_prompts_3[5],
-    "PT2_4_3_1": PT2_prompts_4[0],
-    "PT2_4_3_2": PT2_prompts_4[1],
-    "PT2_4_3_3": PT2_prompts_4[2],
-    "PT2_4_3_4": PT2_prompts_4[3],
-    "PT2_4_3_5": PT2_prompts_4[4],
-    "PT2_4_3_6": PT2_prompts_4[5],
-}
+# Load PT2 prompt dictionary
+with open("Dashboard/src/data/Input/PT2_dictionaries.pkl", "rb") as file:
+    PT2_dictionaries = pickle.load(file)
+PT2_experiment_prompts_dict = PT2_dictionaries[0]
 
-# Function to plot results of PT2 experiments (no ground truth present)
-def PT2_plot_results(df):
-    # Grab experiment id
-    experiment_id = df["Experiment_id"].iloc[0]
-    # Transpose for plotting
-    df = df.transpose()  
-    # Get language model name
-    model = df.loc["Model"].iloc[0]
-    # Get temperature value
-    temperature = df.loc["Temp"].iloc[0]
-    # Get number of observations per temperature value
-    n_observations = df.loc["Obs."].iloc[0]
-
-    fig = go.Figure(data=[
-        go.Bar(
-            name = "Model answers",
-            x = ["p(A)", "p(B)", "p(C)"],
-            y = [df.loc["p(A)"].iloc[0], df.loc["p(B)"].iloc[0], df.loc["p(C)"].iloc[0]],
-            customdata = [n_observations, n_observations, n_observations], 
-            hovertemplate = "Percentage: %{y:.2f}%<br>Number of observations: %{customdata}<extra></extra>",
-            marker_color = "rgb(55, 83, 109)",
-            showlegend = True,
-        ),
-    ])
-
-    fig.update_layout(
-    xaxis = dict(
-        title = "Answer options",  
-        title_font=dict(size=18),  
-    ),
-    yaxis = dict(
-        title="Probability (%)",  
-        title_font=dict(size=18), 
-    ),
-    title = dict(
-        text=f"Distribution of answers for temperature {temperature}, using model {model}",
-        x = 0.5, # Center alignment horizontally
-        y = 0.87,  # Vertical alignment
-        font=dict(size=22),  
-    ),
-    legend=dict(
-        x=1.01,  
-        y=0.9,
-        font=dict(family='Arial', size=12, color='black'),
-        bordercolor='black', 
-        borderwidth=2,  
-        
-    ),
-)
-    return fig
-
-# Function to plot original results with hovertemplate
-def PT_plot_og_results(df):
-    n_original = df["Obs."]  # number of answer options 
-    fig = go.Figure(data=[
-        go.Bar(
-                name = "p(A)",
-                x = [0.1, 0.3, 0.5, 0.7],
-                y = [df["p(A)"][0], df["p(A)"][1], df["p(A)"][2], df["p(A)"][3]],
-                customdata = n_original,
-                hovertemplate = "Percentage: %{y:.2f}%<br>Number of observations: %{customdata}<extra></extra>",
-                marker_color="black",
-            ),
-        go.Bar(
-                name = "p(B)",
-                x = [0.15, 0.35, 0.55, 0.75],
-                y = [df["p(B)"][0], df["p(B)"][1], df["p(B)"][2], df["p(B)"][3]],
-                customdata = n_original,
-                hovertemplate = "Percentage: %{y:.2f}%<br>Number of observations: %{customdata}<extra></extra>",
-                marker_color="rgb(55, 83, 109)",
-
-            ),
-        go.Bar(
-                name = "p(C)",
-                x = [0.2, 0.4, 0.6, 0.8],
-                y = [df["p(C)"][0], df["p(C)"][1], df["p(C)"][2], df["p(C)"][3]],
-                customdata = n_original,
-                hovertemplate = "Percentage: %{y:.2f}%<br>Number of observations: %{customdata}<extra></extra>",
-                marker_color="rgb(26, 118, 255)",
-        )
-    ])
-  
-
-    fig.update_layout(
-    barmode = 'group',
-    xaxis = dict(
-        title = "Scenarios",  
-        title_font=dict(size=18),
-        tickfont=dict(size=16),  
-    ),
-    yaxis = dict(
-        title="Probability (%)",  
-        title_font=dict(size=18), 
-    ),
-    title = dict(
-        text=f"Distribution of original answers per scenario",
-        x = 0.5, 
-        y = 0.87,  
-        font=dict(size=22),  
-    ),
-    width = 1000,
-    margin=dict(t=100),
-    legend=dict(
-        x=1.01,  
-        y=0.9,
-        font=dict(family='Arial', size=12, color='black'),
-        bordercolor='black', 
-        borderwidth=2,  
-    ),
-    
-)
-    # Adjust x-axis labels to show 30+ to symbolize aggregation
-    fig.update_xaxes(
-    tickvals =[0.15, 0.35, 0.55, 0.75],
-    ticktext=["Scenario 1", "Scenario 2", "Scenario 3", "Scenario 4"],
-)
-    return fig
-    
 
 # Prospect Page
 layout = [
@@ -732,9 +464,9 @@ html.Div(
                             {"label": "Scenario 4: Segregation of silver linings", "value": 4},
                         ],
                         value = 1,
-                    style={'width': '75%', 'margin': 'auto'},
+                    style={'width': '75%', 'margin': 'auto', 'margin-bottom': '5px'},
                     ),
-                    html.Label("Select configuration", style={'margin': 'auto', 'margin-bottom': '5px'}),
+                    html.Label("Select configuration", style={'margin': 'auto'}),
                     dcc.Dropdown(
                          id = "prospect2-configuration-dropdown",
                             options = [
