@@ -41,7 +41,7 @@ sidebar = html.Div(
                     active="exact",
                 )
                 for page in dash.page_registry.values()
-                if page['location'] == 'sidebar'
+                if page['location'] == 'above-experiments'
             ] +
             [
                 dbc.DropdownMenu(
@@ -56,6 +56,15 @@ sidebar = html.Div(
                     label="Experiments",
                     nav=True,
                 )
+            ] +
+            [
+                dbc.NavLink(
+                    [html.Div(page['name'])],
+                    href=page['path'],
+                    active="exact",
+                )
+                for page in dash.page_registry.values()
+                if page['location'] == 'below-experiments'
             ],
             vertical=True,
             pills=True,

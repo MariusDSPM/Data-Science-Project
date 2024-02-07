@@ -8,7 +8,7 @@ from components.live_experiment.answer_options_tab import answer_option_layout
 from components.live_experiment.numeric_tab import numeric_layout
 
 
-dash.register_page(__name__, path='/live-experiment', name='Live Experiment', location='sidebar')
+dash.register_page(__name__, path='/live-experiment', name='Live Experiment', location='below-experiments')
 
 
 layout = [
