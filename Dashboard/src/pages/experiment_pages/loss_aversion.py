@@ -2,6 +2,7 @@
 import pandas as pd
 import dash
 from dash import Input, Output, dcc, html
+import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 
 
@@ -56,32 +57,61 @@ def plot_loss_aversion(selected_temperature):
 # Loss Aversion Page
 layout = [
     html.H1("Loss Aversion", className="page-heading"),
-    html.P('Description of how the experiment was conducted: ...'),
-    
-    html.Div([
-        # Experiment 1
-        html.Div([
-            html.H6("Scenario with gains:"),
-            html.P(["You are offered two choices. Which choice would you prefer?",
-                    html.Br(),  # Line break
-                    html.Br(),  # Line break
-                    "A: A sure gain of $100.",
-                    html.Br(),  # Line break
-                    "B: A 50% chance to gain $200 and a 50% chance to lose $0."
-            ]),
-        ], style={'width': '40%', 'display': 'inline-block', 'margin-bottom': '60px'}),
+    html.Hr(),
+    html.Div(
+        dbc.Accordion(
+            [
+                dbc.AccordionItem(
+                    [
+                        html.P("The experiment presented participants with two scenarios, each involving decisions under conditions of gain and loss. In the scenario with gains, participants were asked to choose between a sure gain option (Option A: A sure gain of $100) and a risky option (Option B: A 50% chance to gain $200 and a 50% chance to lose $0). In the scenario with losses, participants were presented with a similar choice between a sure loss option (Option A: A sure loss of $100) and a risky option (Option B: A 50% chance to lose $200 and a 50% chance to lose $0)."),
+                    ],
+                    title="Description of Loss Aversion Experiment",
+                ),
+                dbc.AccordionItem(
+                    [
+                        html.P("The experiment taps into the concept of loss aversion, a fundamental principle in behavioral economics. Loss aversion suggests that individuals tend to strongly prefer avoiding losses over acquiring gains of equivalent value. This phenomenon has been widely observed and is a central component of many economic and psychological theories related to decision-making under uncertainty. The interesting aspect of this experiment lies in examining how participants weigh the certainty of outcomes against the potential for larger gains or losses. By comparing responses in scenarios involving gains and losses, researchers can gain insights into whether individuals exhibit consistent risk preferences across different contexts."),
+                    ],
+                    title="Motivation of the Experiment",
+                ),
+                dbc.AccordionItem(
+                        html.Div([
+                            html.Div([
+                                html.H6("Scenario with gains:"),
+                                html.P(["You are offered two choices. Which choice would you prefer?",
+                                        html.Br(),  # Line break
+                                        html.Br(),  # Line break
+                                        "A: A sure gain of $100.",
+                                        html.Br(),  # Line break
+                                        "B: A 50% chance to gain $200 and a 50% chance to lose $0."
+                                ]),
+                            ], style={'width': '40%', 'display': 'inline-block'}),
 
-        html.Div([
-            html.H6("Scenario with losses:"),
-            html.P(["You are offered two choices. Which choice would you prefer?",
-                    html.Br(),  # Line break
-                    html.Br(),  # Line break
-                    "A: A sure loss of $100.",
-                    html.Br(),  # Line break
-                    "B: A 50% chance to lose $200 and a 50% chance to lose $0."
-            ]),
-        ], style={'width': '40%', 'display': 'inline-block', 'margin-bottom': '60px'})
-    ]),
+                            html.Div([
+                                html.H6("Scenario with losses:"),
+                                html.P(["You are offered two choices. Which choice would you prefer?",
+                                        html.Br(),  # Line break
+                                        html.Br(),  # Line break
+                                        "A: A sure loss of $100.",
+                                        html.Br(),  # Line break
+                                        "B: A 50% chance to lose $200 and a 50% chance to lose $0."
+                                ]),
+                            ], 
+                            style={'width': '40%', 'display': 'inline-block'})
+                        ]),
+                    title="Prompts used in the Experiment",
+                ),
+                dbc.AccordionItem(
+                    [
+                        'From Thaler, Richard (2015), "Misbehaving"',
+                    ],
+                    title="References",
+                ),
+            ],
+            always_open=True
+        ),
+        style={'margin-bottom': '50px'}
+    ),  # End of Accordion
+    
 
     html.Div(
         style={'display': 'flex', 'justify-content': 'space-between', 'align-items': 'center'},

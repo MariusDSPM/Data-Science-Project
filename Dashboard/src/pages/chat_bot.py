@@ -1,22 +1,13 @@
 # Import required libraries 
 import dash
-import pandas as pd
 import dash_bootstrap_components as dbc
 from dash import Input, Output, dcc, html, State
-import replicate
 from openai import OpenAI
-import openai
-import os 
+from replicate.client import Client
 
 
-# Get openAI API key (previously saved as environmental variable)
-openai.api_key = os.environ["OPENAI_API_KEY"]
 
-# Set client
-client = OpenAI()
-
-
-dash.register_page(__name__, path='/chat-bot', name='Chat Bot', location='sidebar')
+dash.register_page(__name__, path='/chat-bot', name='Chat Bot', location='below-experiments')
 
 
 layout = dbc.Container(
@@ -26,6 +17,36 @@ layout = dbc.Container(
                conversations, as it has no memory! Giving the chatbot a memory would quickly make its usage rather expensive. 
                It serves as a tool to get a feeling of how the models' responses change when the input changes.
                Therefore, you can freely select any temperature value in the range of 0.01 to 2 and experiment with the maximum number of tokens the model should generate."""),
+        html.Hr(),
+        html.H6("To run your own individual experiment, you'll need to provide API keys to get access to the LLMs:"),
+        html.Br(),
+        html.Div(
+            [
+                dbc.Input(
+                    id='input-openai-key-chatbot', 
+                    placeholder="OpenAI API Key", 
+                    type="password", 
+                    persistence=True, 
+                    persistence_type='session', 
+                    style={'width': '30%'}),
+                dbc.FormText("You'll need an OpenAI API key to use GPT-3.5-Turbo and GPT-4-1106-Preview. You can get one from the OpenAI website (https://platform.openai.com)."),
+            ],
+        ),
+        html.Br(),
+        html.Div(
+            [
+                dbc.Input(
+                    id='input-replicate-key-chatbot', 
+                    placeholder="Replicate API Key", 
+                    type="password", 
+                    persistence=True, 
+                    persistence_type='session', 
+                    style={'width': '30%'}),
+                dbc.FormText("You'll need a Replicate API key to use Llama-2-70b. You can get one from the Replicate website (https://replicate.com)."),
+            ],
+        ),
+        html.Hr(),
+        html.Br(),
         dbc.Row(
             children=[
                 # Left half with text input
@@ -163,14 +184,19 @@ layout = dbc.Container(
      State("instruction-input", "value"),
      State("model-dropdown", "value"),
      State("chatbot-max-tokens", "value"),
-     State("chatbot-temperature-slider", "value")])
+     State("chatbot-temperature-slider", "value"),
+     State("input-openai-key-chatbot", "value"),
+     State("input-replicate-key-chatbot", "value")])
 
 
-def update_chatbot_output(n_clicks, text_input, instruction_input, selected_model, selected_max_tokens, selected_temperature):
+def update_chatbot_output(n_clicks, text_input, instruction_input, selected_model, 
+                          selected_max_tokens, selected_temperature, openai_key, replicate_key):
 
     output = ""
     if n_clicks is not None:
         if selected_model == "llama-2-70b":
+            
+            replicate = Client(api_token=replicate_key)
             response = replicate.run(
                 'meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3',
                 input = {
@@ -183,7 +209,9 @@ def update_chatbot_output(n_clicks, text_input, instruction_input, selected_mode
             for item in response:
                 answer += item
             output = answer
+            
         else: 
+            client = OpenAI(api_key=openai_key)
             response = client.chat.completions.create(
                     model = "gpt-3.5-turbo", 
                     max_tokens = selected_max_tokens,
