@@ -319,11 +319,15 @@ def update_individual_experiment(n_clicks, prompts, models, iterations, temperat
             persistence_type='session',
         )
 
-        results = (
-            [html.H2("Results:", style={'margin-top': '50px', 'margin-bottom': '30px'})] +
-            [html.Br()] +
-            [output_table]
-        )
+        results = [
+            html.H2("Results:", style={'margin-top': '50px', 'margin-bottom': '30px'}),
+            html.Br(),
+            dbc.Alert(
+                "The share of correct answers (Correct Answers / Iterations) is below 50% for at least one experiment. This might indicate that the models were not able to answer the questions correctly. You should change the experiment configuration and run the experiment again.",
+                color="warning"
+            ) if experiment.low_answers_share_warning else None,
+            output_table
+        ]
         
         loading = html.H6('The experiment finished running. Please check the results below.')
 

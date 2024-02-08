@@ -34,6 +34,7 @@ class Experiment:
         self.answer_option_labels = Experiment.ANSWER_OPTION_LABELS[:self.num_options]
         self.model_answers = None
         self.experiment_prompts = []
+        self.low_answers_share_warning = False
         
     def run(self):
         
@@ -156,12 +157,15 @@ class Experiment:
         
         result_dict['Correct Answers'] = len_correct
         
+        if (len_correct / self.iterations) <= 0.5:
+            self.low_answers_share_warning = True
+        
         # Check if len_correct is non-zero before performing further calculations
         if len_correct > 0:
             # Counting results
             for label in self.answer_option_labels:
                 label_share = self.model_answers.count(label) / len_correct
-                result_dict['Share of ' + label] = label_share
+                result_dict['Share of ' + label] = round(label_share, 2)
         else:
             # Set NaN values for share of labels when len_correct is 0
             for label in self.answer_option_labels:
@@ -176,11 +180,14 @@ class Experiment:
         
         result_dict['Correct Answers'] = len_correct
         
+        if (len_correct / self.iterations) <= 0.5:
+            self.low_answers_share_warning = True
+        
         # Check if len_correct is non-zero before performing further calculations
         if len_correct > 0:
             for ans in self.answer_label_mapping[i].keys():
                 label_share = self.model_answers.count(self.answer_label_mapping[i][ans]) / len_correct
-                result_dict[f'Share of "{ans}"'] = label_share
+                result_dict[f'Share of "{ans}"'] = round(label_share, 2)
             
         else: 
             for ans in self.answer_label_mapping[i].keys():
@@ -193,6 +200,9 @@ class Experiment:
         
         valid_prices = [item for item in self.model_answers if item.startswith("$")]
         
+        if (len(valid_prices) / self.iterations) <= 0.5:
+            self.low_answers_share_warning = True
+        
         prices = [float(item.replace('$', '')) for item in valid_prices]
         if model not in self.model_answers_dict.keys():
             self.model_answers_dict[model] = {i: prices}
@@ -200,10 +210,12 @@ class Experiment:
             self.model_answers_dict[model][i] = prices
         
         result_dict['Correct Answers'] = len(valid_prices)
-        # result_dict['Answers'] = prices
         
-        result_dict['Average'] = np.mean(prices)
-        result_dict['Median'] = np.median(prices) 
+        # Calculate the mean, median, and quartiles
+        result_dict['Average'] = round(np.mean(prices), 2)
+        result_dict['25th Percentile'] = round(np.percentile(prices, 25), 2)
+        result_dict['Median'] = round(np.median(prices), 2)
+        result_dict['75th Percentile'] = round(np.percentile(prices, 75), 2)
         
         return result_dict
         
