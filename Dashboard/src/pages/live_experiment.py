@@ -14,6 +14,21 @@ dash.register_page(__name__, path='/live-experiment', name='Live Experiment', lo
 layout = [
     html.H1("Conduct your own individual experiment", className="page-heading"),
     html.Hr(),
+    html.P(["""This page allows you to conduct your own individual experiment. 
+           You can choose your own scenarios and models to run the experiment yourself.
+           When the experiment is finished, you will be able to see the results of the experiment 
+           in a table and graph. You can also download the table as a CSV file.""",
+           html.Br(),
+           html.Br(),
+           """We offer two different types of experiments: Answer Options and Numeric. 
+           In the first one, you can choose the answer options (A, B, C etc.) from which the 
+           model can choose. In the second one, you can choose an experiment where the models give a 
+           dollar amount as an answer.""",
+           html.Br(),
+           html.Br(),
+           """You have a variety of options to choose from. Hover over the settings to see what they do.""",],
+    ),
+    html.Hr(),
     html.H6("To run your own individual experiment, you'll need to provide API keys to get access to the LLMs:"),
     html.Br(),
     html.Div(
@@ -43,8 +58,6 @@ layout = [
     ),
     dcc.Store(id='user-api-keys'),
     html.Hr(),
-    html.Br(),
-    html.P("""Choose scenarios, models, and answer options to run the experiment yourself."""),
     html.Br(),
     html.Div(
         style={"display": "flex"},
