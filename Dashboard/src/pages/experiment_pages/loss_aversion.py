@@ -104,7 +104,7 @@ layout = [
                                         html.Br(),  # Line break
                                         "B: A 50% chance to gain $200 and a 50% chance to lose $0."
                                 ]),
-                            ], style={'width': '40%', 'display': 'inline-block'}),
+                            ], style={'width': '45%', 'display': 'inline-block'}),
 
                             html.Div([
                                 html.H6("Scenario with losses:"),
@@ -116,7 +116,7 @@ layout = [
                                         "B: A 50% chance to lose $200 and a 50% chance to lose $0."
                                 ]),
                             ], 
-                            style={'width': '40%', 'display': 'inline-block'})
+                            style={'width': '45%', 'display': 'inline-block'})
                         ]),
                     title="Prompts used in the Experiment",
                 ),

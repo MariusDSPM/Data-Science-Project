@@ -3,6 +3,7 @@ import pandas as pd
 import dash
 import dash_bootstrap_components as dbc
 from dash import Input, Output, ALL, dcc, html, State, dash_table
+import json
 
 # Local imports
 from utils.experiment import Experiment
@@ -147,24 +148,8 @@ def numeric_layout():
         html.Hr(),
         # Results
         html.Div(id='experiment-prompt-numeric'),
-        html.Div(
-            style={'display': 'flex'},
-            children=[
-                html.Div(
-                    style={'width': '70%', 'padding': '20px'},
-                    children=[
-                        dbc.Col(dcc.Graph(id="graph_1-numeric"))
-                    ]
-                ),
-                html.Div(
-                    style={'width': '30%', 'padding': '20px'},
-                    children=[
-                        html.Div(id="graph_settings-numeric")
-                    ]
-                ),
-            ],
-        )
-        ,
+        html.Div(dcc.Graph(id="graph_1-numeric")),
+        html.Div(id='raw-model-answers-numeric')
     ]
     
     return layout
@@ -253,7 +238,7 @@ def update_cost_estimate(prompts, iterations, models):
                     id='cost-estimate-numeric',
                     style={'text-align': 'center', 'marginBottom': '25px'}),
             dbc.Tooltip(
-                "The cost depends on the number of tokens used in the experiment, the number of iterations, and the selected models. The cost is estimated based on the current token prices of the models. The cost for using the Replicate API (LLama-2-70b) can only be estimated and is approximately the same as for GPT-1101-Preview.",
+                "The cost depends on the number of tokens used in the experiment, the number of iterations, and the selected models. The cost is estimated based on the current token prices of the models. The cost for using the Replicate API (LLama-2-70b) can only be estimated and is approximately the same as for GPT-4-1101-Preview.",
                 target="cost-estimate-numeric",
             )
         ]
@@ -268,7 +253,8 @@ def update_cost_estimate(prompts, iterations, models):
     [
         Output("loading-output-numeric", "children"),
         Output("experiment-prompt-numeric", "children"),
-        Output("experiment-data-numeric", "data")
+        Output("experiment-data-numeric", "data"),
+        Output("raw-model-answers-numeric", "children")
     ],
     [
         Input("individual-update-button-numeric", "n_clicks")
@@ -303,8 +289,12 @@ def update_individual_experiment(n_clicks, prompts, models, iterations, temperat
             instructions=instruction_text,
         )
             
-        # Run experiment
-        experiment.run()
+        # Run the experiment and catch errors
+        try:
+            experiment.run()
+        except Exception as e:
+            error_message = dbc.Alert(f'An error occurred: "{str(e)}". Please try again.', color="danger")
+            return error_message, None, None, None
         
         n_clicks = None
         
@@ -319,19 +309,40 @@ def update_individual_experiment(n_clicks, prompts, models, iterations, temperat
             persistence_type='session',
         )
 
+        # Generate the results
         results = [
             html.H2("Results:", style={'margin-top': '50px', 'margin-bottom': '30px'}),
             html.Br(),
             dbc.Alert(
-                "The share of correct answers (Correct Answers / Iterations) is below 50% for at least one experiment. This might indicate that the models were not able to answer the questions correctly. You should change the experiment configuration and run the experiment again.",
+                "The share of correct answers (Correct Answers / Iterations) is below 50% for at least one experiment. This might indicate that the models were not able to answer the questions correctly. Scroll down to see the raw answers of the models. You should change the experiment configuration and run the experiment again.",
                 color="warning"
             ) if experiment.low_answers_share_warning else None,
-            output_table
+            output_table,
         ]
         
-        loading = html.H6('The experiment finished running. Please check the results below.')
+        # Generate loading message
+        loading = dbc.Alert("The experiment finished running. Please check the results below.", color="success")
+        
+        # Function to generate nested html
+        def generate_nested_html(dictionary):
+            items = []
+            for key, value in dictionary.items():
+                if isinstance(value, dict):
+                    sublist = generate_nested_html(value)
+                    items.append(html.Li([html.Strong(key + ": "), html.Ul(sublist)]))
+                else:
+                    items.append(html.Li([html.Strong(str(key) + ": "), str(value)]))
+            return items
+        
+        # Generate raw model answers
+        items = generate_nested_html(experiment.raw_model_answers_dict)
+        # Add header
+        raw_model_answers = [
+            html.H5("Raw model answers:"),
+            html.Ul(items)
+        ]
 
-        return [loading, results, experiment.model_answers_dict]
+        return [loading, results, experiment.model_answers_dict, raw_model_answers]
     
 
 # Callback to plot results

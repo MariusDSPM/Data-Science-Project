@@ -31,6 +31,7 @@ class Experiment:
         self.max_tokens_openai = 1
         self.max_tokens_llama = 2
         self.model_answers_dict = {}
+        self.raw_model_answers_dict = {}
         self.answer_option_labels = Experiment.ANSWER_OPTION_LABELS[:self.num_options]
         self.model_answers = None
         self.experiment_prompts = []
@@ -61,9 +62,13 @@ class Experiment:
                 else:
                     self.model_answers = self.run_experiment_with_openai(model, prompt, instruction)
                 
-                # Store answers of corresponding model and scenario in a dictionary (for control purposes)
-                # self.model_answers_dict[f'{model} - {i}'] = self.model_answers
+                # Store answers of corresponding model and scenario in a dictionary
+                if model not in self.model_answers_dict.keys():
+                    self.raw_model_answers_dict[model] = {i: self.model_answers}
+                else:
+                    self.raw_model_answers_dict[model][i] = self.model_answers
                 
+                # Create a dictionary to store results
                 result_dict = {
                     'Model': model,
                     'Scenario': i+1,
@@ -73,6 +78,7 @@ class Experiment:
                 
                 # Count answers depending on experiment type
                 if self.experiment_type == 'answer_options':
+                    # Check if the answers were shuffled
                     if not self.shuffle_options:
                         result_dict = self.count_answers(result_dict)
                     elif self.shuffle_options:
@@ -157,7 +163,7 @@ class Experiment:
         
         result_dict['Correct Answers'] = len_correct
         
-        if (len_correct / self.iterations) <= 0.5:
+        if (len_correct / self.iterations) < 0.5:
             self.low_answers_share_warning = True
         
         # Check if len_correct is non-zero before performing further calculations
@@ -180,7 +186,7 @@ class Experiment:
         
         result_dict['Correct Answers'] = len_correct
         
-        if (len_correct / self.iterations) <= 0.5:
+        if (len_correct / self.iterations) < 0.5:
             self.low_answers_share_warning = True
         
         # Check if len_correct is non-zero before performing further calculations
@@ -198,12 +204,18 @@ class Experiment:
                 
     def count_answers_numeric(self, result_dict, model, i):
         
+        # Filter out valid prices
         valid_prices = [item for item in self.model_answers if item.startswith("$")]
         
-        if (len(valid_prices) / self.iterations) <= 0.5:
+        # Check if the share of valid prices is less than 50%
+        if (len(valid_prices) / self.iterations) < 0.5:
             self.low_answers_share_warning = True
         
-        prices = [float(item.replace('$', '')) for item in valid_prices]
+        # Remove commas and dollar signs, convert to float
+        prices = [item.replace(',', '') for item in valid_prices]
+        prices = [float(item.replace('$', '')) for item in prices if item != '$']
+        
+        # Store answers of corresponding model and scenario in a dictionary
         if model not in self.model_answers_dict.keys():
             self.model_answers_dict[model] = {i: prices}
         else:
@@ -213,9 +225,14 @@ class Experiment:
         
         # Calculate the mean, median, and quartiles
         result_dict['Average'] = round(np.mean(prices), 2)
-        result_dict['25th Percentile'] = round(np.percentile(prices, 25), 2)
+        
+        if len(prices) > 1:
+            result_dict['25th Percentile'] = round(np.percentile(prices, 25), 2)
+        
         result_dict['Median'] = round(np.median(prices), 2)
-        result_dict['75th Percentile'] = round(np.percentile(prices, 75), 2)
+        
+        if len(prices) > 1:
+            result_dict['75th Percentile'] = round(np.percentile(prices, 75), 2)
         
         return result_dict
         
