@@ -18,7 +18,7 @@ layout = dbc.Container(
                It serves as a tool to get a feeling of how the models' responses change when the input changes.
                Therefore, you can freely select any temperature value in the range of 0.01 to 2 and experiment with the maximum number of tokens the model should generate."""),
         html.Hr(),
-        html.H6("To run your own individual experiment, you'll need to provide API keys to get access to the LLMs:"),
+        html.H6("To use the Chat Bot, you'll need to provide API keys to get access to the LLMs:"),
         html.Br(),
         html.Div(
             [

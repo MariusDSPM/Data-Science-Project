@@ -65,6 +65,8 @@ layout = [
                             ),
                         ],
                         active_tab="answer_options",
+                        persistence=True,
+                        persistence_type="session",
                     ),
                 ]
             ),

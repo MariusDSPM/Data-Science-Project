@@ -9,6 +9,14 @@ from utils.experiment import Experiment
 from utils.plotting import plot_results_numeric
 
 
+# Constants
+GPT_3_5_INPUT_COST = 0.0005
+GPT_3_5_OUTPUT_COST = 0.0015
+GPT_4_INPUT_COST = 0.01
+GPT_4_OUTPUT_COST = 0.03
+LLAMA_2_INPUT_COST = GPT_4_INPUT_COST  # Llama-2-70b through Replicate has approximately the same cost as GPT-4-1106-Preview
+LLAMA_2_OUTPUT_COST = GPT_4_OUTPUT_COST  # Llama-2-70b through Replicate has approximately the same cost as GPT-4-1106-Preview
+
 
 input_style = {'width': '25%', 'marginBottom': '25px'}
 
@@ -17,103 +25,127 @@ def numeric_layout():
         dcc.Store(id='experiment-data-numeric', storage_type='session'),
         html.Div(
             children=[
+                # Left column
                 html.Div(
                     children=[
                         html.Div(id='scenarios-container-numeric', style={'width': '100%', 'marginBottom': '20px'}),
                     ],
                     style={'display': 'flex', 'flexDirection': 'column', 'alignItems': 'center', 'width': '50%'},
                 ),
-                html.Div(
+                # Right column
+                dbc.Col(
                     children=[
-                        # Right column
                         dbc.Card(
-                            children=[
-                                html.H3("Experiment Settings", style={'marginBottom': '30px'}),
-                                html.H6("Select number of scenarios"),
-                                dbc.Input(
-                                    id="num-scenarios-numeric",
-                                    type="number",
-                                    value=1,
-                                    min=1,
-                                    max=4,
-                                    step=1,
-                                    style=input_style,
-                                    persistence=True,
-                                    persistence_type='session',
-                                ),
-                                html.H6("Select number of requests"),
-                                dbc.Input(
-                                    id="individual-iterations-numeric",
-                                    type="number",
-                                    value=1,
-                                    min=0,
-                                    max=100,
-                                    step=1,
-                                    style=input_style,
-                                    persistence=True,
-                                    persistence_type='session',
-                                ),
-                                dbc.Checklist(
-                                    id="instruction-checklist-numeric",
-                                    options=[
-                                        {"label": "Add instruction", "value": "add_instruction"}
-                                    ],
-                                    value=["add_instruction"],
-                                    switch=True,
-                                    inline=False,
-                                    style={'marginBottom': '25px'},
-                                    inputStyle={'margin-right': '10px'},
-                                    persistence=True,
-                                    persistence_type='session',
-                                ),
-                                html.H6("Select language models"),
-                                dbc.Checklist(
-                                    id="individual-model-checklist-numeric",
-                                    options=[
-                                        {"label": "GPT-3.5-Turbo", "value": "gpt-3.5-turbo"},
-                                        {"label": "GPT-4-1106-Preview", "value": "gpt-4-1106-preview"},
-                                        {"label": "LLama-2-70b", "value": "llama-2-70b"}
-                                    ],
-                                    value=["gpt-3.5-turbo"],
-                                    inline=False,
-                                    style={'marginBottom': '25px', 'lineHeight': '30px'},
-                                    inputStyle={'margin-right': '10px'},
-                                    persistence=True,
-                                    persistence_type='session',
-                                ),
-                                html.Div(
-                                    [
-                                        html.H6("Select Temperature value"),
-                                        dcc.Slider(
-                                            id="individual-temperature-numeric",
-                                            min=0.01,
-                                            max=2,
-                                            step=0.01,
-                                            marks={0.01: '0.01', 1: '1', 2: '2'},
+                            [
+                                dbc.CardHeader(html.H5("Select Experiment Configuration")),
+                                dbc.CardBody(
+                                    children=[
+                                        html.H6("Select number of scenarios"),
+                                        dbc.Input(
+                                            id="num-scenarios-numeric",
+                                            type="number",
                                             value=1,
-                                            tooltip={'placement': 'top'},
+                                            min=1,
+                                            max=4,
+                                            step=1,
+                                            style=input_style,
                                             persistence=True,
                                             persistence_type='session',
                                         ),
+                                        dbc.Tooltip(
+                                                    "Each scenario will presented to the selected models",
+                                                    target="num-scenarios-numeric",
+                                                ),
+                                        html.H6("Select number of requests"),
+                                        dbc.Input(
+                                            id="individual-iterations-numeric",
+                                            type="number",
+                                            value=1,
+                                            min=0,
+                                            max=500,
+                                            step=1,
+                                            style=input_style,
+                                            persistence=True,
+                                            persistence_type='session',
+                                        ),
+                                        dbc.Tooltip(
+                                            "This is how often the LLMs will answer the questions. The more iterations, the more accurate the answer distribution will be. However, the experiment will also be more expensive. The maximum is 500.",
+                                            target="individual-iterations-numeric",
+                                        ),
+                                        dbc.Checklist(
+                                            id="instruction-checklist-numeric",
+                                            options=[
+                                                {"label": "Add instruction", "value": "add_instruction"}
+                                            ],
+                                            value=["add_instruction"],
+                                            switch=True,
+                                            inline=False,
+                                            style={'marginBottom': '25px'},
+                                            inputStyle={'margin-right': '10px'},
+                                            persistence=True,
+                                            persistence_type='session',
+                                        ),
+                                        dbc.Tooltip(
+                                            "The instruction role is to guide the LLMs to answer the questions in a specific way. For example, to only answer with the letter of the answer options.",
+                                            target="instruction-checklist-numeric",
+                                        ),
+                                        html.H6("Select language models"),
+                                        dbc.Checklist(
+                                            id="individual-model-checklist-numeric",
+                                            options=[
+                                                {"label": "GPT-3.5-Turbo", "value": "gpt-3.5-turbo"},
+                                                {"label": "GPT-4-1106-Preview", "value": "gpt-4-1106-preview"},
+                                                {"label": "LLama-2-70b", "value": "llama-2-70b"}
+                                            ],
+                                            value=["gpt-3.5-turbo"],
+                                            inline=False,
+                                            style={'marginBottom': '25px', 'lineHeight': '30px'},
+                                            inputStyle={'margin-right': '10px'},
+                                            persistence=True,
+                                            persistence_type='session',
+                                        ),
+                                        html.Div(
+                                            [
+                                                html.H6("Select Temperature value"),
+                                                dcc.Slider(
+                                                    id="individual-temperature-numeric",
+                                                    min=0.01,
+                                                    max=2,
+                                                    step=0.01,
+                                                    marks={0.01: '0.01', 1: '1', 2: '2'},
+                                                    value=1,
+                                                    tooltip={'placement': 'top'},
+                                                    persistence=True,
+                                                    persistence_type='session',
+                                                ),
+                                            ],
+                                            style={'width': '100%', 'marginBottom': '40px'}, 
+                                        ),
+                                        dbc.Tooltip(
+                                            "The temperature value controls the randomness of the models' responses. A higher temperature value will result in more random answers, while a lower temperature value will result in more deterministic responses.",
+                                            target="individual-temperature-numeric",
+                                        ),
+                                        dbc.Button('Run the experiment', id='individual-update-button-numeric', 
+                                                        n_clicks=None, style={'marginBottom': '25px', 'width': '100%'}),
+                                        html.Div(id='cost-estimate-numeric-container'),
+                                        dbc.Spinner(
+                                            html.Div(id="loading-output-numeric", 
+                                                     style={'textAlign': 'center'}),
+                                            color="primary"),
                                     ],
-                                    style={'width': '100%', 'marginBottom': '40px'}, 
+                                    style={'display': 'flex', 'flexDirection': 'column', 'width': '100%'}
                                 ),
-                                # Add a button to trigger callback
-                               dbc.Button('Run the experiment', id='individual-update-button-numeric', 
-                                            n_clicks=None, style={'marginBottom': '25px', 'width': '100%'}),
-                                html.Div(id='cost-estimate-numeric'),
-                                dbc.Spinner(html.Div(id="loading-output-numeric", style={'textAlign': 'center'})),
-                            ],
-                            style={'padding': '20px', 'width': '55%', 'marginBottom': '30px'},
+                            ],   
+                            style={'width': '50%'}
                         ),
                     ],
-                    style={'display': 'flex', 'flexDirection': 'column', 'alignItems': 'center', 'width': '50%'},
+                    style={'display': 'flex', 'flexDirection': 'column', 'alignItems': 'center', 'width': '100%'},
                 ),
             ],
             style={'display': 'flex', 'flexWrap': 'wrap'}
         ),  
         html.Hr(),
-        # Additional text section
+        # Results
         html.Div(id='experiment-prompt-numeric'),
         html.Div(
             style={'display': 'flex'},
@@ -148,7 +180,6 @@ def numeric_layout():
 def update_num_scenarios(num_scenarios, instruction):
     
     container = []
-    count = 0
     
     answer_textarea_style = {'width': '100%', 'height': 30} 
     
@@ -157,7 +188,7 @@ def update_num_scenarios(num_scenarios, instruction):
             html.Div(
                 children=[
                     html.Label(f"Scenario {i+1}:", style={'textAlign': 'center', 'font-size': '18px', 'font-weight': 'bold'}),
-                    dcc.Textarea(
+                    dbc.Textarea(
                         id={"type": "individual-prompt-numeric", "index": i},
                         value="How much does a chair cost?",
                         style={'width': '100%', 'height': 100},
@@ -172,7 +203,7 @@ def update_num_scenarios(num_scenarios, instruction):
         if "add_instruction" in instruction:
             container.extend([
                 html.Label(f"Instruction:", style={'textAlign': 'center', 'marginTop': '20px'}),
-                dcc.Textarea(
+                dbc.Textarea(
                     id={"type": "instruction-text-numeric", "index": i},
                     value='Answer by only giving a single price in dollars and cents without an explanation.',
                     style=answer_textarea_style, 
@@ -185,6 +216,50 @@ def update_num_scenarios(num_scenarios, instruction):
         container.append(html.Div(style={'height': '60px'}))
     
     return container
+
+
+
+# Callback for cost estimate
+@dash.callback(
+    [
+        Output("cost-estimate-numeric-container", "children"),
+    ],
+    [
+        Input({"type": "individual-prompt-numeric", "index": ALL}, "value"),
+        Input("individual-iterations-numeric", "value"),
+        Input("individual-model-checklist-numeric", "value"),
+    ]
+)
+def update_cost_estimate(prompts, iterations, models):
+    # Function to count words in a list of sentences
+    def count_words(sentences_list):
+        word_count = sum(len(sentence.split()) for sentence in sentences_list)
+        return word_count
+    
+    total_tokens = count_words(prompts) * iterations
+    
+    estimated_cost = 0
+    if "gpt-3.5-turbo" in models:
+        estimated_cost += GPT_3_5_INPUT_COST * (total_tokens / 1000) + GPT_3_5_OUTPUT_COST * (5/1000)
+    if "gpt-4-1106-preview" in models:
+        estimated_cost += GPT_4_INPUT_COST * (total_tokens / 1000) + GPT_4_OUTPUT_COST * (5/1000)
+    if "llama-2-70b" in models:
+        estimated_cost += LLAMA_2_INPUT_COST * (total_tokens / 1000) + LLAMA_2_OUTPUT_COST * (5/1000)
+    
+    
+    cost_estimate = html.Div(
+        [
+            html.P(f"Estimated cost for Experiment: {estimated_cost:.2f} USD",
+                    id='cost-estimate-numeric',
+                    style={'text-align': 'center', 'marginBottom': '25px'}),
+            dbc.Tooltip(
+                "The cost depends on the number of tokens used in the experiment, the number of iterations, and the selected models. The cost is estimated based on the current token prices of the models. The cost for using the Replicate API (LLama-2-70b) can only be estimated and is approximately the same as for GPT-1101-Preview.",
+                target="cost-estimate-numeric",
+            )
+        ]
+    )
+    
+    return [cost_estimate]
 
 
 
@@ -239,7 +314,9 @@ def update_individual_experiment(n_clicks, prompts, models, iterations, temperat
             columns=[{'name': col, 'id': col} for col in experiment.results_df.columns],
             data=experiment.results_df.to_dict('records'),
             style_table={'margin-top': '10px', 'margin-bottom': '30px'},
-            export_format='csv'
+            export_format='csv',
+            persistence=True,
+            persistence_type='session',
         )
 
         results = (
@@ -252,7 +329,8 @@ def update_individual_experiment(n_clicks, prompts, models, iterations, temperat
 
         return [loading, results, experiment.model_answers_dict]
     
-    
+
+# Callback to plot results
 @dash.callback(
     [
         Output("graph_1-numeric", "figure"),
@@ -267,35 +345,3 @@ def plot_results(data):
     figure = plot_results_numeric(df)
     
     return [figure]
-
-
-# Callback for cost estimate
-@dash.callback(
-    [
-        Output("cost-estimate-numeric", "children"),
-    ],
-    [
-        Input({"type": "individual-prompt-numeric", "index": ALL}, "value"),
-        Input("individual-iterations-numeric", "value"),
-        Input("individual-model-checklist-numeric", "value"),
-    ]
-)
-def update_cost_estimate(prompts, iterations, models):
-    # Function to count words in a list of sentences
-    def count_words(sentences_list):
-        word_count = sum(len(sentence.split()) for sentence in sentences_list)
-        return word_count
-    
-    total_tokens = count_words(prompts) * iterations
-    
-    estimated_cost = 0
-    if "gpt-3.5-turbo" in models:
-        estimated_cost += 0.001 * (total_tokens / 1000) + 0.002 * (5/1000)
-    if "gpt-4-1106-preview" in models:
-        estimated_cost += 0.01 * (total_tokens / 1000) + 0.03 * (5/1000)
-    
-    
-    cost_estimate = html.P(f"Estimated cost for OpenAI models: {estimated_cost:.2f} USD",
-                           style={'text-align': 'center', 'marginBottom': '25px'})
-    
-    return [cost_estimate]

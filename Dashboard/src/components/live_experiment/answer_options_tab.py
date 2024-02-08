@@ -10,6 +10,14 @@ from utils.experiment import Experiment
 from utils.plotting import plot_results
 
 
+# Constants
+GPT_3_5_INPUT_COST = 0.0005
+GPT_3_5_OUTPUT_COST = 0.0015
+GPT_4_INPUT_COST = 0.01
+GPT_4_OUTPUT_COST = 0.03
+LLAMA_2_INPUT_COST = GPT_4_INPUT_COST  # Llama-2-70b through Replicate has approximately the same cost as GPT-4-1106-Preview
+LLAMA_2_OUTPUT_COST = GPT_4_OUTPUT_COST  # Llama-2-70b through Replicate has approximately the same cost as GPT-4-1106-Preview
+
 presets = {
     "Default": {
         "prompts": ["You are a random pedestrian being chosen for a survey. The question is: Would you rather:"],
@@ -86,143 +94,156 @@ def answer_option_layout():
                             id="preset-dropdown",
                             options=[{"label": preset, "value": preset} for preset in presets.keys()],
                             value="Default",
-                            style={'width': '57%', 'margin': 'auto', 'marginBottom': '20px'},
+                            style={'width': '45%', 'margin': 'auto', 'marginBottom': '20px'},
                             persistence=True,
                             persistence_type='session',
                         ),
                     ],
                     style={'width': '100%', 'textAlign': 'center', 'marginBottom': '20px'},
                 ),
+                dbc.Tooltip(
+                    "Choose the settings of one of the pre-built experiments that you can find in the sidebar.",
+                    target="preset-dropdown",
+                    placement="top-start",
+                ),
+                # Left column
                 html.Div(
                     children=[
                         html.Div(id='scenarios-container', style={'width': '100%', 'marginBottom': '20px'}),
                     ],
                     style={'display': 'flex', 'flexDirection': 'column', 'alignItems': 'center', 'width': '50%'},
                 ),
-                html.Div(
+                # Right column
+                dbc.Col(
                     children=[
-                        # Right column
                         dbc.Card(
-                            children=[
-                                html.H3("Experiment Settings", style={'marginBottom': '30px'}),
-                                html.H6("Select number of scenarios"),
-                                dbc.Input(
-                                    id="num-scenarios",
-                                    type="number",
-                                    value=1,
-                                    min=1,
-                                    max=4,
-                                    step=1,
-                                    style=input_style,
-                                    persistence=True,
-                                    persistence_type='session',
-                                ),
-                                dbc.Tooltip(
-                                    "Each scenario with the corresponding answer options will presented to the selected models",
-                                    target="num-scenarios",
-                                ),
-                                html.H6("Select number of answer options"),
-                                dbc.Input(
-                                    id="num-answer-options",
-                                    type="number",
-                                    value=3,
-                                    min=2,
-                                    max=6,
-                                    step=1,
-                                    style=input_style,
-                                    persistence=True,
-                                    persistence_type='session',
-                                ),
-                                dbc.Tooltip(
-                                    "Choose the number of answer options (A, B, C etc.) for each scenario.",
-                                    target="num-answer-options",
-                                ),
-                                html.H6("Select number of requests"),
-                                dbc.Input(
-                                    id="individual-iterations",
-                                    type="number",
-                                    value=1,
-                                    min=0,
-                                    max=100,
-                                    step=1,
-                                    style=input_style,
-                                    persistence=True,
-                                    persistence_type='session',
-                                ),
-                                dbc.Tooltip(
-                                    "This is how often the LLMs will answer the questions. The more iterations, the more accurate the answer distribution will be. However, the experiment will also be more expensive.",
-                                    target="individual-iterations",
-                                ),
-                                dbc.Checklist(
-                                    id="instruction-checklist",
-                                    options=[
-                                        {"label": "Add instruction", "value": "add_instruction"}
-                                    ],
-                                    value=["add_instruction"],
-                                    switch=True,
-                                    inline=False,
-                                    style={'marginBottom': '25px'},
-                                    inputStyle={'margin-right': '10px'},
-                                    persistence=True,
-                                    persistence_type='session',
-                                ),
-                                dbc.Tooltip(
-                                    "The instruction role is to guide the LLMs to answer the questions in a specific way. For example, to only answer with the letter of the answer options.",
-                                    target="instruction-checklist",
-                                ),
-                                html.Div(id='shuffle-checklist-container'),
-                                html.H6("Select language models"),
-                                dbc.Checklist(
-                                    id="individual-model-checklist",
-                                    options=[
-                                        {"label": "GPT-3.5-Turbo", "value": "gpt-3.5-turbo"},
-                                        {"label": "GPT-4-1106-Preview", "value": "gpt-4-1106-preview"},
-                                        {"label": "LLama-2-70b", "value": "llama-2-70b"}
-                                    ],
-                                    value=["gpt-3.5-turbo"],
-                                    inline=False,
-                                    style={'marginBottom': '25px', 'lineHeight': '30px'},
-                                    inputStyle={'margin-right': '10px'},
-                                    persistence=True,
-                                    persistence_type='session',
-                                ),
-                                html.Div(
-                                    [
-                                        html.H6("Select Temperature value"),
-                                        dcc.Slider(
-                                            id="individual-temperature",
-                                            min=0.01,
-                                            max=2,
-                                            step=0.01,
-                                            marks={0.01: '0.01', 1: '1', 2: '2'},
+                            [
+                                dbc.CardHeader(html.H5("Select Experiment Configuration")),
+                                dbc.CardBody(
+                                    children=[
+                                        html.H6("Select number of scenarios"),
+                                        dbc.Input(
+                                            id="num-scenarios",
+                                            type="number",
                                             value=1,
-                                            tooltip={'placement': 'top'},
+                                            min=1,
+                                            max=4,
+                                            step=1,
+                                            style=input_style,
                                             persistence=True,
                                             persistence_type='session',
                                         ),
+                                        dbc.Tooltip(
+                                            "Each scenario with the corresponding answer options will presented to the selected models",
+                                            target="num-scenarios",
+                                        ),
+                                        html.H6("Select number of answer options"),
+                                        dbc.Input(
+                                            id="num-answer-options",
+                                            type="number",
+                                            value=3,
+                                            min=2,
+                                            max=6,
+                                            step=1,
+                                            style=input_style,
+                                            persistence=True,
+                                            persistence_type='session',
+                                        ),
+                                        dbc.Tooltip(
+                                            "Choose the number of answer options (A, B, C etc.) for each scenario.",
+                                            target="num-answer-options",
+                                        ),
+                                        html.H6("Select number of requests"),
+                                        dbc.Input(
+                                            id="individual-iterations",
+                                            type="number",
+                                            value=1,
+                                            min=0,
+                                            max=500,
+                                            step=1,
+                                            style=input_style,
+                                            persistence=True,
+                                            persistence_type='session',
+                                        ),
+                                        dbc.Tooltip(
+                                            "This is how often the LLMs will answer the questions. The more iterations, the more accurate the answer distribution will be. However, the experiment will also be more expensive. The maximum is 500.",
+                                            target="individual-iterations",
+                                        ),
+                                        dbc.Checklist(
+                                            id="instruction-checklist",
+                                            options=[
+                                                {"label": "Add instruction", "value": "add_instruction"}
+                                            ],
+                                            value=["add_instruction"],
+                                            switch=True,
+                                            inline=False,
+                                            style={'marginBottom': '25px'},
+                                            inputStyle={'margin-right': '10px'},
+                                            persistence=True,
+                                            persistence_type='session',
+                                        ),
+                                        dbc.Tooltip(
+                                            "The instruction role is to guide the LLMs to answer the questions in a specific way. For example, to only answer with the letter of the answer options.",
+                                            target="instruction-checklist",
+                                        ),
+                                        html.Div(id='shuffle-checklist-container'),
+                                        html.H6("Select language models"),
+                                        dbc.Checklist(
+                                            id="individual-model-checklist",
+                                            options=[
+                                                {"label": "GPT-3.5-Turbo", "value": "gpt-3.5-turbo"},
+                                                {"label": "GPT-4-1106-Preview", "value": "gpt-4-1106-preview"},
+                                                {"label": "LLama-2-70b", "value": "llama-2-70b"}
+                                            ],
+                                            value=["gpt-3.5-turbo"],
+                                            inline=False,
+                                            style={'marginBottom': '25px', 'lineHeight': '30px'},
+                                            inputStyle={'margin-right': '10px'},
+                                            persistence=True,
+                                            persistence_type='session',
+                                        ),
+                                        html.Div(
+                                            [
+                                                html.H6("Select Temperature value"),
+                                                dcc.Slider(
+                                                    id="individual-temperature",
+                                                    min=0.01,
+                                                    max=2,
+                                                    step=0.01,
+                                                    marks={0.01: '0.01', 0.5: '0.5', 1: '1', 1.5: '1.5', 2: '2'},
+                                                    value=1,
+                                                    tooltip={'placement': 'top'},
+                                                    persistence=True,
+                                                    persistence_type='session',
+                                                ),
+                                            ],
+                                            style={'width': '100%', 'marginBottom': '40px'}, 
+                                        ),
+                                        dbc.Tooltip(
+                                            "The temperature value controls the randomness of the models' responses. A higher temperature value will result in more random answers, while a lower temperature value will result in more deterministic responses.",
+                                            target="individual-temperature",
+                                        ),
+                                        dbc.Button('Run the experiment', id='individual-update-button', 
+                                                    n_clicks=None, style={'marginBottom': '25px', 'width': '100%'}),
+                                        html.Div(id='cost-estimate-container'),
+                                        dbc.Spinner(
+                                            html.Div(id="loading-output", 
+                                                     style={'textAlign': 'center', 'word-wrap': 'break-word'}), 
+                                            color="primary"),
                                     ],
-                                    style={'width': '100%', 'marginBottom': '40px'}, 
+                                    style={'display': 'flex', 'flexDirection': 'column', 'width': '100%'}
                                 ),
-                                dbc.Tooltip(
-                                    "The temperature value controls the randomness of the models' responses. A higher temperature value will result in more random answers, while a lower temperature value will result in more deterministic responses.",
-                                    target="individual-temperature",
-                                ),
-                                # Add a button to trigger callback
-                                dbc.Button('Run the experiment', id='individual-update-button', 
-                                            n_clicks=None, style={'marginBottom': '25px', 'width': '100%'}),
-                                html.Div(id='cost-estimate'),
-                                dbc.Spinner(html.Div(id="loading-output", style={'textAlign': 'center'}), color="primary"),
-                            ],
-                            style={'padding': '20px', 'width': '55%', 'marginBottom': '30px'},
+                            ],   
+                            style={'width': '50%'}
                         ),
                     ],
-                    style={'display': 'flex', 'flexDirection': 'column', 'alignItems': 'center', 'width': '50%'},
+                    style={'display': 'flex', 'flexDirection': 'column', 'alignItems': 'center', 'width': '100%'},
                 ),
             ],
             style={'display': 'flex', 'flexWrap': 'wrap'}
         ),  
         html.Hr(),
-        # Additional text section
+        # Results
         html.Div(id='experiment_prompt'),
         html.Div(
             style={'display': 'flex'},
@@ -313,6 +334,139 @@ def update_num_scenarios(num_scenarios, num_options, instruction):
     
     return container
 
+
+# Callbacks to load preset values into the input elements
+# 1st Callback  to load preset values into the input elements 
+@dash.callback(
+    [
+        Output("num-scenarios", "value"),
+        Output("num-answer-options", "value"),
+        Output("individual-iterations", "value"),
+        Output("individual-model-checklist", "value"),
+        Output("individual-temperature", "value"),
+        Output("instruction-checklist", "value"),
+    ],
+    [Input("preset-dropdown", "value")]
+)
+def update_preset(selected_preset):
+    if not selected_preset:
+        raise PreventUpdate
+
+    preset_values = presets[selected_preset]
+    return (
+        preset_values["num_scenarios"],
+        preset_values["num_options"],
+        preset_values["iterations"],
+        preset_values["models"],
+        preset_values["temperature"],
+        preset_values["instruction_checklist"],
+        
+    )
+    
+# 2nd Callback to fill in the textareas
+@dash.callback(
+    [
+        Output({"type": "individual-prompt", "index": ALL}, "value"),
+        Output({"type": "individual-answer", "index": ALL}, "value"),
+        Output({"type": "instruction-text", "index": ALL}, "value"),
+        Output("shuffle-checklist", "value")
+    ],
+    [   
+        Input("preset-dropdown", "value")
+    ]
+)
+def update_preset(selected_preset):
+    if not selected_preset:
+        raise PreventUpdate
+
+    preset_values = presets[selected_preset]
+    return (
+        preset_values["prompts"],
+        preset_values["answer_texts"],
+        preset_values["instruction_text"],
+        preset_values["shuffle-checklist"],
+    )
+    
+    
+# Callback for cost estimate
+@dash.callback(
+    [
+        Output("cost-estimate-container", "children"),
+    ],
+    [
+        Input({"type": "individual-prompt", "index": ALL}, "value"),
+        Input({"type": "individual-answer", "index": ALL}, "value"),
+        Input("individual-iterations", "value"),
+        Input("individual-model-checklist", "value"),
+        Input("shuffle-checklist", "value"),
+    ]
+)
+def update_cost_estimate(prompts, answers, iterations, models, shuffle_checklist):
+    # Function to count words in a list of sentences
+    def count_words(sentences_list):
+        word_count = sum(len(sentence.split()) for sentence in sentences_list)
+        return word_count
+    
+    multiplier = 3 if "shuffle_options" in shuffle_checklist else 1
+    total_tokens = (count_words(prompts) + count_words(answers)) * iterations * multiplier
+    
+    estimated_cost = 0
+    if "gpt-3.5-turbo" in models:
+        estimated_cost += GPT_3_5_INPUT_COST * (total_tokens / 1000) + GPT_3_5_OUTPUT_COST * (1/1000)
+    if "gpt-4-1106-preview" in models:
+        estimated_cost += GPT_4_INPUT_COST * (total_tokens / 1000) + GPT_4_OUTPUT_COST * (1/1000)
+    if "llama-2-70b" in models:
+        estimated_cost += LLAMA_2_INPUT_COST * (total_tokens / 1000) + LLAMA_2_OUTPUT_COST * (1/1000)
+    
+    
+    cost_estimate = html.Div(
+        [
+            html.P(f"Estimated cost for Experiment: {estimated_cost:.2f} USD",
+                    id='cost-estimate',
+                    style={'text-align': 'center', 'marginBottom': '25px'}),
+            dbc.Tooltip(
+                "The cost depends on the number of tokens used in the experiment, the number of iterations, and the selected models. The cost is estimated based on the current token prices of the models. The cost for using the Replicate API (LLama-2-70b) can only be estimated and is approximately the same as for GPT-1101-Preview.",
+                target="cost-estimate",
+            )
+        ]
+    )
+    
+    return [cost_estimate]
+
+
+
+
+# Callback for shuffle option
+@dash.callback(
+    [
+        Output("shuffle-checklist-container", "children"),
+    ],
+    [
+        Input("num-scenarios", "value"),
+    ]
+)
+def update_shuffle_checklist(num_scenarios):
+    if num_scenarios == 1:
+        return [[dbc.Checklist(
+                    id="shuffle-checklist",
+                    options=[
+                        {"label": "Shuffle answer options", "value": "shuffle_options"}
+                    ],
+                    inline=False,
+                    style={'marginBottom': '20px'},
+                    inputStyle={'margin-right': '10px'},
+                    switch=True,
+                    persistence=True,
+                    persistence_type='session',
+                ),
+                dbc.Tooltip(
+                    "The order of the answer options will be shuffled two times if activated. This is to determine whether the order of the answer options has an influence on the answers of the models.",
+                    target="shuffle-checklist",
+                )
+                ]]
+    else:
+        return [html.Div(id="shuffle-checklist")]
+
     
 # Callback to run individual live experiment
 @dash.callback(
@@ -378,19 +532,13 @@ def update_individual_experiment(n_clicks, prompts, models, iterations, temperat
             columns=[{'name': col, 'id': col} for col in experiment.results_df.columns],
             data=experiment.results_df.to_dict('records'),
             style_table={'margin-top': '10px', 'margin-bottom': '30px'},
-            export_format='csv'
+            export_format='csv',
+            persistence=True,
+            persistence_type='session',
         )
 
         results = (
             [html.H2("Results:", style={'margin-top': '50px', 'margin-bottom': '30px'})] +
-            [
-                html.Div(
-                    [html.H6(f"The prompt used in scenario {i+1}:", style={'margin-bottom': '10px'})] +
-                    [html.P(paragraph, style={'margin-bottom': '5px'}) 
-                    for paragraph in experiment_prompt.split('\n')]
-                )
-                for i, experiment_prompt in enumerate(experiment.experiment_prompts)
-            ] +
             [html.Br()] +
             [output_table]
         )
@@ -408,7 +556,9 @@ def update_individual_experiment(n_clicks, prompts, models, iterations, temperat
                                 {"label": "Scenario", "value": "Scenario"},
                             ],
                             value="Model",
-                            style={'marginBottom': '20px'}
+                            style={'marginBottom': '20px'},
+                            persistence=True,
+                            persistence_type='session',
                         ),
                     ]
                 ),
@@ -446,7 +596,9 @@ def graph_settings(x_axis, data):
                         for scenario in df["Scenario"].unique()
                     ],
                     value=df["Scenario"].unique()[0],
-                    style={'marginBottom': '20px'}
+                    style={'marginBottom': '20px'},
+                    persistence=True,
+                    persistence_type='session',
                 ),
             ]
         )
@@ -461,6 +613,8 @@ def graph_settings(x_axis, data):
                         for model in df["Model"].unique()
                     ],
                     value=df["Model"].unique()[0],
+                    persistence=True,
+                    persistence_type='session',
                 ),
             ]
         )
@@ -488,124 +642,3 @@ def update_graph(x_axis, groupby, data, iterations, temperature):
     figure = plot_results(df, x_axis, groupby, iterations, temperature)
     
     return [figure]
-
-
-
-# 2 Callbacks to load preset values into the input elements
-# 1st Callback  to load preset values into the input elements 
-@dash.callback(
-    [
-        Output("num-scenarios", "value"),
-        Output("num-answer-options", "value"),
-        Output("individual-iterations", "value"),
-        Output("individual-model-checklist", "value"),
-        Output("individual-temperature", "value"),
-        Output("instruction-checklist", "value"),
-    ],
-    [Input("preset-dropdown", "value")]
-)
-def update_preset(selected_preset):
-    if not selected_preset:
-        raise PreventUpdate
-
-    preset_values = presets[selected_preset]
-    return (
-        preset_values["num_scenarios"],
-        preset_values["num_options"],
-        preset_values["iterations"],
-        preset_values["models"],
-        preset_values["temperature"],
-        preset_values["instruction_checklist"],
-        
-    )
-    
-# 2nd Callback to fill in the textareas
-@dash.callback(
-    [
-        Output({"type": "individual-prompt", "index": ALL}, "value"),
-        Output({"type": "individual-answer", "index": ALL}, "value"),
-        Output({"type": "instruction-text", "index": ALL}, "value"),
-        Output("shuffle-checklist", "value")
-    ],
-    [   
-        Input("preset-dropdown", "value")
-    ]
-)
-def update_preset(selected_preset):
-    if not selected_preset:
-        raise PreventUpdate
-
-    preset_values = presets[selected_preset]
-    return (
-        preset_values["prompts"],
-        preset_values["answer_texts"],
-        preset_values["instruction_text"],
-        preset_values["shuffle-checklist"],
-    )
-    
-    
-# Callback for cost estimate
-@dash.callback(
-    [
-        Output("cost-estimate", "children"),
-    ],
-    [
-        Input({"type": "individual-prompt", "index": ALL}, "value"),
-        Input({"type": "individual-answer", "index": ALL}, "value"),
-        Input("individual-iterations", "value"),
-        Input("individual-model-checklist", "value"),
-        Input("shuffle-checklist", "value"),
-    ]
-)
-def update_cost_estimate(prompts, answers, iterations, models, shuffle_checklist):
-    # Function to count words in a list of sentences
-    def count_words(sentences_list):
-        word_count = sum(len(sentence.split()) for sentence in sentences_list)
-        return word_count
-    
-    multiplier = 3 if "shuffle_options" in shuffle_checklist else 1
-    total_tokens = (count_words(prompts) + count_words(answers)) * iterations * multiplier
-    
-    estimated_cost = 0
-    if "gpt-3.5-turbo" in models:
-        estimated_cost += 0.001 * (total_tokens / 1000) + 0.002 * (1/1000)
-    if "gpt-4-1106-preview" in models:
-        estimated_cost += 0.01 * (total_tokens / 1000) + 0.03 * (1/1000)
-    
-    
-    cost_estimate = html.P(f"Estimated cost for OpenAI models: {estimated_cost:.2f} USD",
-                           style={'text-align': 'center', 'marginBottom': '25px'})
-    
-    return [cost_estimate]
-
-
-# Callback for shuffle option
-@dash.callback(
-    [
-        Output("shuffle-checklist-container", "children"),
-    ],
-    [
-        Input("num-scenarios", "value"),
-    ]
-)
-def update_shuffle_checklist(num_scenarios):
-    if num_scenarios == 1:
-        return [[dbc.Checklist(
-                    id="shuffle-checklist",
-                    options=[
-                        {"label": "Shuffle answer options", "value": "shuffle_options"}
-                    ],
-                    inline=False,
-                    style={'marginBottom': '20px'},
-                    inputStyle={'margin-right': '10px'},
-                    switch=True,
-                    persistence=True,
-                    persistence_type='session',
-                ),
-                dbc.Tooltip(
-                    "The order of the answer options will be shuffled two times. This is to determine whether the order of the answer options has an influence on the answers of the models.",
-                    target="shuffle-checklist",
-                )
-                ]]
-    else:
-        return [html.Div(id="shuffle-checklist")]
