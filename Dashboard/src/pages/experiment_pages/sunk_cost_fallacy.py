@@ -48,11 +48,28 @@ def plot_sunk_cost_1(selected_temperature, selected_sunk_cost):
     
     fig_sunk_cost.update_layout(
         barmode='group',
-        xaxis=dict(title='Model'),
-        yaxis=dict(title='Share', range=[0, 1.1]),
-        title=dict(text=f"Shares for Answer Options (Sunk Cost: ${selected_sunk_cost}, Temperature: {selected_temperature})",
-                   x=0.45),
-        legend=dict(),
+        xaxis=dict(
+            title='Model',
+            title_font=dict(size=18),
+        ),
+        yaxis=dict(
+            title='Share', 
+            range=[0, 1.1],
+            title_font=dict(size=18)
+        ),
+        title=dict(
+            text=f"Shares for Answer Options (Sunk Cost: ${selected_sunk_cost}, Temperature: {selected_temperature})",
+            x=0.43,
+            y = 0.9,
+            font=dict(size=22)
+        ),
+        legend=dict(
+            x=1.01,  
+            y=0.9,
+            font=dict(family='Arial', size=12, color='black'),
+            bordercolor='black',  
+            borderwidth=2
+        ),
         bargap=0.3  # Gap between models
     )
 
@@ -102,12 +119,30 @@ def plot_sunk_cost_2(selected_temperature, selected_model):
 
     fig.update_layout(
         barmode='group',
-        xaxis=dict(tickvals=np.arange(len(df.columns[cols_to_select:end_col+1])) + ((len(prompts) - 1) / 2 * bar_width),
-                ticktext=['$0', '$20', '$20 plus interest', '$75', '-$55']),
-        yaxis=dict(title='Share', range=[0, 1.1]),
-        title=dict(text=f'Shares for Answer Options (Model: {selected_model}, Temperature: {selected_temperature})',
-                   x=0.45),
-        legend=dict(),
+        xaxis=dict(
+            title='Answer Option',
+            tickvals=np.arange(len(df.columns[cols_to_select:end_col+1])) + ((len(prompts) - 1) / 2 * bar_width),
+            ticktext=['$0', '$20', '$20 plus interest', '$75', '-$55'],
+            title_font=dict(size=18),
+        ),
+        yaxis=dict(
+            title='Share', 
+            range=[0, 1.1],
+            title_font=dict(size=18)
+        ),
+        title=dict(
+            text=f'Shares for Answer Options (Model: {selected_model}, Temperature: {selected_temperature})',
+            x=0.45,
+            y = 0.9,
+            font=dict(size=22)
+        ),
+        legend=dict(
+            x=1.01,  
+            y=0.9,
+            font=dict(family='Arial', size=12, color='black'),
+            bordercolor='black',  
+            borderwidth=2, 
+        ),
         bargap=0.3  # Gap between bars
     )
 

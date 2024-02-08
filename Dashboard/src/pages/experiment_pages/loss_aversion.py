@@ -43,11 +43,31 @@ def plot_loss_aversion(selected_temperature):
     # Update layout
     fig.update_layout(
         barmode='group',
-        xaxis=dict(tickmode='array', tickvals=list(range(len(models))), ticktext=models),
-        yaxis=dict(title='Shares for "B"'),
-        title=dict(text='Shares for "B" (risk-seeking option) by Model and Scenario',
-                   x=0.45),
-        bargap=0.6  # Gap between bars
+        xaxis=dict(
+            title='Model',
+            tickmode='array', 
+            tickvals=list(range(len(models))), 
+            ticktext=models,
+            title_font=dict(size=18),  
+        ),
+        yaxis=dict(
+            title='Shares for "B"',
+            title_font=dict(size=18)
+        ),
+        title=dict(
+            text='Shares for "B" (risk-seeking option) by Model and Scenario',
+            x=0.45,
+            y = 0.9,
+            font=dict(size=22)
+        ),
+        legend=dict(
+            x=1.01,  
+            y=0.9,
+            font=dict(family='Arial', size=12, color='black'),
+            bordercolor='black',  
+            borderwidth=2,  
+        ),
+        bargap = 0.5
     )
     
     return fig
