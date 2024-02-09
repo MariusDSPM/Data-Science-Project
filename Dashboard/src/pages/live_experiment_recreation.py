@@ -32,7 +32,7 @@ from utils.experiment_functions import *
 from utils.plotting_functions import *
 
 
-dash.register_page(__name__, path='/experiment-recreation', name='Experiment Recreation', location='experiments')
+dash.register_page(__name__, path='/experiment-recreation', name='Experiment Recreation', location='below-experiments')
 
 
 
