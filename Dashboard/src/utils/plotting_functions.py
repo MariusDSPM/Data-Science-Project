@@ -274,7 +274,8 @@ def extract_dollar_amounts(answers):
 
 # Function to plot results of first experiment 
 def TU_plot_results(df):
- 
+    # Capitalize column names
+    df.columns = df.columns.str.capitalize() 
     # Transpose for plotting
     df = df.transpose()
     # Get original and model answers
@@ -291,6 +292,8 @@ def TU_plot_results(df):
     temperature = df.loc["Temperature"].iloc[0]
     # Get model name
     model = df.loc["Model"].iloc[0]
+    if model == "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3":
+        model = "llama-2-70b"
 
     # Compute percentage of $0:
     percent_0 = (prices.count("0")/n_observations)*100
@@ -309,7 +312,7 @@ def TU_plot_results(df):
             x = ["$0", "$5", "$10", "$15", "Other"],
             y = [percent_0, percent_5, percent_10, percent_15, percent_other],
             customdata = [n_observations, n_observations, n_observations, n_observations, n_observations], 
-            hovertemplate = "Percentage: %{y:.2f}%<br>Number of observations: %{customdata}<extra></extra>",
+            hovertemplate = "Percentage: %{y:.2f}%<br>Number of total observations: %{customdata}<extra></extra>",
             marker_color = "rgb(55, 83, 109)"
         ),
         go.Bar(
@@ -317,7 +320,7 @@ def TU_plot_results(df):
             x = ["$0", "$5", "$10", "$15", "Other"],
             y = [og_answers[0], og_answers[1], og_answers[2], 0, og_answers[3]], # 0 because no-one answered $15, but model did 
             customdata = [n_original, n_original, n_original, n_original, n_original],
-            hovertemplate = "Percentage: %{y:.2f}%<br>Number of observations: %{customdata}<extra></extra>",
+            hovertemplate = "Percentage: %{y:.2f}%<br>Number of total observations: %{customdata}<extra></extra>",
             marker_color = "rgb(26, 118, 255)"
         )
     ])
@@ -356,105 +359,157 @@ def TU_plot_results(df):
 
 # Function to plot results of second experiment
 def TU2_plot_results(df):
-    
-    # Select requested subset of results
 
     # Transpose for plotting
     df = df.transpose()
-    # Get temperature value 
-    temperature = df.loc["Temperature"].iloc[0]
     # Get model name
     model = df.loc["Model"].iloc[0]
+    # Get temperature value 
+    temperature = df.loc["Temperature"].iloc[0]
     # Get number of observations 
     n_observations = df.loc["Obs."].iloc[0] 
     # Get place
     place = df.loc["Place"].iloc[0]
     # Adjust name of place for plot title
     if place == "grocery":
-        place = "grocery store"
-
+        place = "Grocery store"
+    if place == "hotel":
+        place = "Hotel"
+    # Get income
+    income = df.loc["Income"].iloc[0]
+    if income == "0":
+        income = "No information"
     # Apply literal_eval to work with list of strings
     answers = df.loc["Answers"].apply(literal_eval).iloc[0]
     # Get stated WTP
     prices = extract_dollar_amounts(answers)
-    # Convert to float
-    prices = [float(price) for price in prices]
-    # Get max, mean and median
-    median = np.median(prices)
-    mean = np.mean(prices)
-    max = np.max(prices)
+    sorted_prices = sorted(prices, key=lambda x: float(x))
+    numeric_prices = [float(price) for price in prices]
+    # Get mean and median
+    mean = np.round(np.mean(numeric_prices),2).astype(str)
+    median = np.round(np.median(numeric_prices),2).astype(str)
+    # Get number of unique answers
+    num_unique_answers = len(set(prices))
+   
 
-    # Adjust prices so that every value above 30 is set to 30, deals with outliers
-    prices = [30.00 if price > 30 else price for price in prices]
-
-    # Create the histogram using custom bins
-    fig = go.Figure(data=[
-    go.Bar(
-        x = list(Counter(prices).keys()),
-        y = list(Counter(prices).values()),
-        name="Model answers",
-        customdata=[n_observations] * len(prices),
-        hovertemplate="Value: %{x}<br>Number of observations: %{y}<br>Number of total observations: %{customdata}<extra></extra>",
-        marker_color="rgb(55, 83, 109)",
-        width=0.4 ,  # Adjust the width of the bars if needed
-    ),
-    # Add vertical line for median
-    go.Scatter(
-        x = [median, median], #start and enf of x
-        y = [0, Counter(prices).most_common(1)[0][1]], # count of most common price
-        mode="lines",
-        name="Median",
-        line=dict(color="red", width=4, dash="dash"),
-        hovertemplate = "Median: %{x}<extra></extra>",
+    fig = go.Figure(data = [
+    go.Histogram(x = sorted_prices,
+                    customdata = [n_observations] * num_unique_answers,
+                    hovertemplate = "Price asked: $%{x} <br>Frequency: %{y}<br>Total answers: %{customdata}<br>Mean: $" + mean + "<br>Median: $" + median +"<extra></extra>",
+                    marker_color = "rgb(55, 83, 109)",
+                    name = f"Place: {place}<br>Income: {income}<br>Mean: ${mean}<br>Median: ${median}",
 ),
-    # Add vertical line for mean
-    go.Scatter(
-        x = [mean, mean], #start and enf of x
-        y = [0, Counter(prices).most_common(1)[0][1]], # count of most common price
-        mode="lines",
-        name="Mean",
-        line=dict(color="green", width=4, dash="dash"),
-        hovertemplate = "Mean: %{x}<extra></extra>",
-    )
-])
-
+    ])
 
     # Layout
     fig.update_layout(
-    xaxis = dict(
-        title = "Willingness to pay (USD)",
-        titlefont_size = 18,
-        tickfont_size = 16,
-        tickformat=".2f",
-    ),
-    yaxis = dict(
-        title = "Frequency",
-        titlefont_size = 18,
-        tickfont_size = 16,
-    ),
-    title = dict(
-    text =  f"Distribution of {model}'s WTP for beer at the {place} for temperature {temperature}",
-    x = 0.5, 
-    y = 0.95,
-    font_size = 18,
-    ),
-    legend=dict(
-        x=1.01, 
-        y=0.9,
-        font=dict(family='Arial', size=12, color='black'),
-        bordercolor='black',  
-        borderwidth=2,  
-    ),
-    showlegend = True,
-    width = 1000,
-    margin=dict(t=60)
+        xaxis=dict(
+            title="Price asked ($)",
+            titlefont_size=18,
+            tickfont_size=16,
+            tickformat=".2f",
+        ),
+        yaxis=dict(
+            title="Frequency",
+            titlefont_size=18,
+            tickfont_size=16,
+        ),
+        title=dict(
+            text=f"Distribution of {model}'s WTP for temperature {temperature}",
+            x=0.5,
+            y=0.95,
+            font_size=18,
+        ),
+        legend=dict(
+            x=1.01,  
+            y=0.9,
+            font=dict(family='Arial', size=16, color='black'),
+            bordercolor='black',  
+            borderwidth=2,           
+        ),
+        showlegend=True,
+        width=1000,
+        margin=dict(t=60),
     )
-    # Adjust x-axis labels to show 30+ to symbolize aggregation
-    fig.update_xaxes(
-    tickvals = sorted(fig.data[0].x),
-    ticktext=["$30+" if tick_value == 30.0 else tick_value for tick_value in sorted(set(fig.data[0].x))],
-)
+    
 
-    print(f"The maximum WTP stated by {model} for beer at the {place} for temperature {temperature} is ${max}.")
+    # Show the plot
+    return fig
+
+# Function to plot results of third experiment
+def TU3_plot_results(df):
+
+    # Transpose for plotting
+    df = df.transpose()
+    # Extract model name from the dataframe
+    model = df.loc["Model"].iloc[0]
+    if model == "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3":
+        model = "llama-2-70b"
+
+    # Get temperature value 
+    temperature = df.loc["Temperature"].iloc[0]
+    # Get number of observations 
+    n_observations = df.loc["Obs."].iloc[0]
+    # Extract model answers
+    answers = df.loc["Answers"].apply(literal_eval).iloc[0]
+    sorted_answers = sorted(answers, key=lambda x: float(x))
+    numeric_answers = [float(answer) for answer in answers]
+
+    # Get number of unique answers
+    num_unique_answers = len(set(answers))
+    # Get actual ticker price
+    actual_price = df.loc["Actual_price"].iloc[0]
+    # Get current market price
+    current_price = df.loc["Orientation_price"].iloc[0]
+    # Get price paid
+    initial_cost = df.loc["Initial_cost"].iloc[0]
+    # Get buyer 
+    buyer = df.loc["Buyer"].iloc[0].capitalize()
+    # Compute mean
+    mean = np.round(np.mean(numeric_answers),2).astype(str)
+    median = np.round(np.median(numeric_answers),2).astype(str)
+   
+
+    fig = go.Figure(data = [
+    go.Histogram(x = sorted_answers,
+                    customdata = [n_observations] * num_unique_answers,
+                    hovertemplate = "Price asked: $%{x} <br>Frequency: %{y}<br>Total answers: %{customdata}<br><extra></extra>",
+
+                    marker_color = "rgb(55, 83, 109)",
+                    name = f"Actual price: ${actual_price}<br>Initial costs: ${initial_cost}<br>Current price: ${current_price}<br>Buyer: {buyer}<br>Mean: ${mean}<br>Median: ${median}"),
+    ])
+
+    # Layout
+    fig.update_layout(
+        xaxis=dict(
+            title="Price asked ($)",
+            titlefont_size=18,
+            tickfont_size=16,
+            tickformat=".2f",
+        ),
+        yaxis=dict(
+            title="Frequency",
+            titlefont_size=18,
+            tickfont_size=16,
+        ),
+        title=dict(
+            text=f"Distribution of {model}'s answers for temperature {temperature}",
+            x=0.45,
+            y=0.95,
+            font_size=18,
+        ),
+        legend=dict(
+            x=1.01,  
+            y=0.9,
+            font=dict(family='Arial', size=16, color='black'),
+            bordercolor='black',  
+            borderwidth=2,           
+        ),
+        showlegend=True,
+        width=1000,
+        margin=dict(t=60),
+    )
+    
+
     # Show the plot
     return fig

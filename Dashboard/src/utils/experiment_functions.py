@@ -21,12 +21,12 @@ import pickle
 
 client = OpenAI()
 
-## Import and assign prompts for every experiment
-# Prospect Theory
+##### Import and assign prompts for every experiment
+### Prospect Theory
 with open('Dashboard/src/data/Input/PT_prompts.pkl', 'rb') as f:
     PT_prompts = pickle.load(f)
 
-# Prospect Theory 2
+### Prospect Theory 2
 # Scenario 1
 with open("Dashboard/src/data/Input/PT2_prompts_1.pkl", "rb") as file:
     PT2_prompts_1 = pickle.load(file)
@@ -43,47 +43,57 @@ with open("Dashboard/src/data/Input/PT2_prompts_3.pkl", "rb") as file:
 with open("Dashboard/src/data/Input/PT2_prompts_4.pkl", "rb") as file:
     PT2_prompts_4 = pickle.load(file)
 
-# Decoy Effect
+
+### Decoy Effect
 with open('Dashboard/src/data/Input/DE_prompts.pkl', 'rb') as f:
     DE_prompts = pickle.load(f)
 
-# Transaction Utility
+### Transaction Utility
 with open('Dashboard/src/data/Input/TU_prompts.pkl', 'rb') as f:
     TU_prompts = pickle.load(f)
 
-# Transaction Utility 2
+### Transaction Utility 2
 with open('Dashboard/src/data/Input/TU2_prompts.pkl', 'rb') as f:
     TU2_prompts = pickle.load(f)
 
+### Transaction Utility 3
+with open('Dashboard/src/data/Input/TU3_prompts.pkl', 'rb') as f:
+    TU3_prompts = pickle.load(f)
+
 ## Import and assign dictionaries for every experiment
-# Prospect Theory
+### Prospect Theory
 with open('Dashboard/src/data/Input/PT_dictionaries.pkl', 'rb') as f:
     PT_dictionaries = pickle.load(f)
 PT_experiment_prompts_dict, PT_prompt_ids_dict, PT_model_dict, PT_scenario_dict, PT_priming_dict, PT_results_dict, PT_answercount_dict = PT_dictionaries
 
-# Prospect Theory 2
+### Prospect Theory 2
 with open('Dashboard/src/data/Input/PT2_dictionaries.pkl', 'rb') as f:
     PT2_dictionaries = pickle.load(f)
 (PT2_experiment_prompts_dict, PT2_prices_dict, PT2_results_dict, PT2_model_dict, PT2_prompt_ids_dict,
 PT2_scenario_dict, PT2_configuration_dict) = PT2_dictionaries
 
-# Decoy Effect
+### Decoy Effect
 with open('Dashboard/src/data/Input/DE_dictionaries.pkl', 'rb') as f:
     DE_dictionaries = pickle.load(f)
 (DE_experiment_prompts_dict, DE_prompt_ids_dict, DE_model_dict, DE_og_results_dict, DE_answercount_dict,
   DE_scenario_dict, DE_priming_dict, DE_reorder_dict) = DE_dictionaries
 
-# Transaction Utility
+### Transaction Utility
 with open('Dashboard/src/data/Input/TU_dictionaries.pkl', 'rb') as f:
     TU_dictionaries = pickle.load(f)
 (TU_experiment_prompts_dict, TU_model_dict, TU_prompt_ids_dict, TU_initial_costs_dict, TU_orientation_prices_dict, TU_buyers_dict,
   TU_results_dict, TU_answercount_dict, TU_configurations_dict, TU_experiment_ids_dict) = TU_dictionaries
 
-# Transaction Utility 2
+### Transaction Utility 2
 with open('Dashboard/src/data/Input/TU2_dictionaries.pkl', 'rb') as f:
     TU2_dictionaries = pickle.load(f)
 TU2_experiment_prompts_dict, TU2_model_dict, TU2_prompt_ids_dict, TU2_places_dict, TU2_income_dict, TU2_configuration_dict = TU2_dictionaries
 
+### Transaction Utility 3
+with open('Dashboard/src/data/Input/TU3_dictionaries.pkl', 'rb') as f:
+    TU3_dictionaries = pickle.load(f)
+(TU3_experiment_prompts_dict, TU3_model_dict, TU3_prompt_ids_dict, TU3_actual_price_dict,
+                     TU3_initial_costs_dict, TU3_orientation_price_dict, TU3_configuration_dict, TU3_buyer_dict) = TU3_dictionaries
 
 
 
@@ -480,10 +490,11 @@ def TU_run_experiment_dashboard(experiment_id, n, temperature):
     n_observations = len(valid_prices)
 
     # Collect results 
-    results = pd.Dataframe([experiment_id, temperature, TU_model_dict[experiment_id], TU_initial_costs_dict[experiment_id], TU_orientation_prices_dict[experiment_id],
-                TU_buyers_dict[experiment_id], answers, n_observations, TU_configurations_dict[experiment_id], TU_results_dict[experiment_id], TU_answercount_dict[experiment_id]])
+    results = pd.DataFrame([experiment_id, temperature, TU_model_dict[experiment_id], TU_initial_costs_dict[experiment_id], TU_orientation_prices_dict[experiment_id],
+                TU_buyers_dict[experiment_id], f"{answers}", n_observations, TU_configurations_dict[experiment_id], f"{TU_results_dict[experiment_id]}", TU_answercount_dict[experiment_id]])
     results = results.set_index(pd.Index(
-        ["experiment_id", "temperature", "model", "initial_cost", "orientation_price", "buyer", "answers", "Obs.", "configuration", "original", "original_count"]))
+        ["Experiment_id", "Temperature", "Model", "Initial_cost", "Orientation_price", "Buyer", "Answers", "Obs.", "Configuration", "Original", "Original_count"]))
+    results = results.transpose()    
 
     # Give out results
     return results
@@ -514,12 +525,169 @@ def TU_run_experiment_llama_dashboard(experiment_id, n, temperature):
     n_observations = len(valid_prices)
 
     # Collect results 
-    results = pd.Dataframe([experiment_id, temperature, TU_model_dict[experiment_id], TU_initial_costs_dict[experiment_id], TU_orientation_prices_dict[experiment_id],
-               TU_buyers_dict[experiment_id], answers, n_observations, TU_configurations_dict[experiment_id], TU_results_dict[experiment_id], TU_answercount_dict[experiment_id]])
+    results = pd.DataFrame([experiment_id, temperature, TU_model_dict[experiment_id], TU_initial_costs_dict[experiment_id], TU_orientation_prices_dict[experiment_id],
+                TU_buyers_dict[experiment_id], f"{answers}", n_observations, TU_configurations_dict[experiment_id], f"{TU_results_dict[experiment_id]}", TU_answercount_dict[experiment_id]])
     results = results.set_index(pd.Index(
-        ["experiment_id", "temperature", "model", "initial_cost", "orientation_price", "buyer", "answers", "Obs.", "configuration", "original", "original_count"]))
-  
+        ["Experiment_id", "Temperature", "Model", "Initial_cost", "Orientation_price", "Buyer", "Answers", "Obs.", "Configuration", "Original", "Original_count"]))
+    results = results.transpose()    
+
     # Give out results
     return results
 
 ### Transaction Utility 2 ###
+
+# openAI models
+def TU2_run_experiment_dashboard(experiment_id, n, temperature):
+    
+    answers = []
+    for _ in range(n): 
+        response = client.chat.completions.create(
+            model = TU2_model_dict[experiment_id], 
+            max_tokens = 2,
+            temperature = temperature, # range is 0 to 2
+            messages = [
+            {"role": "system", "content": "Answer by only giving a single price in dollars and cents without an explanation."},        
+            {"role": "user", "content": 
+             f"{TU2_experiment_prompts_dict[experiment_id]} Answer by only giving a single price in dollars and cents without an explanation."}
+                   ])
+
+        # Store the answer in the list
+        answer = response.choices[0].message.content
+        answers.append(answer.strip())
+
+
+    # Extract valid prices from answers
+    valid_prices = extract_dollar_amounts(answers)
+
+    # Compute number of valid answers
+    n_observations = len(valid_prices)
+
+    # Collect results 
+    results = [experiment_id, temperature, TU2_model_dict[experiment_id], TU2_places_dict[experiment_id],
+                TU2_income_dict[experiment_id], f"{answers}", n_observations, TU2_configuration_dict[experiment_id]]
+    results = pd.DataFrame(results, index = ["Experiment_id", "Temperature", "Model", "Place", "Income", "Answers", "Obs.", "Configuration"]).T
+
+    # Give out results
+    return results
+
+# Llama model
+def TU2_run_experiment_llama_dashboard(experiment_id, n, temperature):
+    answers = []
+    for _ in range(n):
+        response = replicate.run(
+            TU2_model_dict[experiment_id],
+            input = {
+                "system_prompt":  "Answer by only giving a single price in dollars and cents without an explanation.",
+                "temperature": temperature,
+                "max_new_tokens": 10, 
+                "prompt": f"{TU2_experiment_prompts_dict[experiment_id]} Answer by only giving a single price in dollars and cents without an explanation."
+            }
+        )
+        # Grab answer and append to list
+        answer = "" # Set to empty string, otherwise it would append the previous answer to the new one
+        for item in response:
+            answer = answer + item
+        answers.append(answer.strip())
+
+   # Extract valid prices from answers
+    valid_prices = extract_dollar_amounts(answers)
+
+    # Compute number of valid answers
+    n_observations = len(valid_prices)
+
+    # Collect results 
+    results = [experiment_id, temperature, TU2_model_dict[experiment_id], TU2_places_dict[experiment_id],
+                TU2_income_dict[experiment_id], f"{answers}", n_observations, TU2_configuration_dict[experiment_id]]
+    results = pd.DataFrame(results, index = ["Experiment_id", "Temperature", "Model", "Place", "Income", "Answers", "Obs.", "Configuration"]).T
+    
+    # Give out results
+    return results
+
+### Transaction Utility 3 ###
+
+# openAI models
+def TU3_run_experiment_dashboard(experiment_id, n, temperature):
+    
+    answers = []
+    for _ in range(n): 
+        response = client.chat.completions.create(
+            model = TU3_model_dict[experiment_id], 
+            max_tokens = 2,
+            temperature = temperature, # range is 0 to 2
+            messages = [
+            {"role": "system", "content": "Answer by only giving a single price in dollars and cents without an explanation."},        
+            {"role": "user", "content": 
+             f"{TU3_experiment_prompts_dict[experiment_id]} Answer by only giving a single price in dollars and cents without an explanation."}
+                   ])
+
+        # Store the answer in the list
+        answer = response.choices[0].message.content
+        answers.append(answer.strip())
+
+    # Extract valid prices from answers
+    valid_prices = extract_dollar_amounts(answers)
+
+    # Compute number of valid answers
+    n_observations = len(valid_prices)
+
+    # Collect results 
+    results = pd.DataFrame([experiment_id, temperature, TU3_model_dict[experiment_id], TU3_actual_price_dict[experiment_id], TU3_initial_costs_dict[experiment_id],
+                TU3_orientation_price_dict[experiment_id], TU3_configuration_dict[experiment_id], n_observations, f"{valid_prices}", TU3_buyer_dict[experiment_id]])
+    results = results.set_index(pd.Index(["Experiment_id", "Temperature", "Model", "Actual_price", "Initial_cost", "Orientation_price", "Configuration", "Obs.", "Answers", "Buyer"]))
+    results = results.transpose()
+    
+
+
+
+    # Give out results
+    return results
+
+# Llama model
+def TU3_run_experiment_llama_dashboard(experiment_id, n, temperature):
+    answers = []
+    for _ in range(n):
+        response = replicate.run(
+            TU3_model_dict[experiment_id],
+            input = {
+                "system_prompt":  "Answer by only giving a single price in dollars and cents without an explanation.",
+                "temperature": temperature,
+                "max_new_tokens": 10, 
+                "prompt": f"{TU3_experiment_prompts_dict[experiment_id]} Answer by only giving a single price in dollars and cents without an explanation."
+            }
+        )
+        # Grab answer and append to list
+        answer = "" # Set to empty string, otherwise it would append the previous answer to the new one
+        for item in response:
+            answer = answer + item
+        answers.append(answer.strip())
+   
+    # Extract valid prices from answers
+    valid_prices = extract_dollar_amounts(answers)
+
+    # Compute number of valid answers
+    n_observations = len(valid_prices)
+
+    # Collect results 
+    results = pd.DataFrame([experiment_id, temperature, TU3_model_dict[experiment_id], TU3_actual_price_dict[experiment_id], TU3_initial_costs_dict[experiment_id],
+                TU3_orientation_price_dict[experiment_id], TU3_configuration_dict[experiment_id], n_observations, f"{valid_prices}", TU3_buyer_dict[experiment_id]])
+    results = results.set_index(pd.Index(["Experiment_id", "Temperature", "Model", "Actual_price", "Initial_cost", "Orientation_price", "Configuration", "Obs.", "Answers", "Buyer"]))
+    results = results.transpose()
+    
+
+    # Give out results
+    return results
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
