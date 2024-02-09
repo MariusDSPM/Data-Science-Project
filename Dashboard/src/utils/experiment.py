@@ -63,7 +63,7 @@ class Experiment:
                     self.model_answers = self.run_experiment_with_openai(model, prompt, instruction)
                 
                 # Store answers of corresponding model and scenario in a dictionary
-                if model not in self.model_answers_dict.keys():
+                if model not in self.raw_model_answers_dict.keys():
                     self.raw_model_answers_dict[model] = {i: self.model_answers}
                 else:
                     self.raw_model_answers_dict[model][i] = self.model_answers

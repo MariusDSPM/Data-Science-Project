@@ -331,7 +331,7 @@ def update_individual_experiment(n_clicks, prompts, models, iterations, temperat
                     sublist = generate_nested_html(value)
                     items.append(html.Li([html.Strong(key + ": "), html.Ul(sublist)]))
                 else:
-                    items.append(html.Li([html.Strong(str(key) + ": "), str(value)]))
+                    items.append(html.Li([html.Strong(f"Scenario {key+1}: "), str(value)]))
             return items
         
         # Generate raw model answers
