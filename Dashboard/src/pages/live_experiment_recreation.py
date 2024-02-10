@@ -19,6 +19,8 @@ from openai import OpenAI
 import openai
 from io import StringIO
 import pandas as pd
+from openai import OpenAI
+from replicate.client import Client
 
 
 
@@ -33,16 +35,55 @@ dash.register_page(__name__, path='/experiment-recreation', name='Experiment Rec
 
 
 
-
 ### Layout ###
 layout = [
     html.H1("Live Experiment Recreation", className="page-heading"),
     html.Hr(),
+    dcc.Markdown("""
+           On this page you can recreate the findings of our experiments concerning:
+           * Prospect Theory
+           * Prospect Theory 2: Odd numbers and unfair scenarios
+           * Decoy Effect
+           * Transaction Utility 1: Spare hockey game ticket
+           * Transaction Utility 2: Hockey game ticket with alternative numbers
+           * Transaction Utility 3: Beer from hotel vs. grocery store \n
+            You can choose the desired experiment configuration from the dropdowns and the prompts will automatically be adjusted. After that, you will
+            need to select the number of desired requests (i.e. how often the LLM should answer the same prompt) and a temperature value. 
+            After hitting "Run the experiment", the results will automatically be visualized and you can download the raw results in form of a csv-file.
+            """),
+        
+            html.Div(
+            [
+                dbc.Input(
+                    id='openai-api-key', 
+                    placeholder="OpenAI API Key", 
+                    type="password", 
+                    persistence=True, 
+                    persistence_type='session', 
+                    style={'width': '30%'}),
+                dbc.FormText("You'll need an OpenAI API key to use GPT-3.5-Turbo and GPT-4-1106-Preview. You can get one from the OpenAI website (https://platform.openai.com)."),
+            ],
+        ),
+        html.Br(),
+        html.Div(
+            [
+                dbc.Input(
+                    id='replicate-api-token', 
+                    placeholder="Replicate API Key", 
+                    type="password", 
+                    persistence=True, 
+                    persistence_type='session', 
+                    style={'width': '30%'}),
+                dbc.FormText("You'll need a Replicate API key to use Llama-2-70b. You can get one from the Replicate website (https://replicate.com)."),
+            ],
+        ),
+        html.Br(),
+        html.Hr(),
 ### Prospect Theory 1 ###
     html.H2("Prospect Theory Live Experiment"), 
     html.Hr(),
-    html.P("""Choose an experiment configuration from the options below and run the experiment yourself. You can choose 4 different scenarios, 3 different models and 
-           primed vs. unprimed prompts."""),
+    dcc.Markdown("""To look up the original study design of the Prospect Theory experiments, as well as the implementation for the LLMs, 
+                 you can visit the [Prospect Theory page](/prospect-theory)."""),
     html.Br(),
     html.Div(
         children=[
@@ -88,10 +129,15 @@ layout = [
                             type = "number",
                             value = 1, 
                             min = 0, 
-                            max = 100, 
+                            max = 500, 
                             step = 1,
                         style={'width': '56%', 'margin': 'auto', 'margin-bottom': '5px'},
-                    ),      
+                    ),     
+                    dbc.Tooltip(
+                    """The number of requests determines how often the same prompt is answered by the LLM. A higher number of requests will
+                      however also result in higher costs. The maximum input value is set to 500.""",
+                    target="prospect1-iteration-input",
+                     ),   
                     html.Div(
                         [
                                 html.H6("Select Temperature value"),
@@ -107,6 +153,10 @@ layout = [
                                     persistence_type='session',
                                         ),
                         ],
+                    ),
+                    dbc.Tooltip(
+                        "The temperature value controls the randomness of the models' responses. A higher temperature value will result in more random answers, while a lower temperature value will result in more deterministic responses.",
+                        target="prospect1-temperature-slider",
                     ),
 
                     # Add a button to trigger calback
@@ -132,6 +182,8 @@ layout = [
 ### Prospect Theory 2 ###
     html.H2("Prospect Theory 2 Live Experiment: Odd numbers and unfair scenarios"), 
     html.Hr(),
+        dcc.Markdown("""To look up the original study design of the second Prospect Theory experiment, as well as the implementation for the LLMs, 
+                 you can visit the [Prospect Theory page](/prospect-theory)."""),
     html.Br(),
     html.Div(
         children=[
@@ -180,10 +232,15 @@ layout = [
                             type = "number",
                             value = 1, 
                             min = 0, 
-                            max = 100, 
+                            max = 500, 
                             step = 1,
                         style={'width': '56%', 'margin': 'auto', 'margin-bottom': '5px'},
-                    ),      
+                    ),     
+                    dbc.Tooltip(
+                    """The number of requests determines how often the same prompt is answered by the LLM. A higher number of requests will
+                      however also result in higher costs. The maximum input value is set to 500.""",
+                    target="prospect2-iteration-input",
+                     ),   
                     html.Div(
                         [
                                 html.H6("Select Temperature value"),
@@ -200,6 +257,11 @@ layout = [
                                         ),
                         ],
                     ),
+                    dbc.Tooltip(
+                        "The temperature value controls the randomness of the models' responses. A higher temperature value will result in more random answers, while a lower temperature value will result in more deterministic responses.",
+                        target="prospect2-temperature-slider",
+                    ),
+
 
                     # Add a button to trigger calback
                     dbc.Button('Run the experiment', id = 'prospect2-update-button', n_clicks = None),
@@ -224,6 +286,8 @@ layout = [
 ########## Decoy Effect ##########
     html.H2("Decoy Effect Live Experiment"), 
     html.Hr(),
+    dcc.Markdown("""To look up the original study design of the Decoy Effect experiments, as well as the implementation for the LLMs, 
+                 you can visit the [Decoy Effect page](/decoy-effect)."""),
     html.Br(),
     html.Div(
         children=[
@@ -276,10 +340,15 @@ layout = [
                         type = "number",
                         value = 1, 
                         min = 0, 
-                        max = 100, 
+                        max = 500, 
                         step = 1,
                         style={'width': '56%', 'margin': 'auto', 'margin-bottom': '5px'},
-                    ),                  
+                    ),  
+                    dbc.Tooltip(
+                    """The number of requests determines how often the same prompt is answered by the LLM. A higher number of requests will
+                      however also result in higher costs. The maximum input value is set to 500.""",
+                    target="decoy-iteration-input",
+                     ),                 
                     html.Div(
                         [
                                 html.H6("Select Temperature value"),
@@ -296,6 +365,11 @@ layout = [
                                         ),
                         ],
                     ),
+                    dbc.Tooltip(
+                        "The temperature value controls the randomness of the models' responses. A higher temperature value will result in more random answers, while a lower temperature value will result in more deterministic responses.",
+                        target="decoy-temperature-slider",
+                    ),
+
 
                     # Add a button to trigger calback
                     dbc.Button('Run the experiment', id = 'decoy-update-button', n_clicks = None),
@@ -318,8 +392,10 @@ layout = [
     html.Hr(),   
 
     ########## Transaction Utility  ##########
-    html.H2("Transaction Utility Live Experiment: Hockey game ticket"), 
+    html.H2("Transaction Utility Live Experiment 1: Hockey game ticket"), 
     html.Hr(),
+    dcc.Markdown("""To look up the original study design of the Transaction Utility experiments, as well as the implementation for the LLMs, 
+                 you can visit the [Transaction Utility page](/transaction-utility)."""),
     html.Br(),
     html.Div(
         children=[
@@ -374,9 +450,14 @@ layout = [
                         type = "number",
                         value = 1, 
                         min = 0, 
-                        max = 100, 
+                        max = 500, 
                         step = 1,
                         style={'width': '56%', 'margin': 'auto', 'margin-bottom': '5px'},
+                    ), 
+                    dbc.Tooltip(
+                    """The number of requests determines how often the same prompt is answered by the LLM. A higher number of requests will
+                      however also result in higher costs. The maximum input value is set to 500.""",
+                    target="tu1-iteration-input",
                     ), 
                     html.Div(
                         [
@@ -392,6 +473,11 @@ layout = [
                             ),
                         ],
                     ),
+                    dbc.Tooltip(
+                        "The temperature value controls the randomness of the models' responses. A higher temperature value will result in more random answers, while a lower temperature value will result in more deterministic responses.",
+                        target="tu1-temperature-slider",
+                    ),
+
 
                     # Add a button to trigger calback
                     dbc.Button('Run the experiment', id = 'tu1-update-button', n_clicks = None),
@@ -417,6 +503,9 @@ layout = [
     ########## Transaction Utility 3 (listed as 2 for better comparison) ##########
     html.H2("Transaction Utility Live Experiment 2: Hockey game ticket with alternative numbers"), 
     html.Hr(),
+    dcc.Markdown("""To look up the original study design of the second Transaction Utility experiment, as well as the implementation for the LLMs, 
+                 you can visit the [Transaction Utility page](/transaction-utility)."""),
+    html.Br(),
     html.H3("Scenario 1: Price scaled by factor Pi"),
     html.Br(),
     html.Div(
@@ -472,9 +561,14 @@ layout = [
                         type = "number",
                         value = 1, 
                         min = 0, 
-                        max = 100, 
+                        max = 500, 
                         step = 1,
                         style={'width': '56%', 'margin': 'auto', 'margin-bottom': '5px'},
+                    ), 
+                    dbc.Tooltip(
+                    """The number of requests determines how often the same prompt is answered by the LLM. A higher number of requests will
+                      however also result in higher costs. The maximum input value is set to 500.""",
+                    target="tu3-iteration-input",
                     ), 
                     html.Div(
                         [
@@ -490,6 +584,11 @@ layout = [
                             ),
                         ],
                     ),
+                    dbc.Tooltip(
+                        "The temperature value controls the randomness of the models' responses. A higher temperature value will result in more random answers, while a lower temperature value will result in more deterministic responses.",
+                        target="tu3-temperature-slider",
+                    ),
+
 
                     # Add a button to trigger calback
                     dbc.Button('Run the experiment', id = 'tu3-update-button', n_clicks = None),
@@ -567,9 +666,14 @@ layout = [
                         type = "number",
                         value = 1, 
                         min = 0, 
-                        max = 100, 
+                        max = 500, 
                         step = 1,
                         style={'width': '56%', 'margin': 'auto', 'margin-bottom': '5px'},
+                    ), 
+                    dbc.Tooltip(
+                    """The number of requests determines how often the same prompt is answered by the LLM. A higher number of requests will
+                      however also result in higher costs. The maximum input value is set to 500.""",
+                    target="tu3-iteration-input2",
                     ), 
                     html.Div(
                         [
@@ -585,6 +689,11 @@ layout = [
                             ),
                         ],
                     ),
+                    dbc.Tooltip(
+                        "The temperature value controls the randomness of the models' responses. A higher temperature value will result in more random answers, while a lower temperature value will result in more deterministic responses.",
+                        target="tu3-temperature-slider2",
+                    ),
+
 
                     # Add a button to trigger calback
                     dbc.Button('Run the experiment', id = 'tu3-update-button2', n_clicks = None),
@@ -609,6 +718,8 @@ layout = [
     html.Hr(),
     html.H2("Transaction Utility expriment 3: Beer from hotel vs. grocery store"),
     html.Hr(),
+    dcc.Markdown("""To look up the original study design of the third Transaction Utility experiment, as well as the implementation for the LLMs, 
+                 you can visit the [Transaction Utility page](/transaction-utility)."""),
     html.Br(),
     html.Div(
         children=[
@@ -654,9 +765,14 @@ layout = [
                         type = "number",
                         value = 1, 
                         min = 0, 
-                        max = 100, 
+                        max = 500, 
                         step = 1,
                         style={'width': '56%', 'margin': 'auto', 'margin-bottom': '5px'},
+                    ), 
+                    dbc.Tooltip(
+                    """The number of requests determines how often the same prompt is answered by the LLM. A higher number of requests will
+                      however also result in higher costs. The maximum input value is set to 500.""",
+                    target="tu2-iteration-input",
                     ), 
                     html.Div(
                         [
@@ -671,6 +787,11 @@ layout = [
                             ),
                         ],
                     ),
+                    dbc.Tooltip(
+                        "The temperature value controls the randomness of the models' responses. A higher temperature value will result in more random answers, while a lower temperature value will result in more deterministic responses.",
+                        target="tu2-temperature-slider",
+                    ),
+
 
                     # Add a button to trigger calback
                     dbc.Button('Run the experiment', id = 'tu2-update-button', n_clicks = None),
@@ -702,9 +823,11 @@ layout = [
      State("prospect1-model-dropdown", "value"),
      State("prospect1-priming-dropdown", "value"),
      State("prospect1-iteration-input", "value"),
-     State("prospect1-temperature-slider", "value")]
+     State("prospect1-temperature-slider", "value"),
+     State("openai-api-key", "value"),
+     State("replicate-api-token", "value")]
      )
-def update_prospect_live(n_clicks, selected_scenario, selected_model, selected_priming, selected_iterations, selected_temperature):
+def update_prospect_live(n_clicks, selected_scenario, selected_model, selected_priming, selected_iterations, selected_temperature, openai_key, replicate_token):
     # Check if the button was clicked
     if n_clicks is not None:
         if selected_scenario == 1 and selected_model == "gpt-3.5-turbo" and selected_priming == 0:
@@ -760,9 +883,9 @@ def update_prospect_live(n_clicks, selected_scenario, selected_model, selected_p
         
         # Run Experiment for selected parameters
         if selected_model == "llama-2-70b":
-            results, probs = PT_run_experiment_llama_dashboard(experiment_id, selected_iterations, selected_temperature)
+            results, probs = PT_run_experiment_llama_dashboard(experiment_id, selected_iterations, selected_temperature, replicate_token)
         else:
-            results, probs = PT_run_experiment_dashboard(experiment_id, selected_iterations, selected_temperature)
+            results, probs = PT_run_experiment_dashboard(experiment_id, selected_iterations, selected_temperature, openai_key)
         n_clicks = None
         
         prompt = html.P(f"The prompt used in this experiment is: {PT_experiment_prompts_dict[experiment_id]}")

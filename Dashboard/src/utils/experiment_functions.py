@@ -8,6 +8,7 @@
 
 # Import required libraries
 from openai import OpenAI
+from replicate.client import Client
 import openai
 import matplotlib.pyplot as plt
 import os 
@@ -19,7 +20,8 @@ from ast import literal_eval
 import plotly.graph_objects as go
 import pickle
 
-client = OpenAI()
+##### Set clients for API calls
+
 
 ##### Import and assign prompts for every experiment
 ### Prospect Theory
@@ -100,7 +102,7 @@ with open('Dashboard/src/data/Input/TU3_dictionaries.pkl', 'rb') as f:
 ### Prospect Theory ### 
 
 # openAI models
-def PT_run_experiment_dashboard(experiment_id, n, temperature):
+def PT_run_experiment_dashboard(experiment_id, n, temperature, openai_key):
 
     """
     Function to query ChatGPT multiple times with a survey having answers designed as: A, B, C.
@@ -115,9 +117,10 @@ def PT_run_experiment_dashboard(experiment_id, n, temperature):
         results (list): List containing count of answers for each option, also containing experiment_id, temperature and number of observations
         probs (list): List containing probability of each option being chosen, also containing experiment_id, temeperature and number of observations
     """
-    
+    print("Received API key:", openai_key)
     answers = []
     for _ in range(n): 
+        client = OpenAI(api_key=openai_key)
         response = client.chat.completions.create(
             model = PT_model_dict[experiment_id], 
             max_tokens = 1,
@@ -162,9 +165,11 @@ def PT_run_experiment_dashboard(experiment_id, n, temperature):
     return results, probs
 
 # LLama model
-def PT_run_experiment_llama_dashboard(experiment_id, n, temperature):
+def PT_run_experiment_llama_dashboard(experiment_id, n, temperature, replicate_token):
+    print("Received API key:", replicate_token)
     answers = []
     for _ in range(n):
+        replicate = Client(api_token = replicate_token)
         response = replicate.run(
             PT_model_dict[experiment_id],
             input = {
@@ -216,7 +221,7 @@ def PT_run_experiment_llama_dashboard(experiment_id, n, temperature):
 ### Prospect Theory 2 ###
 
 # openAI models
-def PT2_run_experiment_dashboard(experiment_id, n, temperature):
+def PT2_run_experiment_dashboard(experiment_id, n, temperature, openai_key):
 
     """
     Function to query ChatGPT multiple times with a survey having answers designed as: A, B, C.
@@ -274,7 +279,7 @@ def PT2_run_experiment_dashboard(experiment_id, n, temperature):
     return results, probs
 
 # Llama model
-def PT2_run_experiment_llama_dashboard(experiment_id, n, temperature):
+def PT2_run_experiment_llama_dashboard(experiment_id, n, temperature, replicate_key):
     answers = []
     for _ in range(n):
         response = replicate.run(
@@ -356,7 +361,7 @@ def DE_correct_answers(answers: list, experiment_id: str):
 
 # Functions to run the experiment
 # openAI models
-def DE_run_experiment_dashboard(experiment_id: int, n: int, temperature: int):
+def DE_run_experiment_dashboard(experiment_id: int, n: int, temperature: int, openai_key):
     """
     Function to query ChatGPT multiple times with a survey having answers designed as: A, B, C.
     
@@ -411,7 +416,7 @@ def DE_run_experiment_dashboard(experiment_id: int, n: int, temperature: int):
     return results, probs 
 
 # Llama model
-def DE_run_experiment_llama_dashboard(experiment_id, n, temperature):
+def DE_run_experiment_llama_dashboard(experiment_id, n, temperature, replicate_key):
     answers = []
     for _ in range(n):
         response = replicate.run(
@@ -466,7 +471,7 @@ def extract_dollar_amounts(answers):
     return prices
 
 # openAI models
-def TU_run_experiment_dashboard(experiment_id, n, temperature):
+def TU_run_experiment_dashboard(experiment_id, n, temperature, openai_key):
     
     answers = []
     for _ in range(n): 
@@ -501,7 +506,7 @@ def TU_run_experiment_dashboard(experiment_id, n, temperature):
     return results
 
 # Llama model
-def TU_run_experiment_llama_dashboard(experiment_id, n, temperature):
+def TU_run_experiment_llama_dashboard(experiment_id, n, temperature, replicate_key):
     answers = []
     for _ in range(n):
         response = replicate.run(
@@ -538,7 +543,7 @@ def TU_run_experiment_llama_dashboard(experiment_id, n, temperature):
 ### Transaction Utility 2 ###
 
 # openAI models
-def TU2_run_experiment_dashboard(experiment_id, n, temperature):
+def TU2_run_experiment_dashboard(experiment_id, n, temperature, openai_key):
     
     answers = []
     for _ in range(n): 
@@ -572,7 +577,7 @@ def TU2_run_experiment_dashboard(experiment_id, n, temperature):
     return results
 
 # Llama model
-def TU2_run_experiment_llama_dashboard(experiment_id, n, temperature):
+def TU2_run_experiment_llama_dashboard(experiment_id, n, temperature, replicate_key):
     answers = []
     for _ in range(n):
         response = replicate.run(
@@ -607,7 +612,7 @@ def TU2_run_experiment_llama_dashboard(experiment_id, n, temperature):
 ### Transaction Utility 3 ###
 
 # openAI models
-def TU3_run_experiment_dashboard(experiment_id, n, temperature):
+def TU3_run_experiment_dashboard(experiment_id, n, temperature, openai_key):
     
     answers = []
     for _ in range(n): 
@@ -644,7 +649,7 @@ def TU3_run_experiment_dashboard(experiment_id, n, temperature):
     return results
 
 # Llama model
-def TU3_run_experiment_llama_dashboard(experiment_id, n, temperature):
+def TU3_run_experiment_llama_dashboard(experiment_id, n, temperature, replicate_key):
     answers = []
     for _ in range(n):
         response = replicate.run(
