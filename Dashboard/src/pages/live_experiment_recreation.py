@@ -18,6 +18,13 @@ import os
 from openai import OpenAI
 import openai
 
+# Get openAI API key (previously saved as environmental variable)
+openai.api_key = os.environ["OPENAI_API_KEY"]
+
+# Set client
+client = OpenAI()
+
+
 
 ##  Import every function in utils.experiment_functions
 from utils.experiment_functions import *
