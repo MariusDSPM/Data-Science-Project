@@ -112,6 +112,11 @@ layout = dbc.Container(
                                                             value=20,
                                                             style={'width': '100%', 'margin': 'auto', 'margin-bottom': '15px'}
                                                         ),
+                                                        dbc.Tooltip(
+                                                        """The maximum number of tokens the model should generate. Note, that this is a hard cut-off limit, meaning the
+                                                        models will not adjust their answers to fit the token limit. Once the limit is reached, the text generation will stop mid-sentence.""",
+                                                        target="chatbot-max-tokens",
+                                                        ),   
                                                     ],
                                                     width=12,
                                                 ),
@@ -129,6 +134,11 @@ layout = dbc.Container(
                                                             persistence=True,
                                                             persistence_type='session',
                                                         ),
+                                                        dbc.Tooltip(
+                                                        """The temperature value controls the randomness of the models' responses. A higher temperature value
+                                                          will result in more random answers, while a lower temperature value will result in more deterministic responses.""",
+                                                        target="chatbot-temperature-slider",
+                                                        ),  
                                                     ],
                                                     width=12,
                                                     style={'width': '100%', 'marginBottom': '40px'},

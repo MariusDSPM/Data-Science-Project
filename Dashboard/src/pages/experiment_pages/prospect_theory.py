@@ -2,6 +2,7 @@
 import pandas as pd
 import dash
 from dash import Input, Output, dcc, html
+import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 from PIL import Image
 from ast import literal_eval
@@ -65,39 +66,45 @@ PT2_experiment_prompts_dict = PT2_dictionaries[0]
 layout = [
      html.H1("Prospect Theory and Mental Accounting Experiment", className="page-heading"),
      html.Hr(),
-     html.P(["""According to Prospect Theory and Mental Accounting, financial gains and losses are booked into different fictitious accounts. On top of that, 
-            relative to a reference point, losses weigh more heavily than gains and the perceived sum of two individual gains/losses will, in absolute terms, be larger than 
-            one single gain/loss of the same amount. In the context of Marketing, four main rules can be derived by this theory:""",
-            html.Br(),
-            html.Br(),
-            "1) Segregation of gains",
-            html.Br(),
-            "2) Integration of losses",
-            html.Br(), 
-            "3) Cancellation of losses against larger gains",
-            html.Br(),
-            "4) Segregation of silver linings",
-            html.Br(),
-            html.Br(),
-            """One possible practical implication each of these rules hold, is each reflected in the different scenarios we examine below.""",
-            html.Br(),
-            """In order to research how Large Language models react to this kind of experiment, we queried multiple models over different temperature values and used either primed 
-            or unprimed prompts. The results of our experiments are visualized below. The original results are taken
-            from Thaler, Richard (1985), “Mental Accounting and Consumer Choice,” Marketing Science, 4 (3), 199–214 and the prompts we query the Language Models with are
-            constructed so that we can stay as close to the original phrasing as possible, while still instructing the models sufficiently well to produce meaningful results.
-            For every scenario, the participants could decide on either Mister A, Mister B or a No-difference option.
-            In the case of primed experiments, we instructed the model to be a market researcher, that knows about Prospect Theory and Mental Accounting.""",
-            html.Br(),
-            html.Br(),
-            ]),
-
-html.H2("Experiment 1: Recreating the original study"),
+     dbc.Accordion(
+         [
+        dbc.AccordionItem(
+            html.P(["""According to Prospect Theory and Mental Accounting, financial gains and losses are booked into different fictitious accounts. On top of that, 
+                    relative to a reference point, losses weigh more heavily than gains and the perceived sum of two individual gains/losses will, in absolute terms, be larger than 
+                    one single gain/loss of the same amount. In the context of Marketing, four main rules can be derived by this theory:""",
+                    html.Br(),
+                    html.Br(),
+                    "1) Segregation of gains",
+                    html.Br(),
+                    "2) Integration of losses",
+                    html.Br(), 
+                    "3) Cancellation of losses against larger gains",
+                    html.Br(),
+                    "4) Segregation of silver linings",
+                    html.Br(),
+                    html.Br(),
+                    """One possible practical implication each of these rules hold, is each reflected in the different scenarios we examine below."""]),
+                    title = "Experiment Description"),
+        dbc.AccordionItem(
+                    html.P(["""In order to research how Large Language models react to this kind of experiment, we queried multiple models over different temperature values and used either primed 
+                    or unprimed prompts. The results of our experiments are visualized below. The original results are taken
+                    from Thaler, Richard (1985), “Mental Accounting and Consumer Choice,” Marketing Science, 4 (3), 199–214 and the prompts we query the Language Models with are
+                    constructed so that we can stay as close to the original phrasing as possible, while still instructing the models sufficiently well to produce meaningful results.
+                    For every scenario, the participants could decide on either Mister A, Mister B or a No-difference option.
+                    In the case of primed experiments, we instructed the model to be a market researcher, that knows about Prospect Theory and Mental Accounting."""]),
+                    title = "Implementation of the experiment"),
+                    
+         ],
+        start_collapsed=True,
+        ),
 html.Br(),
+html.Hr(),
+html.H2("Experiment 1: Recreating the original study"),
+html.Hr(),
 # Scenario 1: Segregation of gains
 html.Div(
     children=[
         html.H3("Scenario 1: Segregation of gains"),
-        html.Hr(),
         html.Div(
             children=[
                 html.P(
@@ -154,6 +161,12 @@ html.Div(
                             value=0.5,
                             tooltip={'placement': 'top'},
                             ),
+                        dbc.Tooltip(
+                        """Note: For both openAI models, setting a temperature of 0 is possible. However, for the Llama model, a temperature of 0
+                          is not a valid input parameter. The minimum temperature value for the Llama model is 0.01. Therefore, although it is possible
+                            to select both values for every model, 0 only works for the openAI models, while 0.01 only works for the Llama model.""",
+                        target="prospect-scenario1-temperature-slider",
+                    ),                            
                         ],
                     ),
             ],
@@ -169,12 +182,11 @@ html.Div(
     style={'textAlign': 'center', 'margin': '20px', 'margin': 'auto'},
     )]),
 
-    
+html.Hr(),    
 # Scenario 2: Integration of losses
 html.Div(
     children=[
         html.H3("Scenario 2: Integration of losses"),
-        html.Hr(),
         html.Div(
             children=[
                 html.P(
@@ -239,6 +251,12 @@ html.Div(
                             value=0.5,
                             tooltip={'placement': 'top'},
                             ),
+                        dbc.Tooltip(
+                        """Note: For both openAI models, setting a temperature of 0 is possible. However, for the Llama model, a temperature of 0
+                          is not a valid input parameter. The minimum temperature value for the Llama model is 0.01. Therefore, although it is possible
+                            to select both values for every model, 0 only works for the openAI models, while 0.01 only works for the Llama model.""",
+                        target="prospect-scenario2-temperature-slider",
+                    ),                               
                         ],
                     ),
             ],
@@ -254,12 +272,11 @@ html.Div(
     style={'textAlign': 'center', 'margin': '20px', 'margin': 'auto'},
     )]),
 
-    
+html.Hr(),    
 # Scenario 3: Cancellation of losses against larger gains
 html.Div(
     children=[
         html.H3("Scenario 3: Cancellation of losses against larger gains"),
-        html.Hr(),
         html.Div(
             children=[
                 html.P(
@@ -320,6 +337,12 @@ html.Div(
                             value=0.5,
                             tooltip={'placement': 'top'},
                             ),
+                        dbc.Tooltip(
+                        """Note: For both openAI models, setting a temperature of 0 is possible. However, for the Llama model, a temperature of 0
+                          is not a valid input parameter. The minimum temperature value for the Llama model is 0.01. Therefore, although it is possible
+                            to select both values for every model, 0 only works for the openAI models, while 0.01 only works for the Llama model.""",
+                        target="prospect-scenario3-temperature-slider",
+                    ),                               
                         ],
                     ),
             ],
@@ -335,11 +358,11 @@ html.Div(
     style={'textAlign': 'center', 'margin': '20px', 'margin': 'auto'},
     )]),
 
+html.Hr(),
 # Scenario 4: Segregation of silver linings
 html.Div(
     children=[
         html.H3("Scenario 4: Segregation of silver linings"),
-        html.Hr(),
         html.Div(
             children=[
                 html.P(
@@ -402,6 +425,12 @@ html.Div(
                             value=0.5,
                             tooltip={'placement': 'top'},
                             ),
+                        dbc.Tooltip(
+                        """Note: For both openAI models, setting a temperature of 0 is possible. However, for the Llama model, a temperature of 0
+                          is not a valid input parameter. The minimum temperature value for the Llama model is 0.01. Therefore, although it is possible
+                            to select both values for every model, 0 only works for the openAI models, while 0.01 only works for the Llama model.""",
+                        target="prospect-scenario4-temperature-slider",
+                    ),                               
                         ],
                     ),
             ],
@@ -503,6 +532,12 @@ html.Div(
                             value=0.5,
                             tooltip={'placement': 'top'},
                             ),
+                        dbc.Tooltip(
+                        """Note: For this experiment we only regarded the temperature values 0.5, 1 and 1.5. Since the number of scenarios and configurations
+                        in this experiment is already quite large, this helped reduce costs, while still covering a broad range of temperature values, enabling 
+                        us to still get sufficiently meaningful results.""",
+                        target="prospect2-temperature-slider",
+                    ),                               
                         ],
                     ),
                     ],                 

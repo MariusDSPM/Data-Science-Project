@@ -8,6 +8,7 @@ import plotly.graph_objects as go
 import pickle
 from ast import literal_eval
 from utils.plotting_functions import DE_plot_results
+import dash_bootstrap_components as dbc
 
 
 dash.register_page(__name__, path='/decoy-effect', name='Decoy Effect', location='experiments')
@@ -121,6 +122,12 @@ layout = [
                             value=0.5,
                             tooltip={'placement': 'top'},
                             ),
+                        dbc.Tooltip(
+                        """Note: For both openAI models, setting a temperature of 0 is possible. However, for the Llama model, a temperature of 0
+                          is not a valid input parameter. The minimum temperature value for the Llama model is 0.01. Therefore, although it is possible
+                            to select both values for every model, 0 only works for the openAI models, while 0.01 only works for the Llama model.""",
+                        target="DE-temperature-slider",
+                    ),
                         ],
                     ),
                          ],
