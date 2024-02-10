@@ -141,10 +141,10 @@ def PT_run_experiment_dashboard(experiment_id, n, temperature):
 
     # Collecting results in a list
     results = [experiment_id, temperature, A, B, C, len_correct, PT_model_dict[experiment_id], PT_scenario_dict[experiment_id],
-               PT_priming_dict[experiment_id], PT_results_dict[experiment_id], PT_answercount_dict[experiment_id]]
+               PT_priming_dict[experiment_id], f"{PT_results_dict[experiment_id]}", PT_answercount_dict[experiment_id]]
     results = pd.DataFrame(results)
-    results.set_index(pd.Index(["Experiment_id", "Temp", "p(A)", "p(B)", "p(C)", "Obs.", "Model", "Scenario", "Priming", "Original", "Original_count"]))
-    results.transpose()
+    results = results.set_index(pd.Index(["Experiment_id", "Temp", "A", "B", "C", "Obs.", "Model", "Scenario", "Priming", "Original", "Original_count"]))
+    results = results.transpose()
 
     # Getting percentage of each answer
     p_a = (A / len_correct) * 100 if len_correct != 0 else 0
@@ -153,7 +153,7 @@ def PT_run_experiment_dashboard(experiment_id, n, temperature):
 
     # Collect probabilities in a dataframe
     probs = [experiment_id, temperature, p_a, p_b, p_c, len_correct, PT_model_dict[experiment_id], PT_scenario_dict[experiment_id],
-             PT_priming_dict[experiment_id], f"{PT_results_dict[experiment_id]}", PT_answercount_dict[experiment_id]] # Original results as as string 
+             PT_priming_dict[experiment_id], f"{PT_results_dict[experiment_id]}", PT_answercount_dict[experiment_id]]
     probs = pd.DataFrame(probs)
     probs = probs.set_index(pd.Index(["Experiment_id", "Temp", "p(A)", "p(B)", "p(C)", "Obs.", "Model", "Scenario", "Priming", "Original", "Original_count"]))
     probs = probs.transpose()
@@ -188,13 +188,14 @@ def PT_run_experiment_llama_dashboard(experiment_id, n, temperature):
 
     # Count of "correct" answers, sums over indicator function thack checks if answer is either A, B or C
     len_correct = sum(1 for ans in answers if ans in ["A", "B", "C"])
-
+    
     # Collecting results in a list
     results = [experiment_id, temperature, A, B, C, len_correct, PT_model_dict[experiment_id], PT_scenario_dict[experiment_id],
-               PT_priming_dict[experiment_id], PT_results_dict[experiment_id], PT_answercount_dict[experiment_id]]
+               PT_priming_dict[experiment_id], f"{PT_results_dict[experiment_id]}", PT_answercount_dict[experiment_id]]
     results = pd.DataFrame(results)
-    results.set_index(pd.Index(["Experiment_id", "Temp", "p(A)", "p(B)", "p(C)", "Obs.", "Model", "Scenario", "Priming", "Original", "Original_count"]))
-    results.transpose()
+    results = results.set_index(pd.Index(["Experiment_id", "Temp", "A", "B", "C", "Obs.", "Model", "Scenario", "Priming", "Original", "Original_count"]))
+    results = results.transpose()
+
 
     # Getting percentage of each answer
     p_a = (A / len_correct) * 100 if len_correct != 0 else 0

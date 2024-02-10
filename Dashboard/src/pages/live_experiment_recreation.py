@@ -17,6 +17,9 @@ import replicate
 import os 
 from openai import OpenAI
 import openai
+from io import StringIO
+import pandas as pd
+
 
 # Get openAI API key (previously saved as environmental variable)
 openai.api_key = os.environ["OPENAI_API_KEY"]
@@ -127,8 +130,9 @@ layout = [
             id='prospect1-prompt-output',
             style={'textAlign': 'center', 'margin': '20px'}),
     ),
-    html.Button("Download CSV", id="btn_csv"),
-        dcc.Download(id="download-dataframe-csv"),
+    dcc.Store(id='prospect-data-store', storage_type='memory'),
+    html.Button("Download CSV", id="pt1-csv-button"),
+        dcc.Download(id="prospect1-csv-download"),
     html.Br(),
     html.Hr(),
 
@@ -218,8 +222,9 @@ layout = [
             id='prospect2-prompt-output',
             style={'textAlign': 'center', 'margin': '20px'}),
     ),
-    html.Button("Download CSV", id="btn_csv"),
-        dcc.Download(id="download-dataframe-csv"),
+    dcc.Store(id='prospect2-data-store', storage_type='memory'),
+    html.Button("Download CSV", id="pt2-csv-button"),
+        dcc.Download(id="prospect2-csv-download"),
     html.Br(),
     html.Hr(),
 
@@ -313,8 +318,9 @@ layout = [
             id='decoy-prompt-output',
             style={'textAlign': 'center', 'margin': '20px'}),
     ),
-    html.Button("Download CSV", id="btn_csv"),
-        dcc.Download(id="download-dataframe-csv"),
+    dcc.Store(id='decoy-data-store', storage_type='memory'),
+    html.Button("Download CSV", id="decoy-csv-button"),
+        dcc.Download(id="decoy-csv-download"),
     html.Br(),
     html.Hr(),   
 
@@ -385,9 +391,9 @@ layout = [
                             dcc.Slider(
                                 id="tu1-temperature-slider",
                                 min=0.01,
+                                step = 0.01,
                                 max=2,
                                 marks={0.01: '0.01', 0.5: '0.5', 1: '1', 1.5: '1.5', 2: '2'},
-                                step = None, # To only allow values as specified in marks
                                 value=0.5,
                                 tooltip={'placement': 'top'},
                             ),
@@ -408,15 +414,17 @@ layout = [
             id='tu1-prompt-output',
             style={'textAlign': 'center', 'margin': '20px'}),
     ),
-    html.Button("Download CSV", id="btn_csv"),
-        dcc.Download(id="download-dataframe-csv"),
+    dcc.Store(id='tu1-data-store', storage_type='memory'),
+    html.Button("Download CSV", id="tu1-csv-button"),
+        dcc.Download(id="tu1-csv-download"),
+    html.Br(),
     html.Br(),
     html.Hr(), 
 
     ########## Transaction Utility 3 (listed as 2 for better comparison) ##########
-    html.H2("Transaction Utility 2 Live Experiment: Hockey game ticket"), 
-    html.H3("Scenario 1: Price multiplied by Pi"),
+    html.H2("Transaction Utility Live Experiment 2: Hockey game ticket with alternative numbers"), 
     html.Hr(),
+    html.H3("Scenario 1: Price scaled by factor Pi"),
     html.Br(),
     html.Div(
         children=[
@@ -482,8 +490,8 @@ layout = [
                                 id="tu3-temperature-slider",
                                 min=0.01,
                                 max=2,
+                                step = 0.01,
                                 marks={0.01: '0.01', 0.5: '0.5', 1: '1', 1.5: '1.5', 2: '2'},
-                                step = None,
                                 value=0.5,
                                 tooltip={'placement': 'top'},
                             ),
@@ -504,14 +512,14 @@ layout = [
             id='tu3-prompt-output',
             style={'textAlign': 'center', 'margin': '20px'}),
     ),
-    html.Button("Download CSV", id="btn_csv"),
-        dcc.Download(id="download-dataframe-csv"),
+    dcc.Store(id='tu3-data-store1', storage_type='memory'),
+    html.Button("Download CSV", id="tu3-csv-button1"),
+        dcc.Download(id="tu3-csv-download1"),
     html.Br(),
     html.Hr(), 
 
     ########## Transaction Utility 3: Scenario 2 ##########
-    html.H3("Scenario 2: Price multiplied by 10"),
-    html.Hr(),
+    html.H3("Scenario 2: Prices scaled by factor 10"),
     html.Br(),
     html.Div(
         children=[
@@ -577,8 +585,8 @@ layout = [
                                 id="tu3-temperature-slider2",
                                 min=0.01,
                                 max=2,
+                                step = 0.01,
                                 marks={0.01: '0.01', 0.5: '0.5', 1: '1', 1.5: '1.5', 2: '2'},
-                                step = None,
                                 value=0.5,
                                 tooltip={'placement': 'top'},
                             ),
@@ -599,15 +607,15 @@ layout = [
             id='tu3-prompt-output2',
             style={'textAlign': 'center', 'margin': '20px'}),
     ),
-    html.Button("Download CSV", id="btn_csv"),
-        dcc.Download(id="download-dataframe-csv"),
+    dcc.Store(id='tu3-data-store2', storage_type='memory'),
+    html.Button("Download CSV", id="tu3-csv-button2"),
+        dcc.Download(id="tu3-csv-download2"),
     html.Br(),
-    html.Hr(), 
-
 
     ########## Transaction Utility 2 ##########
     html.Hr(),
-    html.H2("Experiment 2: Beer at the grocery store"),
+    html.H2("Transaction Utility expriment 3: Beer from hotel vs. grocery store"),
+    html.Hr(),
     html.Br(),
     html.Div(
         children=[
@@ -665,7 +673,6 @@ layout = [
                                 min=0.01,
                                 max=2,
                                 marks={0.01: '0.01', 0.5: '0.5', 1: '1', 1.5: '1.5', 2: '2'},
-                                step = None,
                                 value=0.5,
                                 tooltip={'placement': 'top'},
                             ),
@@ -686,18 +693,17 @@ layout = [
             id='tu2-prompt-output',
             style={'textAlign': 'center', 'margin': '20px'}),
     ),
-    html.Button("Download CSV", id="btn_csv"),
-        dcc.Download(id="download-dataframe-csv"),
-    html.Br(),
-    html.Hr(), 
-
+    dcc.Store(id='tu2-data-store', storage_type='memory'),
+    html.Button("Download CSV", id="tu2-csv-button"),
+        dcc.Download(id="tu2-csv-download"),
 
 ]
 
 #  Callback for Individual Prospect Theory Experiment
 @dash.callback(
     [Output("prospect1-graph-output", "figure"),
-     Output('prospect1-prompt-output', 'children')], 
+     Output('prospect1-prompt-output', 'children'),
+     Output('prospect-data-store', 'data')],
     [Input("prospect1-update-button", "n_clicks")],
     [State("prospect1-scenario-dropdown", "value"),
      State("prospect1-model-dropdown", "value"),
@@ -767,12 +773,30 @@ def update_prospect_live(n_clicks, selected_scenario, selected_model, selected_p
         n_clicks = None
         
         prompt = html.P(f"The prompt used in this experiment is: {PT_experiment_prompts_dict[experiment_id]}")
-        return PT_plot_results(probs), prompt
+        return PT_plot_results(probs), prompt, results.to_json(date_format='iso', orient='split')
+    
+# Callback for PT download
+@dash.callback(
+    Output("prospect1-csv-download", "data"),
+    [Input("pt1-csv-button", "n_clicks")],
+    [State('prospect-data-store', 'data')]
+)
+def download_csv(n_clicks, stored_data):
+    if n_clicks:
+        # Convert stored data back to dataframe
+        stored_df = pd.read_json(StringIO(stored_data), orient='split')
+        return dcc.send_data_frame(stored_df.to_csv, "PT_results.csv")
+    else:
+        return dash.no_update
+
+    
+
 
 # Callback for Prospect Theory 2
 @dash.callback(
     [Output("prospect2-graph-output", "figure"),
-     Output('prospect2-prompt-output', 'children')], 
+     Output('prospect2-prompt-output', 'children'),
+     Output('prospect2-data-store', 'data')], 
     [Input("prospect2-update-button", "n_clicks")],
     [State("prospect2-scenario-dropdown", "value"),
      State("prospect2-configuration-dropdown", "value"),
@@ -937,12 +961,29 @@ def update_prospect2_live(n_clicks, selected_scenario, selected_configuration, s
             results, probs = PT2_run_experiment_dashboard(experiment_id, selected_iterations, selected_temperature)
         n_clicks = None
         prompt = html.P(f"The prompt used in this experiment is: {PT2_experiment_prompts_dict[experiment_id]}")
-        return PT2_plot_results(probs), prompt
+        return PT2_plot_results(probs), prompt, results.to_json(date_format='iso', orient='split')
+    
+# Callback for PT2 download
+@dash.callback(
+    Output("prospect2-csv-download", "data"),
+    [Input("pt2-csv-button", "n_clicks")],
+    [State('prospect2-data-store', 'data')]
+)
+def download_csv(n_clicks, stored_data):
+    if n_clicks:
+        # Convert stored data back to dataframe
+        stored_df = pd.read_json(StringIO(stored_data), orient='split')
+        return dcc.send_data_frame(stored_df.to_csv, "PT2_results.csv")
+    else:
+        return dash.no_update
+
+    
     
 # Callback for Decoy Effect
 @dash.callback(
     [Output("decoy-graph-output", "figure"),
-     Output('decoy-prompt-output', 'children')],
+     Output('decoy-prompt-output', 'children'),
+     Output('decoy-data-store', 'data')],
     [Input("decoy-update-button", "n_clicks")],
     [State("decoy-scenario-dropdown", "value"),
      State("decoy-priming-dropdown", "value"),
@@ -1010,12 +1051,27 @@ def update_decoy_live(n_clicks, selected_scenario, selected_priming, selected_re
             results, probs = DE_run_experiment_dashboard(experiment_id, selected_iterations, selected_temperature)
         n_clicks = None
         prompt = html.P(f"The prompt used in this experiment is: {DE_experiment_prompts_dict[experiment_id]}")
-        return DE_plot_results(probs), prompt
+        return DE_plot_results(probs), prompt, results.to_json(date_format='iso', orient='split')
+    
+# Callback for DE download
+@dash.callback(
+    Output("decoy-csv-download", "data"),
+    [Input("decoy-csv-button", "n_clicks")],
+    [State('decoy-data-store', 'data')]
+)
+def download_csv(n_clicks, stored_data):
+    if n_clicks:
+        # Convert stored data back to dataframe
+        stored_df = pd.read_json(StringIO(stored_data), orient='split')
+        return dcc.send_data_frame(stored_df.to_csv, "DE_results.csv")
+    else:
+        return dash.no_update
     
 # Callback for Transaction Utility
 @dash.callback(
     [Output("tu1-graph-output", "figure"),
-     Output('tu1-prompt-output', 'children')],
+     Output('tu1-prompt-output', 'children'),
+     Output('tu1-data-store', 'data')],
     [Input("tu1-update-button", "n_clicks")],
     [State("tu1-initial-cost-dropdown", "value"),
      State("tu1-current-cost-dropdown", "value"),
@@ -1107,12 +1163,28 @@ def update_tu1_live(n_clicks, selected_initial_cost, selected_current_cost, sele
             results= TU_run_experiment_dashboard(experiment_id, selected_iterations, selected_temperature)
         n_clicks = None
         prompt = html.P(f"The prompt used in this experiment is: {TU_experiment_prompts_dict[experiment_id]}")
-        return TU_plot_results(results), prompt
+        return TU_plot_results(results), prompt, results.to_json(date_format='iso', orient='split')
+    
+# Callback for TU1 download
+@dash.callback(
+    Output("tu1-csv-download", "data"),
+    [Input("tu1-csv-button", "n_clicks")],
+    [State('tu1-data-store', 'data')]
+)
+def download_csv(n_clicks, stored_data):
+    if n_clicks:
+        # Convert stored data back to dataframe
+        stored_df = pd.read_json(StringIO(stored_data), orient='split')
+        return dcc.send_data_frame(stored_df.to_csv, "TU_results.csv")
+    else:
+        return dash.no_update
+    
     
 # Callback for Transaction Utility 3: Scenario 1
 @dash.callback(
     [Output("tu3-graph-output", "figure"),
-     Output('tu3-prompt-output', 'children')],
+     Output('tu3-prompt-output', 'children'),
+     Output('tu3-data-store1', 'data')],
     [Input("tu3-update-button", "n_clicks")],
     [State("tu3-initial-cost-dropdown", "value"),
      State("tu3-current-cost-dropdown", "value"),
@@ -1203,13 +1275,29 @@ def update_tu3_live(n_clicks, selected_initial_cost, selected_current_cost, sele
             results= TU3_run_experiment_dashboard(experiment_id, selected_iterations, selected_temperature)
         n_clicks = None
         prompt = html.P(f"The prompt used in this experiment is: {TU3_experiment_prompts_dict[experiment_id]}")
-        return TU3_plot_results(results), prompt
+        return TU3_plot_results(results), prompt, results.to_json(date_format='iso', orient='split')
+    
+# Callback for TU3 Scenario 1 download
+@dash.callback(
+    Output("tu3-csv-download1", "data"),
+    [Input("tu3-csv-button1", "n_clicks")],
+    [State('tu3-data-store1', 'data')]
+)
+def download_csv(n_clicks, stored_data):
+    if n_clicks:
+        # Convert stored data back to dataframe
+        stored_df = pd.read_json(StringIO(stored_data), orient='split')
+        return dcc.send_data_frame(stored_df.to_csv, "TU2_scenario_1_results.csv")
+    else:
+        return dash.no_update
+    
     
 
 # Callback for Transaction Utility 3: Scenario 2
 @dash.callback(
     [Output("tu3-graph-output2", "figure"),
-     Output('tu3-prompt-output2', 'children')],
+     Output('tu3-prompt-output2', 'children'),
+     Output('tu3-data-store2', 'data')],
     [Input("tu3-update-button2", "n_clicks")],
     [State("tu3-initial-cost-dropdown2", "value"),
      State("tu3-current-cost-dropdown2", "value"),
@@ -1302,13 +1390,28 @@ def update_tu3_2_live(n_clicks, selected_initial_cost, selected_current_cost, se
             results= TU3_run_experiment_dashboard(experiment_id, selected_iterations, selected_temperature)
         n_clicks = None
         prompt = html.P(f"The prompt used in this experiment is: {TU3_experiment_prompts_dict[experiment_id]}")
-        return TU3_plot_results(results), prompt
+        return TU3_plot_results(results), prompt, results.to_json(date_format='iso', orient='split')
+    
+# Callback for TU3 Scenario 2 download
+@dash.callback(
+    Output("tu3-csv-download2", "data"),
+    [Input("tu3-csv-button2", "n_clicks")],
+    [State('tu3-data-store2', 'data')]
+)
+def download_csv(n_clicks, stored_data):
+    if n_clicks:
+        # Convert stored data back to dataframe
+        stored_df = pd.read_json(StringIO(stored_data), orient='split')
+        return dcc.send_data_frame(stored_df.to_csv, "TU2_scenario_2_results.csv")
+    else:
+        return dash.no_update
     
 
 # Callback for Transaction Utility 2
 @dash.callback(
     [Output("tu2-graph-output", "figure"),
-     Output('tu2-prompt-output', 'children')],
+     Output('tu2-prompt-output', 'children'),
+     Output('tu2-data-store', 'data')],
     [Input("tu2-update-button", "n_clicks")],
     [State("tu2-place-dropdown", "value"),
      State("tu2-income-dropdown", "value"),
@@ -1374,4 +1477,19 @@ def update_tu2_live(n_clicks, selected_place, selected_income, selected_model, s
             results= TU2_run_experiment_dashboard(experiment_id, selected_iterations, selected_temperature)
         n_clicks = None
         prompt = html.P(f"The prompt used in this experiment is: {TU2_experiment_prompts_dict[experiment_id]}")
-        return TU2_plot_results(results), prompt
+        return TU2_plot_results(results), prompt, results.to_json(date_format='iso', orient='split')
+    
+# Callback for TU2 download
+@dash.callback(
+    Output("tu2-csv-download", "data"),
+    [Input("tu2-csv-button", "n_clicks")],
+    [State('tu2-data-store', 'data')]
+)
+def download_csv(n_clicks, stored_data):
+    if n_clicks:
+        # Convert stored data back to dataframe
+        stored_df = pd.read_json(StringIO(stored_data), orient='split')
+        return dcc.send_data_frame(stored_df.to_csv, "TU3_results.csv")
+    else:
+        return dash.no_update
+    
