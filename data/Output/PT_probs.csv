@@ -1,4 +1,4 @@
-Experiment_id,Temp,p(A),p(B),p(C),Obs.,Model,Priming,Scenario,Original,Original_count
+Experiment_id,Temp,A,B,C,Obs.,Model,Priming,Scenario,Original,Original_count
 PT_2_1,0.0,0.0,0.0,100.0,50,gpt-4-1106-preview,0,1,"[64.37, 18.39, 17.24]",87
 PT_2_1,0.5,0.0,0.0,100.0,50,gpt-4-1106-preview,0,1,"[64.37, 18.39, 17.24]",87
 PT_2_1,1.0,0.0,0.0,100.0,50,gpt-4-1106-preview,0,1,"[64.37, 18.39, 17.24]",87

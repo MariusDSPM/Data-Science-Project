@@ -1,4 +1,4 @@
-Experiment_id,Temp,p(A),p(B),p(C),Obs.,Model,Scenario,Priming,Reorder,Original,Original_count
+Experiment_id,Temp,A,B,C,Obs.,Model,Scenario,Priming,Reorder,Original,Original_count
 DE_1_1,0.0,0.0,0.0,100.0,100,gpt-3.5-turbo,1,0,0,"[16, 0, 84]",100
 DE_1_1,0.5,0.0,1.0,99.0,100,gpt-3.5-turbo,1,0,0,"[16, 0, 84]",100
 DE_1_1,1.0,6.0,5.0,89.0,100,gpt-3.5-turbo,1,0,0,"[16, 0, 84]",100
