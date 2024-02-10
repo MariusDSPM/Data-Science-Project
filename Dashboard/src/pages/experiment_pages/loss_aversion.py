@@ -58,7 +58,7 @@ def plot_loss_aversion(selected_temperature):
             text='Shares for "B" (risk-seeking option) by Model and Scenario',
             x=0.45,
             y = 0.9,
-            font=dict(size=22)
+            font=dict(size=20)
         ),
         legend=dict(
             x=1.01,  

@@ -61,7 +61,7 @@ def plot_sunk_cost_1(selected_temperature, selected_sunk_cost):
             text=f"Shares for Answer Options (Sunk Cost: ${selected_sunk_cost}, Temperature: {selected_temperature})",
             x=0.43,
             y = 0.9,
-            font=dict(size=22)
+            font=dict(size=20)
         ),
         legend=dict(
             x=1.01,  
@@ -134,7 +134,7 @@ def plot_sunk_cost_2(selected_temperature, selected_model):
             text=f'Shares for Answer Options (Model: {selected_model}, Temperature: {selected_temperature})',
             x=0.45,
             y = 0.9,
-            font=dict(size=22)
+            font=dict(size=18)
         ),
         legend=dict(
             x=1.01,  
