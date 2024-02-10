@@ -48,7 +48,7 @@ layout = [
             You can choose the desired experiment configuration from the dropdowns and the prompt will automatically be adjusted. After that, you will
             need to select the number of desired requests (i.e. how often the LLM should answer the same prompt) and a temperature value. 
             After hitting "Run the experiment", the results will automatically be visualized and you can download the raw results in form of a csv-file.
-            The prompt, along with a cost estimate for the experiment, will also be displayed. If you are uncertain about the aspect of costs, you can revisit
+            The prompt, along with a cost estimate, will also be displayed, once the experiment is done. If you are uncertain about the aspect of costs, you can revisit
             our [Overview page](/overview) or go to https://openai.com/pricing for further information."""),
         
             html.Div(
