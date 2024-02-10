@@ -117,10 +117,9 @@ def PT_run_experiment_dashboard(experiment_id, n, temperature, openai_key):
         results (list): List containing count of answers for each option, also containing experiment_id, temperature and number of observations
         probs (list): List containing probability of each option being chosen, also containing experiment_id, temeperature and number of observations
     """
-    print("Received API key:", openai_key)
+    client = OpenAI(api_key=openai_key)
     answers = []
     for _ in range(n): 
-        client = OpenAI(api_key=openai_key)
         response = client.chat.completions.create(
             model = PT_model_dict[experiment_id], 
             max_tokens = 1,
@@ -166,10 +165,9 @@ def PT_run_experiment_dashboard(experiment_id, n, temperature, openai_key):
 
 # LLama model
 def PT_run_experiment_llama_dashboard(experiment_id, n, temperature, replicate_token):
-    print("Received API key:", replicate_token)
+    replicate = Client(api_token = replicate_token)
     answers = []
     for _ in range(n):
-        replicate = Client(api_token = replicate_token)
         response = replicate.run(
             PT_model_dict[experiment_id],
             input = {
@@ -236,7 +234,7 @@ def PT2_run_experiment_dashboard(experiment_id, n, temperature, openai_key):
         results (list): List containing count of answers for each option, also containing experiment_id, temperature and number of observations
         probs (list): List containing probability of each option being chosen, also containing experiment_id, temeperature and number of observations
     """
-    
+    client = OpenAI(api_key=openai_key)
     answers = []
     for _ in range(n): 
         response = client.chat.completions.create(
@@ -279,8 +277,9 @@ def PT2_run_experiment_dashboard(experiment_id, n, temperature, openai_key):
     return results, probs
 
 # Llama model
-def PT2_run_experiment_llama_dashboard(experiment_id, n, temperature, replicate_key):
+def PT2_run_experiment_llama_dashboard(experiment_id, n, temperature, replicate_token):
     answers = []
+    replicate = Client(api_token = replicate_token)
     for _ in range(n):
         response = replicate.run(
             PT2_model_dict[experiment_id],
@@ -376,6 +375,7 @@ def DE_run_experiment_dashboard(experiment_id: int, n: int, temperature: int, op
         probs (list): List containing probability of each option being chosen, also containing experiment_id, temeperature and number of observations
     """
     answers = []
+    client = OpenAI(api_key=openai_key)
     for _ in range(n): 
         response = client.chat.completions.create(
             model = DE_model_dict[experiment_id], 
@@ -416,8 +416,9 @@ def DE_run_experiment_dashboard(experiment_id: int, n: int, temperature: int, op
     return results, probs 
 
 # Llama model
-def DE_run_experiment_llama_dashboard(experiment_id, n, temperature, replicate_key):
+def DE_run_experiment_llama_dashboard(experiment_id, n, temperature, replicate_token):
     answers = []
+    replicate = Client(api_token = replicate_token)
     for _ in range(n):
         response = replicate.run(
             DE_model_dict[experiment_id],
@@ -472,7 +473,7 @@ def extract_dollar_amounts(answers):
 
 # openAI models
 def TU_run_experiment_dashboard(experiment_id, n, temperature, openai_key):
-    
+    client = OpenAI(api_key=openai_key)
     answers = []
     for _ in range(n): 
         response = client.chat.completions.create(
@@ -506,8 +507,9 @@ def TU_run_experiment_dashboard(experiment_id, n, temperature, openai_key):
     return results
 
 # Llama model
-def TU_run_experiment_llama_dashboard(experiment_id, n, temperature, replicate_key):
+def TU_run_experiment_llama_dashboard(experiment_id, n, temperature, replicate_token):
     answers = []
+    replicate = Client(api_token = replicate_token)
     for _ in range(n):
         response = replicate.run(
             TU_model_dict[experiment_id],
@@ -544,7 +546,7 @@ def TU_run_experiment_llama_dashboard(experiment_id, n, temperature, replicate_k
 
 # openAI models
 def TU2_run_experiment_dashboard(experiment_id, n, temperature, openai_key):
-    
+    client = OpenAI(api_key=openai_key)
     answers = []
     for _ in range(n): 
         response = client.chat.completions.create(
@@ -577,8 +579,9 @@ def TU2_run_experiment_dashboard(experiment_id, n, temperature, openai_key):
     return results
 
 # Llama model
-def TU2_run_experiment_llama_dashboard(experiment_id, n, temperature, replicate_key):
+def TU2_run_experiment_llama_dashboard(experiment_id, n, temperature, replicate_token):
     answers = []
+    replicate = Client(api_token = replicate_token)
     for _ in range(n):
         response = replicate.run(
             TU2_model_dict[experiment_id],
@@ -613,7 +616,7 @@ def TU2_run_experiment_llama_dashboard(experiment_id, n, temperature, replicate_
 
 # openAI models
 def TU3_run_experiment_dashboard(experiment_id, n, temperature, openai_key):
-    
+    client = OpenAI(api_key=openai_key)
     answers = []
     for _ in range(n): 
         response = client.chat.completions.create(
@@ -649,8 +652,9 @@ def TU3_run_experiment_dashboard(experiment_id, n, temperature, openai_key):
     return results
 
 # Llama model
-def TU3_run_experiment_llama_dashboard(experiment_id, n, temperature, replicate_key):
+def TU3_run_experiment_llama_dashboard(experiment_id, n, temperature, replicate_token):
     answers = []
+    replicate = Client(api_token = replicate_token)
     for _ in range(n):
         response = replicate.run(
             TU3_model_dict[experiment_id],

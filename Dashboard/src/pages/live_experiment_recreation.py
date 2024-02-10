@@ -918,9 +918,11 @@ def download_csv(n_clicks, stored_data):
      State("prospect2-configuration-dropdown", "value"),
      State("prospect2-model-dropdown", "value"),
      State("prospect2-iteration-input", "value"),
-     State("prospect2-temperature-slider", "value")]
+     State("prospect2-temperature-slider", "value"),
+     State("openai-api-key", "value"),
+     State("replicate-api-token", "value")]
      )
-def update_prospect2_live(n_clicks, selected_scenario, selected_configuration, selected_model, selected_iterations, selected_temperature):
+def update_prospect2_live(n_clicks, selected_scenario, selected_configuration, selected_model, selected_iterations, selected_temperature, openai_key, replicate_token):
         # Check if button was clicked
     if n_clicks is not None:
         if selected_scenario == 1 and selected_model == "gpt-3.5-turbo" and selected_configuration == 1:
@@ -1072,9 +1074,9 @@ def update_prospect2_live(n_clicks, selected_scenario, selected_configuration, s
 
         # Run Experiment for selected parameters
         if selected_model == "llama-2-70b":
-            results, probs = PT2_run_experiment_llama_dashboard(experiment_id, selected_iterations, selected_temperature)
+            results, probs = PT2_run_experiment_llama_dashboard(experiment_id, selected_iterations, selected_temperature, replicate_token)
         else:
-            results, probs = PT2_run_experiment_dashboard(experiment_id, selected_iterations, selected_temperature)
+            results, probs = PT2_run_experiment_dashboard(experiment_id, selected_iterations, selected_temperature, openai_key)
         n_clicks = None
         prompt = html.P(f"The prompt used in this experiment is: {PT2_experiment_prompts_dict[experiment_id]}")
         return PT2_plot_results(probs), prompt, results.to_json(date_format='iso', orient='split')
@@ -1106,9 +1108,11 @@ def download_csv(n_clicks, stored_data):
      State("decoy-reordering-dropdown", "value"),
      State("decoy-model-dropdown", "value"),
      State("decoy-iteration-input", "value"),
-     State("decoy-temperature-slider", "value")]
+     State("decoy-temperature-slider", "value"),
+     State("openai-api-key", "value"),
+     State("replicate-api-token", "value")]
      )
-def update_decoy_live(n_clicks, selected_scenario, selected_priming, selected_reordering, selected_model, selected_iterations, selected_temperature):
+def update_decoy_live(n_clicks, selected_scenario, selected_priming, selected_reordering, selected_model, selected_iterations, selected_temperature, openai_key, replicate_token):
     # Check if button was clicked
     if n_clicks is not None:
         if selected_scenario == 1 and selected_model == "gpt-3.5-turbo" and selected_priming == 0 and selected_reordering == 0:
@@ -1162,9 +1166,9 @@ def update_decoy_live(n_clicks, selected_scenario, selected_priming, selected_re
         
         # Run Experiment for selected parameters
         if selected_model == "llama-2-70b":
-            results, probs = DE_run_experiment_llama_dashboard(experiment_id, selected_iterations, selected_temperature)
+            results, probs = DE_run_experiment_llama_dashboard(experiment_id, selected_iterations, selected_temperature, replicate_token)
         else:
-            results, probs = DE_run_experiment_dashboard(experiment_id, selected_iterations, selected_temperature)
+            results, probs = DE_run_experiment_dashboard(experiment_id, selected_iterations, selected_temperature, openai_key)
         n_clicks = None
         prompt = html.P(f"The prompt used in this experiment is: {DE_experiment_prompts_dict[experiment_id]}")
         return DE_plot_results(probs), prompt, results.to_json(date_format='iso', orient='split')
@@ -1194,10 +1198,12 @@ def download_csv(n_clicks, stored_data):
      State("tu1-buyer-dropdown", "value"),
      State("tu1-language-model-dropdown", "value"),
      State("tu1-iteration-input", "value"),
-     State("tu1-temperature-slider", "value")]
+     State("tu1-temperature-slider", "value"),
+     State("openai-api-key", "value"),
+     State("replicate-api-token", "value")]
      )
 
-def update_tu1_live(n_clicks, selected_initial_cost, selected_current_cost, selected_buyer, selected_model, selected_iterations, selected_temperature):
+def update_tu1_live(n_clicks, selected_initial_cost, selected_current_cost, selected_buyer, selected_model, selected_iterations, selected_temperature, openai_key, replicate_token):
     if n_clicks is not None:
         if selected_initial_cost == 0 and selected_current_cost == 5 and selected_buyer == "friend" and selected_model == "gpt-3.5-turbo":
             experiment_id = "TU_1_1_1_1"
@@ -1274,9 +1280,9 @@ def update_tu1_live(n_clicks, selected_initial_cost, selected_current_cost, sele
 
         # Run Experiment for selected parameters
         if selected_model == "llama-2-70b":
-            results = TU_run_experiment_llama_dashboard(experiment_id, selected_iterations, selected_temperature)
+            results = TU_run_experiment_llama_dashboard(experiment_id, selected_iterations, selected_temperature, replicate_token)
         else:
-            results= TU_run_experiment_dashboard(experiment_id, selected_iterations, selected_temperature)
+            results= TU_run_experiment_dashboard(experiment_id, selected_iterations, selected_temperature, openai_key)
         n_clicks = None
         prompt = html.P(f"The prompt used in this experiment is: {TU_experiment_prompts_dict[experiment_id]}")
         return TU_plot_results(results), prompt, results.to_json(date_format='iso', orient='split')
@@ -1307,9 +1313,11 @@ def download_csv(n_clicks, stored_data):
      State("tu3-buyer-dropdown", "value"),
      State("tu3-language-model-dropdown", "value"),
      State("tu3-iteration-input", "value"),
-     State("tu3-temperature-slider", "value")]
+     State("tu3-temperature-slider", "value"),
+     State("openai-api-key", "value"),
+     State("replicate-api-token", "value")]
      )
-def update_tu3_live(n_clicks, selected_initial_cost, selected_current_cost, selected_buyer, selected_model, selected_iterations, selected_temperature):
+def update_tu3_live(n_clicks, selected_initial_cost, selected_current_cost, selected_buyer, selected_model, selected_iterations, selected_temperature, openai_key, replicate_token):
     if n_clicks is not None:
         if selected_initial_cost == 0 and selected_current_cost == 15.71 and selected_buyer == "friend" and selected_model == "gpt-3.5-turbo":
             experiment_id = "TU3_1_1_1_1_1"
@@ -1386,9 +1394,9 @@ def update_tu3_live(n_clicks, selected_initial_cost, selected_current_cost, sele
         
         # Run Experiment for selected parameters
         if selected_model == "llama-2-70b":
-            results = TU3_run_experiment_llama_dashboard(experiment_id, selected_iterations, selected_temperature)
+            results = TU3_run_experiment_llama_dashboard(experiment_id, selected_iterations, selected_temperature, replicate_token)
         else:
-            results= TU3_run_experiment_dashboard(experiment_id, selected_iterations, selected_temperature)
+            results= TU3_run_experiment_dashboard(experiment_id, selected_iterations, selected_temperature, openai_key)
         n_clicks = None
         prompt = html.P(f"The prompt used in this experiment is: {TU3_experiment_prompts_dict[experiment_id]}")
         return TU3_plot_results(results), prompt, results.to_json(date_format='iso', orient='split')
@@ -1420,9 +1428,11 @@ def download_csv(n_clicks, stored_data):
      State("tu3-buyer-dropdown2", "value"),
      State("tu3-language-model-dropdown2", "value"),
      State("tu3-iteration-input2", "value"),
-     State("tu3-temperature-slider2", "value")]
+     State("tu3-temperature-slider2", "value"),
+     State("openai-api-key", "value"),
+     State("replicate-api-token", "value")]
      )
-def update_tu3_2_live(n_clicks, selected_initial_cost, selected_current_cost, selected_buyer, selected_model, selected_iterations, selected_temperature):
+def update_tu3_2_live(n_clicks, selected_initial_cost, selected_current_cost, selected_buyer, selected_model, selected_iterations, selected_temperature, openai_key, replicate_token):
     # Check if button was clicked
     if n_clicks is not None:
         # Get experiment id based on selected parameters
@@ -1501,9 +1511,9 @@ def update_tu3_2_live(n_clicks, selected_initial_cost, selected_current_cost, se
 
         # Run Experiment for selected parameters
         if selected_model == "llama-2-70b":
-            results = TU3_run_experiment_llama_dashboard(experiment_id, selected_iterations, selected_temperature)
+            results = TU3_run_experiment_llama_dashboard(experiment_id, selected_iterations, selected_temperature, replicate_token)
         else:
-            results= TU3_run_experiment_dashboard(experiment_id, selected_iterations, selected_temperature)
+            results= TU3_run_experiment_dashboard(experiment_id, selected_iterations, selected_temperature, openai_key)
         n_clicks = None
         prompt = html.P(f"The prompt used in this experiment is: {TU3_experiment_prompts_dict[experiment_id]}")
         return TU3_plot_results(results), prompt, results.to_json(date_format='iso', orient='split')
@@ -1533,9 +1543,11 @@ def download_csv(n_clicks, stored_data):
      State("tu2-income-dropdown", "value"),
      State("tu2-language-model-dropdown", "value"),
      State("tu2-iteration-input", "value"),
-     State("tu2-temperature-slider", "value")]
+     State("tu2-temperature-slider", "value"),
+     State("openai-api-key", "value"),
+     State("replicate-api-token", "value")]
      )
-def update_tu2_live(n_clicks, selected_place, selected_income, selected_model, selected_iterations, selected_temperature):
+def update_tu2_live(n_clicks, selected_place, selected_income, selected_model, selected_iterations, selected_temperature, openai_key, replicate_token):
     if n_clicks is not None: 
         if selected_model == "gpt-3.5-turbo" and selected_place == "hotel" and selected_income == "0":
             experiment_id = "TU2_1_1_1"
@@ -1588,9 +1600,9 @@ def update_tu2_live(n_clicks, selected_place, selected_income, selected_model, s
 
         # Run Experiment for selected parameters
         if selected_model == "llama-2-70b":
-            results = TU2_run_experiment_llama_dashboard(experiment_id, selected_iterations, selected_temperature)
+            results = TU2_run_experiment_llama_dashboard(experiment_id, selected_iterations, selected_temperature, replicate_token)
         else:
-            results= TU2_run_experiment_dashboard(experiment_id, selected_iterations, selected_temperature)
+            results= TU2_run_experiment_dashboard(experiment_id, selected_iterations, selected_temperature, openai_key)
         n_clicks = None
         prompt = html.P(f"The prompt used in this experiment is: {TU2_experiment_prompts_dict[experiment_id]}")
         return TU2_plot_results(results), prompt, results.to_json(date_format='iso', orient='split')
