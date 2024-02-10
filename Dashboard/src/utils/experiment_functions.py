@@ -23,74 +23,74 @@ client = OpenAI()
 
 ##### Import and assign prompts for every experiment
 ### Prospect Theory
-with open('Dashboard/src/data/Input/PT_prompts.pkl', 'rb') as f:
+with open('data/Input/PT_prompts.pkl', 'rb') as f:
     PT_prompts = pickle.load(f)
 
 ### Prospect Theory 2
 # Scenario 1
-with open("Dashboard/src/data/Input/PT2_prompts_1.pkl", "rb") as file:
+with open("data/Input/PT2_prompts_1.pkl", "rb") as file:
     PT2_prompts_1 = pickle.load(file)
 
 # Scenario 2
-with open("Dashboard/src/data/Input/PT2_prompts_2.pkl", "rb") as file:
+with open("data/Input/PT2_prompts_2.pkl", "rb") as file:
     PT2_prompts_2 = pickle.load(file)
 
 # Scenario 3
-with open("Dashboard/src/data/Input/PT2_prompts_3.pkl", "rb") as file:
+with open("data/Input/PT2_prompts_3.pkl", "rb") as file:
     PT2_prompts_3 = pickle.load(file)
 
 # Scenario 4
-with open("Dashboard/src/data/Input/PT2_prompts_4.pkl", "rb") as file:
+with open("data/Input/PT2_prompts_4.pkl", "rb") as file:
     PT2_prompts_4 = pickle.load(file)
 
 
 ### Decoy Effect
-with open('Dashboard/src/data/Input/DE_prompts.pkl', 'rb') as f:
+with open('data/Input/DE_prompts.pkl', 'rb') as f:
     DE_prompts = pickle.load(f)
 
 ### Transaction Utility
-with open('Dashboard/src/data/Input/TU_prompts.pkl', 'rb') as f:
+with open('data/Input/TU_prompts.pkl', 'rb') as f:
     TU_prompts = pickle.load(f)
 
 ### Transaction Utility 2
-with open('Dashboard/src/data/Input/TU2_prompts.pkl', 'rb') as f:
+with open('data/Input/TU2_prompts.pkl', 'rb') as f:
     TU2_prompts = pickle.load(f)
 
 ### Transaction Utility 3
-with open('Dashboard/src/data/Input/TU3_prompts.pkl', 'rb') as f:
+with open('data/Input/TU3_prompts.pkl', 'rb') as f:
     TU3_prompts = pickle.load(f)
 
 ## Import and assign dictionaries for every experiment
 ### Prospect Theory
-with open('Dashboard/src/data/Input/PT_dictionaries.pkl', 'rb') as f:
+with open('data/Input/PT_dictionaries.pkl', 'rb') as f:
     PT_dictionaries = pickle.load(f)
 PT_experiment_prompts_dict, PT_prompt_ids_dict, PT_model_dict, PT_scenario_dict, PT_priming_dict, PT_results_dict, PT_answercount_dict = PT_dictionaries
 
 ### Prospect Theory 2
-with open('Dashboard/src/data/Input/PT2_dictionaries.pkl', 'rb') as f:
+with open('data/Input/PT2_dictionaries.pkl', 'rb') as f:
     PT2_dictionaries = pickle.load(f)
 (PT2_experiment_prompts_dict, PT2_prices_dict, PT2_results_dict, PT2_model_dict, PT2_prompt_ids_dict,
 PT2_scenario_dict, PT2_configuration_dict) = PT2_dictionaries
 
 ### Decoy Effect
-with open('Dashboard/src/data/Input/DE_dictionaries.pkl', 'rb') as f:
+with open('data/Input/DE_dictionaries.pkl', 'rb') as f:
     DE_dictionaries = pickle.load(f)
 (DE_experiment_prompts_dict, DE_prompt_ids_dict, DE_model_dict, DE_og_results_dict, DE_answercount_dict,
   DE_scenario_dict, DE_priming_dict, DE_reorder_dict) = DE_dictionaries
 
 ### Transaction Utility
-with open('Dashboard/src/data/Input/TU_dictionaries.pkl', 'rb') as f:
+with open('data/Input/TU_dictionaries.pkl', 'rb') as f:
     TU_dictionaries = pickle.load(f)
 (TU_experiment_prompts_dict, TU_model_dict, TU_prompt_ids_dict, TU_initial_costs_dict, TU_orientation_prices_dict, TU_buyers_dict,
   TU_results_dict, TU_answercount_dict, TU_configurations_dict, TU_experiment_ids_dict) = TU_dictionaries
 
 ### Transaction Utility 2
-with open('Dashboard/src/data/Input/TU2_dictionaries.pkl', 'rb') as f:
+with open('data/Input/TU2_dictionaries.pkl', 'rb') as f:
     TU2_dictionaries = pickle.load(f)
 TU2_experiment_prompts_dict, TU2_model_dict, TU2_prompt_ids_dict, TU2_places_dict, TU2_income_dict, TU2_configuration_dict = TU2_dictionaries
 
 ### Transaction Utility 3
-with open('Dashboard/src/data/Input/TU3_dictionaries.pkl', 'rb') as f:
+with open('data/Input/TU3_dictionaries.pkl', 'rb') as f:
     TU3_dictionaries = pickle.load(f)
 (TU3_experiment_prompts_dict, TU3_model_dict, TU3_prompt_ids_dict, TU3_actual_price_dict,
                      TU3_initial_costs_dict, TU3_orientation_price_dict, TU3_configuration_dict, TU3_buyer_dict) = TU3_dictionaries
