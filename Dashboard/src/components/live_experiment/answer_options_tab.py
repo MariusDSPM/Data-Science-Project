@@ -78,7 +78,7 @@ presets = {
     },
 }
 
-input_style = {'width': '25%', 'marginBottom': '25px'}
+input_style = {'width': '30%', 'marginBottom': '25px'}
 
 
 # Page for individual experiment
@@ -94,7 +94,7 @@ def answer_option_layout():
                             id="preset-dropdown",
                             options=[{"label": preset, "value": preset} for preset in presets.keys()],
                             value="Default",
-                            style={'width': '45%', 'margin': 'auto', 'marginBottom': '20px'},
+                            style={'width': '50%', 'margin': 'auto', 'marginBottom': '20px'},
                             persistence=True,
                             persistence_type='session',
                         ),
@@ -234,7 +234,7 @@ def answer_option_layout():
                                     style={'display': 'flex', 'flexDirection': 'column', 'width': '100%'}
                                 ),
                             ],   
-                            style={'width': '50%'}
+                            style={'width': '55%'}
                         ),
                     ],
                     style={'display': 'flex', 'flexDirection': 'column', 'alignItems': 'center', 'width': '100%'},

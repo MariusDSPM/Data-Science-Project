@@ -19,7 +19,7 @@ LLAMA_2_INPUT_COST = GPT_4_INPUT_COST  # Llama-2-70b through Replicate has appro
 LLAMA_2_OUTPUT_COST = GPT_4_OUTPUT_COST  # Llama-2-70b through Replicate has approximately the same cost as GPT-4-1106-Preview
 
 
-input_style = {'width': '25%', 'marginBottom': '25px'}
+input_style = {'width': '30%', 'marginBottom': '25px'}
 
 def numeric_layout():
     layout = [
@@ -137,7 +137,7 @@ def numeric_layout():
                                     style={'display': 'flex', 'flexDirection': 'column', 'width': '100%'}
                                 ),
                             ],   
-                            style={'width': '50%'}
+                            style={'width': '55%'}
                         ),
                     ],
                     style={'display': 'flex', 'flexDirection': 'column', 'alignItems': 'center', 'width': '100%'},

@@ -11,7 +11,7 @@ dash.register_page(__name__, path='/sunk-cost-fallacy', name='Sunk Cost Fallacy'
 
 # Function for getting data of Sunk Cost Experiment 1
 def get_sunk_cost_data_1(selected_temperature, selected_sunk_cost):
-    sunk_cost_1 = pd.read_csv('Output/Sunk_cost_experiment_1_with_llama.csv', index_col=0)
+    sunk_cost_1 = pd.read_csv('data/Output/Sunk_cost_experiment_1_with_llama.csv', index_col=0)
     df = sunk_cost_1[(sunk_cost_1['Temperature'] == selected_temperature) & 
                      (sunk_cost_1['Sunk Cost ($)'] == selected_sunk_cost)]
     
@@ -19,7 +19,7 @@ def get_sunk_cost_data_1(selected_temperature, selected_sunk_cost):
 
 # Function for getting data of Sunk Cost Experiment 2
 def get_sunk_cost_data_2(selected_temperature, selected_model):
-    df = pd.read_csv('Output/Sunk_cost_experiment_2_with_llama.csv', index_col=0)
+    df = pd.read_csv('data/Output/Sunk_cost_experiment_2_with_llama.csv', index_col=0)
     df = df[(df['Temperature'] == selected_temperature) & 
             (df['Model'] == selected_model) |
             (df['Model'] == 'Real Experiment')]
@@ -61,7 +61,7 @@ def plot_sunk_cost_1(selected_temperature, selected_sunk_cost):
             text=f"Shares for Answer Options (Sunk Cost: ${selected_sunk_cost}, Temperature: {selected_temperature})",
             x=0.43,
             y = 0.9,
-            font=dict(size=22)
+            font=dict(size=20)
         ),
         legend=dict(
             x=1.01,  
@@ -134,7 +134,7 @@ def plot_sunk_cost_2(selected_temperature, selected_model):
             text=f'Shares for Answer Options (Model: {selected_model}, Temperature: {selected_temperature})',
             x=0.45,
             y = 0.9,
-            font=dict(size=22)
+            font=dict(size=18)
         ),
         legend=dict(
             x=1.01,  

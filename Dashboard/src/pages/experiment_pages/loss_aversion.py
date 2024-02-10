@@ -11,7 +11,7 @@ dash.register_page(__name__, path='/loss-aversion', name='Loss Aversion', locati
 
 # Function for getting data
 def get_loss_aversion_data(selected_temperature):
-    df = pd.read_csv('Output/Loss_aversion_experiment_with_llama.csv', index_col=0)
+    df = pd.read_csv('data/Output/Loss_aversion_experiment_with_llama.csv', index_col=0)
     df = df[(df['Temperature'] == selected_temperature)|
             (df['Model'] == 'Real Experiment')] 
     
@@ -58,7 +58,7 @@ def plot_loss_aversion(selected_temperature):
             text='Shares for "B" (risk-seeking option) by Model and Scenario',
             x=0.45,
             y = 0.9,
-            font=dict(size=22)
+            font=dict(size=20)
         ),
         legend=dict(
             x=1.01,  

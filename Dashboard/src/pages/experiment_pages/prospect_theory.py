@@ -16,23 +16,23 @@ dash.register_page(__name__, path='/prospect-theory', name='Prospect Theory', lo
 
 
 # Load in results and graphs of Prospect Theory experiments
-PT_probs = pd.read_csv("Dashboard/src/data/Output/PT_probs.csv")
+PT_probs = pd.read_csv("data/Output/PT_probs.csv")
 
 # Second Prospect Theory experiment
-PT2_probs = pd.read_csv("Dashboard/src/data/Output/PT2_probs.csv")
-PT_og_results = pd.read_csv("Dashboard/src/data/Input/PT_og_results.csv")
+PT2_probs = pd.read_csv("data/Output/PT2_probs.csv")
+PT_og_results = pd.read_csv("data/Input/PT_og_results.csv")
 
 
 
 ### Prospect Theory 1 ###
 
 # Prompts for PT experiments
-with open ("Dashboard/src/data/Input/PT_prompts.pkl", "rb") as file:
+with open ("data/Input/PT_prompts.pkl", "rb") as file:
     PT_prompts = pickle.load(file)
 
 
 # Load PT prompt dictionary
-with open ("Dashboard/src/data/Input/PT_dictionaries.pkl", "rb") as file:
+with open ("data/Input/PT_dictionaries.pkl", "rb") as file:
     PT_dictionaries = pickle.load(file)
 PT_experiment_prompts_dict = PT_dictionaries[0]
 
@@ -40,23 +40,23 @@ PT_experiment_prompts_dict = PT_dictionaries[0]
 ### Prospect Theory 2 ###
 
 # Scenario 1
-with open("Dashboard/src/data/Input/PT2_prompts_1.pkl", "rb") as file:
+with open("data/Input/PT2_prompts_1.pkl", "rb") as file:
     PT2_prompts_1 = pickle.load(file)
 
 # Scenario 2
-with open("Dashboard/src/data/Input/PT2_prompts_2.pkl", "rb") as file:
+with open("data/Input/PT2_prompts_2.pkl", "rb") as file:
     PT2_prompts_2 = pickle.load(file)
 
 # Scenario 3
-with open("Dashboard/src/data/Input/PT2_prompts_3.pkl", "rb") as file:
+with open("data/Input/PT2_prompts_3.pkl", "rb") as file:
     PT2_prompts_3 = pickle.load(file)
 
 # Scenario 4
-with open("Dashboard/src/data/Input/PT2_prompts_4.pkl", "rb") as file:
+with open("data/Input/PT2_prompts_4.pkl", "rb") as file:
     PT2_prompts_4 = pickle.load(file)
 
 # Load PT2 prompt dictionary
-with open("Dashboard/src/data/Input/PT2_dictionaries.pkl", "rb") as file:
+with open("data/Input/PT2_dictionaries.pkl", "rb") as file:
     PT2_dictionaries = pickle.load(file)
 PT2_experiment_prompts_dict = PT2_dictionaries[0]
 

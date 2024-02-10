@@ -18,14 +18,14 @@ dash.register_page(__name__, path='/transaction-utility', name='Transaction Util
 ##### Transaction Utility #####
 
 # Load experiment results 
-TU_results = pd.read_csv('Dashboard/src/data/Output/TU_results.csv')
+TU_results = pd.read_csv('data/Output/TU_results.csv')
 
 # Load prompts
-with open("Dashboard/src/data/Input/TU_prompts.pkl", "rb") as file:
+with open("data/Input/TU_prompts.pkl", "rb") as file:
     TU_prompts = pickle.load(file)
 
 # Load TU prompt dictionary
-with open("Dashboard/src/data/Input/TU_dictionaries.pkl", "rb") as file:
+with open("data/Input/TU_dictionaries.pkl", "rb") as file:
     TU_dictionaries = pickle.load(file)
 TU_experiment_prompts_dict = TU_dictionaries[0]
 
@@ -33,14 +33,14 @@ TU_experiment_prompts_dict = TU_dictionaries[0]
 ##### Transaction Utility 2 #####
 
 # Load experiment results
-TU2_results = pd.read_csv('Dashboard/src/data/Output/TU2_results.csv')
+TU2_results = pd.read_csv('data/Output/TU2_results.csv')
 
 # Load prompts
-with open("Dashboard/src/data/Input/TU2_prompts.pkl", "rb") as file:
+with open("data/Input/TU2_prompts.pkl", "rb") as file:
     TU2_prompts = pickle.load(file)
 
 # Load TU2 prompt dictionary
-with open("Dashboard/src/data/Input/TU2_dictionaries.pkl", "rb") as file:
+with open("data/Input/TU2_dictionaries.pkl", "rb") as file:
     TU2_dictionaries = pickle.load(file)
 TU2_experiment_prompts_dict = TU2_dictionaries[0]
 
@@ -55,14 +55,14 @@ def extract_dollar_amounts(answers):
 ##### Transaction Utility 3 #####
 
 # Load experiment results
-TU3_results = pd.read_csv('Dashboard/src/data/Output/TU3_results.csv')
+TU3_results = pd.read_csv('data/Output/TU3_results.csv')
 
 # Load prompts
-with open("Dashboard/src/data/Input/TU3_prompts.pkl", "rb") as file:
+with open("data/Input/TU3_prompts.pkl", "rb") as file:
     TU3_prompts = pickle.load(file)
 
 # Load TU3 prompt dictionary
-with open("Dashboard/src/data/Input/TU3_dictionaries.pkl", "rb") as file:
+with open("data/Input/TU3_dictionaries.pkl", "rb") as file:
     TU3_dictionaries = pickle.load(file)
 TU3_experiment_prompts_dict = TU3_dictionaries[0]
 

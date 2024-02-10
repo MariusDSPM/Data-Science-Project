@@ -15,14 +15,14 @@ dash.register_page(__name__, path='/decoy-effect', name='Decoy Effect', location
 
 
 # Load Decoy Effect experiment results
-DE_probs = pd.read_csv("Dashboard/src/data/Output/DE_probs.csv")
+DE_probs = pd.read_csv("data/Output/DE_probs.csv")
 
 # Load Decoy Effect prompts
-with open ("Dashboard/src/data/Input/DE_prompts.pkl", "rb") as file:
+with open ("data/Input/DE_prompts.pkl", "rb") as file:
     DE_prompts = pickle.load(file)
 
 # Load Decoy Effect prompt dictionary
-with open ("Dashboard/src/data/Input/DE_dictionaries.pkl", "rb") as file:
+with open ("data/Input/DE_dictionaries.pkl", "rb") as file:
     DE_dictionaries = pickle.load(file)
 DE_experiment_prompts_dict = DE_dictionaries[0]
 
