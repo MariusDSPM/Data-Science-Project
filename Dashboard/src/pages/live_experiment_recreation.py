@@ -23,20 +23,11 @@ from openai import OpenAI
 from replicate.client import Client
 
 
-# Get openAI API key (previously saved as environmental variable)
-openai.api_key = os.environ["OPENAI_API_KEY"]
-
-# Set client
-client = OpenAI()
-
-
-
 ##  Import every function in utils.experiment_functions
 from utils.experiment_functions import *
 
 ## Import every plotting function in utils.plotting_functions
 from utils.plotting_functions import *
-
 
 dash.register_page(__name__, path='/experiment-recreation', name='Experiment Recreation', location='below-experiments')
 
@@ -54,10 +45,11 @@ layout = [
            * Transaction Utility 1: Spare hockey game ticket
            * Transaction Utility 2: Hockey game ticket with alternative numbers
            * Transaction Utility 3: Beer from hotel vs. grocery store \n
-            You can choose the desired experiment configuration from the dropdowns and the prompts will automatically be adjusted. After that, you will
+            You can choose the desired experiment configuration from the dropdowns and the prompt will automatically be adjusted. After that, you will
             need to select the number of desired requests (i.e. how often the LLM should answer the same prompt) and a temperature value. 
             After hitting "Run the experiment", the results will automatically be visualized and you can download the raw results in form of a csv-file.
-            """),
+            The prompt, along with a cost estimate for the experiment, will also be displayed. If you are uncertain about the aspect of costs, you can revisit
+            our [Overview page](/overview) or go to https://openai.com/pricing for further information."""),
         
             html.Div(
             [
@@ -894,9 +886,12 @@ def update_prospect_live(n_clicks, selected_scenario, selected_model, selected_p
         else:
             results, probs = PT_run_experiment_dashboard(experiment_id, selected_iterations, selected_temperature, openai_key)
         n_clicks = None
-        
-        prompt = html.P(f"The prompt used in this experiment is: {PT_experiment_prompts_dict[experiment_id]}")
-        return PT_plot_results(probs), prompt, results.to_json(date_format='iso', orient='split')
+        text = PT_experiment_prompts_dict[experiment_id]
+        costs = cost_estimate(text, selected_model, selected_iterations)
+        prompt = html.P([f"The prompt used in this experiment is: {PT_experiment_prompts_dict[experiment_id]}",
+                         html.Br(),
+                        f"The total costs of running this experiment are estimated to be ${np.round(costs, 6)}."])
+        return PT_plot_results(probs), prompt, results.to_json(orient='split')
     
 # Callback for PT download
 @dash.callback(
@@ -911,6 +906,7 @@ def download_csv(n_clicks, stored_data):
         return dcc.send_data_frame(stored_df.to_csv, "PT_results.csv")
     else:
         return dash.no_update
+    
 
     
 
@@ -1085,8 +1081,12 @@ def update_prospect2_live(n_clicks, selected_scenario, selected_configuration, s
         else:
             results, probs = PT2_run_experiment_dashboard(experiment_id, selected_iterations, selected_temperature, openai_key)
         n_clicks = None
-        prompt = html.P(f"The prompt used in this experiment is: {PT2_experiment_prompts_dict[experiment_id]}")
-        return PT2_plot_results(probs), prompt, results.to_json(date_format='iso', orient='split')
+        text = PT2_experiment_prompts_dict[experiment_id]
+        costs = cost_estimate(text, selected_model, selected_iterations)
+        prompt = html.P([f"The prompt used in this experiment is: {PT2_experiment_prompts_dict[experiment_id]}",
+                         html.Br(),
+                        f"The total costs of running this experiment are estimated to be ${np.round(costs, 6)}."])
+        return PT2_plot_results(probs), prompt, results.to_json(orient='split')
     
 # Callback for PT2 download
 @dash.callback(
@@ -1177,8 +1177,12 @@ def update_decoy_live(n_clicks, selected_scenario, selected_priming, selected_re
         else:
             results, probs = DE_run_experiment_dashboard(experiment_id, selected_iterations, selected_temperature, openai_key)
         n_clicks = None
-        prompt = html.P(f"The prompt used in this experiment is: {DE_experiment_prompts_dict[experiment_id]}")
-        return DE_plot_results(probs), prompt, results.to_json(date_format='iso', orient='split')
+        text = DE_experiment_prompts_dict[experiment_id]
+        costs = cost_estimate(text, selected_model, selected_iterations)
+        prompt = html.P([f"The prompt used in this experiment is: {DE_experiment_prompts_dict[experiment_id]}",
+                         html.Br(),
+                        f"The total costs of running this experiment are estimated to be ${np.round(costs, 6)}."])
+        return DE_plot_results(probs), prompt, results.to_json(orient='split')
     
 # Callback for DE download
 @dash.callback(
@@ -1291,8 +1295,12 @@ def update_tu1_live(n_clicks, selected_initial_cost, selected_current_cost, sele
         else:
             results= TU_run_experiment_dashboard(experiment_id, selected_iterations, selected_temperature, openai_key)
         n_clicks = None
-        prompt = html.P(f"The prompt used in this experiment is: {TU_experiment_prompts_dict[experiment_id]}")
-        return TU_plot_results(results), prompt, results.to_json(date_format='iso', orient='split')
+        text = TU_experiment_prompts_dict[experiment_id]
+        costs = cost_estimate(text, selected_model, selected_iterations)
+        prompt = html.P([f"The prompt used in this experiment is: {TU_experiment_prompts_dict[experiment_id]}",
+                         html.Br(),
+                        f"The total costs of running this experiment are estimated to be ${np.round(costs, 6)}."])
+        return TU_plot_results(results), prompt, results.to_json(orient='split')
     
 # Callback for TU1 download
 @dash.callback(
@@ -1405,8 +1413,12 @@ def update_tu3_live(n_clicks, selected_initial_cost, selected_current_cost, sele
         else:
             results= TU3_run_experiment_dashboard(experiment_id, selected_iterations, selected_temperature, openai_key)
         n_clicks = None
-        prompt = html.P(f"The prompt used in this experiment is: {TU3_experiment_prompts_dict[experiment_id]}")
-        return TU3_plot_results(results), prompt, results.to_json(date_format='iso', orient='split')
+        text = TU3_experiment_prompts_dict[experiment_id]
+        costs = cost_estimate(text, selected_model, selected_iterations)
+        prompt = html.P([f"The prompt used in this experiment is: {TU3_experiment_prompts_dict[experiment_id]}",
+                         html.Br(),
+                        f"The total costs of running this experiment are estimated to be ${np.round(costs, 6)}."])
+        return TU3_plot_results(results), prompt, results.to_json(orient='split')
     
 # Callback for TU3 Scenario 1 download
 @dash.callback(
@@ -1522,8 +1534,12 @@ def update_tu3_2_live(n_clicks, selected_initial_cost, selected_current_cost, se
         else:
             results= TU3_run_experiment_dashboard(experiment_id, selected_iterations, selected_temperature, openai_key)
         n_clicks = None
-        prompt = html.P(f"The prompt used in this experiment is: {TU3_experiment_prompts_dict[experiment_id]}")
-        return TU3_plot_results(results), prompt, results.to_json(date_format='iso', orient='split')
+        text = TU3_experiment_prompts_dict[experiment_id]
+        costs = cost_estimate(text, selected_model, selected_iterations)
+        prompt = html.P([f"The prompt used in this experiment is: {TU3_experiment_prompts_dict[experiment_id]}",
+                         html.Br(),
+                        f"The total costs of running this experiment are estimated to be ${np.round(costs, 6)}."])
+        return TU3_plot_results(results), prompt, results.to_json(orient='split')
     
 # Callback for TU3 Scenario 2 download
 @dash.callback(
@@ -1611,8 +1627,12 @@ def update_tu2_live(n_clicks, selected_place, selected_income, selected_model, s
         else:
             results= TU2_run_experiment_dashboard(experiment_id, selected_iterations, selected_temperature, openai_key)
         n_clicks = None
-        prompt = html.P(f"The prompt used in this experiment is: {TU2_experiment_prompts_dict[experiment_id]}")
-        return TU2_plot_results(results), prompt, results.to_json(date_format='iso', orient='split')
+        text = TU2_experiment_prompts_dict[experiment_id]
+        costs = cost_estimate(text, selected_model, selected_iterations)
+        prompt = html.P([f"The prompt used in this experiment is: {TU2_experiment_prompts_dict[experiment_id]}",
+                         html.Br(),
+                        f"The total costs of running this experiment are estimated to be ${np.round(costs, 6)}."])
+        return TU2_plot_results(results), prompt, results.to_json(orient='split')
     
 # Callback for TU2 download
 @dash.callback(

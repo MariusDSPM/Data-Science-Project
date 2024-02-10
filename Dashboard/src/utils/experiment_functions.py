@@ -20,7 +20,26 @@ from ast import literal_eval
 import plotly.graph_objects as go
 import pickle
 
-##### Set clients for API calls
+##### General function to calculate costs of experiment (prices given per thousand tokens)
+GPT_3_5_INPUT_COST = 0.0005
+GPT_3_5_OUTPUT_COST = 0.0015
+GPT_4_INPUT_COST = 0.01
+GPT_4_OUTPUT_COST = 0.03
+LLAMA_2_INPUT_COST = GPT_4_INPUT_COST 
+LLAMA_2_OUTPUT_COST = GPT_4_OUTPUT_COST 
+
+# Function to count words in prompts and estimate costs (we generously round output tokens to 5, to prevent underestimation)
+def cost_estimate(prompt, selected_model, iterations):
+    tokens = len(prompt.split())   # Counting words in the prompt
+    if selected_model == "gpt-3.5-turbo":
+        costs = (tokens * GPT_3_5_INPUT_COST + 5 * GPT_3_5_OUTPUT_COST) * iterations / 1000
+    elif selected_model == "gpt-4-1106-preview":
+        costs = (tokens * GPT_4_INPUT_COST + 5 * GPT_4_OUTPUT_COST) * iterations / 1000
+    elif selected_model == "llama-2-70b":
+        costs = (tokens * LLAMA_2_INPUT_COST + 5 * LLAMA_2_OUTPUT_COST) * iterations / 1000
+
+    return costs
+
 
 
 ##### Import and assign prompts for every experiment
@@ -157,7 +176,7 @@ def PT_run_experiment_dashboard(experiment_id, n, temperature, openai_key):
     probs = [experiment_id, temperature, p_a, p_b, p_c, len_correct, PT_model_dict[experiment_id], PT_scenario_dict[experiment_id],
              PT_priming_dict[experiment_id], f"{PT_results_dict[experiment_id]}", PT_answercount_dict[experiment_id]]
     probs = pd.DataFrame(probs)
-    probs = probs.set_index(pd.Index(["Experiment_id", "Temp", "p(A)", "p(B)", "p(C)", "Obs.", "Model", "Scenario", "Priming", "Original", "Original_count"]))
+    probs = probs.set_index(pd.Index(["Experiment_id", "Temp", "A", "B", "C", "Obs.", "Model", "Scenario", "Priming", "Original", "Original_count"]))
     probs = probs.transpose()
         
     # Give out results
@@ -209,7 +228,7 @@ def PT_run_experiment_llama_dashboard(experiment_id, n, temperature, replicate_t
     probs = [experiment_id, temperature, p_a, p_b, p_c, len_correct, PT_model_dict[experiment_id], PT_scenario_dict[experiment_id],
              PT_priming_dict[experiment_id], f"{PT_results_dict[experiment_id]}", PT_answercount_dict[experiment_id]]
     probs = pd.DataFrame(probs)
-    probs = probs.set_index(pd.Index(["Experiment_id", "Temp", "p(A)", "p(B)", "p(C)", "Obs.", "Model", "Scenario", "Priming", "Original", "Original_count"]))
+    probs = probs.set_index(pd.Index(["Experiment_id", "Temp", "A", "B", "C", "Obs.", "Model", "Scenario", "Priming", "Original", "Original_count"]))
     probs = probs.transpose()
         
     # Give out results
@@ -270,7 +289,7 @@ def PT2_run_experiment_dashboard(experiment_id, n, temperature, openai_key):
 
     # Collect probabilities in a dataframe
     probs = pd.DataFrame([experiment_id, temperature, p_a, p_b, p_c, len_correct, PT2_model_dict[experiment_id], PT2_scenario_dict[experiment_id], PT2_configuration_dict[experiment_id]])
-    probs = probs.set_index(pd.Index(["Experiment", "Temp", "p(A)", "p(B)", "p(C)", "Obs.", "Model", "Scenario", "Configuration"]))
+    probs = probs.set_index(pd.Index(["Experiment", "Temp", "A", "B", "C", "Obs.", "Model", "Scenario", "Configuration"]))
     probs = probs.transpose() # Transpose to use existing plotting function
 
     # Give out results
@@ -317,7 +336,7 @@ def PT2_run_experiment_llama_dashboard(experiment_id, n, temperature, replicate_
     
     # Collect probabilities in a dataframe
     probs = pd.DataFrame([experiment_id, temperature, p_a, p_b, p_c, len_correct, PT2_model_dict[experiment_id], PT2_scenario_dict[experiment_id], PT2_configuration_dict[experiment_id]])
-    probs = probs.set_index(pd.Index(["Experiment", "Temp", "p(A)", "p(B)", "p(C)", "Obs.", "Model", "Scenario", "Configuration"]))
+    probs = probs.set_index(pd.Index(["Experiment", "Temp", "A", "B", "C", "Obs.", "Model", "Scenario", "Configuration"]))
     probs = probs.transpose()
     
     # Give out results
@@ -410,7 +429,7 @@ def DE_run_experiment_dashboard(experiment_id: int, n: int, temperature: int, op
     # Collect probabilities in a dataframe
     probs = pd.DataFrame([experiment_id, temperature, p_a, p_b, p_c, len_correct, DE_model_dict[experiment_id], DE_scenario_dict[experiment_id],
                            DE_priming_dict[experiment_id], DE_reorder_dict[experiment_id], f"{DE_og_results_dict[experiment_id]}", DE_answercount_dict[experiment_id]])
-    probs = probs.set_index(pd.Index(["Experiment", "Temp", "p(A)", "p(B)", "p(C)", "Obs.", "Model", "Scenario", "Priming", "Reorder", "Original", "Original_count"]))
+    probs = probs.set_index(pd.Index(["Experiment", "Temp", "A", "B", "C", "Obs.", "Model", "Scenario", "Priming", "Reorder", "Original", "Original_count"]))
     probs = probs.transpose()
 
     return results, probs 
@@ -455,7 +474,7 @@ def DE_run_experiment_llama_dashboard(experiment_id, n, temperature, replicate_t
     # Collect probabilities in a dataframe
     probs = pd.DataFrame([experiment_id, temperature, p_a, p_b, p_c, len_correct, DE_model_dict[experiment_id], DE_scenario_dict[experiment_id],
                            DE_priming_dict[experiment_id], DE_reorder_dict[experiment_id],  f"{DE_og_results_dict[experiment_id]}", DE_answercount_dict[experiment_id]])
-    probs = probs.set_index(pd.Index(["Experiment", "Temp", "p(A)", "p(B)", "p(C)", "Obs.", "Model", "Scenario", "Priming", "Reorder", "Original", "Original_count"]))
+    probs = probs.set_index(pd.Index(["Experiment", "Temp", "A", "B", "C", "Obs.", "Model", "Scenario", "Priming", "Reorder", "Original", "Original_count"]))
     probs = probs.transpose()
     # Give out results
     return results, probs

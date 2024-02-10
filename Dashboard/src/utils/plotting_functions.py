@@ -36,15 +36,15 @@ def PT_plot_results(df):
     fig = go.Figure(data=[
         go.Bar(
             name = "Model answers",
-            x = ["p(A)", "p(B)", "p(C)"],
-            y = [df.loc["p(A)"].iloc[0], df.loc["p(B)"].iloc[0], df.loc["p(C)"].iloc[0]],
+            x = ["A", "B", "C"],
+            y = [df.loc["A"].iloc[0], df.loc["B"].iloc[0], df.loc["C"].iloc[0]],
             customdata = [n_observations, n_observations, n_observations], 
             hovertemplate = "Percentage: %{y:.2f}%<br>Number of observations: %{customdata}<extra></extra>",
             marker_color = "rgb(55, 83, 109)"
         ),
         go.Bar(
             name = "Original answers",
-            x = ["p(A)","p(B)", "p(C)"],
+            x = ["A", "B", "C"],
             y = [og_answers[0], og_answers[1], og_answers[2]],
             customdata = [n_original, n_original, n_original],
             hovertemplate = "Percentage: %{y:.2f}%<br>Number of observations: %{customdata}<extra></extra>",
@@ -59,7 +59,7 @@ def PT_plot_results(df):
         title_font=dict(size=18),  
     ),
     yaxis = dict(
-        title="Probability (%)",  
+        title="Share (%)",  
         title_font=dict(size=18), 
     ),
     title = dict(
@@ -97,8 +97,8 @@ def PT2_plot_results(df):
     fig = go.Figure(data=[
         go.Bar(
             name = "Model answers",
-            x = ["p(A)", "p(B)", "p(C)"],
-            y = [df.loc["p(A)"].iloc[0], df.loc["p(B)"].iloc[0], df.loc["p(C)"].iloc[0]],
+            x = ["A", "B", "C"],
+            y = [df.loc["A"].iloc[0], df.loc["B"].iloc[0], df.loc["C"].iloc[0]],
             customdata = [n_observations, n_observations, n_observations], 
             hovertemplate = "Percentage: %{y:.2f}%<br>Number of observations: %{customdata}<extra></extra>",
             marker_color = "rgb(55, 83, 109)",
@@ -112,7 +112,7 @@ def PT2_plot_results(df):
         title_font=dict(size=18),  
     ),
     yaxis = dict(
-        title="Probability (%)",  
+        title="Share (%)",  
         title_font=dict(size=18), 
     ),
     title = dict(
@@ -137,7 +137,7 @@ def PT_plot_og_results(df):
         go.Bar(
                 name = "p(A)",
                 x = [0.1, 0.3, 0.5, 0.7],
-                y = [df["p(A)"][0], df["p(A)"][1], df["p(A)"][2], df["p(A)"][3]],
+                y = [df["A"][0], df["A"][1], df["A"][2], df["A"][3]],
                 customdata = n_original,
                 hovertemplate = "Percentage: %{y:.2f}%<br>Number of observations: %{customdata}<extra></extra>",
                 marker_color="black",
@@ -145,7 +145,7 @@ def PT_plot_og_results(df):
         go.Bar(
                 name = "p(B)",
                 x = [0.15, 0.35, 0.55, 0.75],
-                y = [df["p(B)"][0], df["p(B)"][1], df["p(B)"][2], df["p(B)"][3]],
+                y = [df["B"][0], df["B"][1], df["B"][2], df["B"][3]],
                 customdata = n_original,
                 hovertemplate = "Percentage: %{y:.2f}%<br>Number of observations: %{customdata}<extra></extra>",
                 marker_color="rgb(55, 83, 109)",
@@ -154,7 +154,7 @@ def PT_plot_og_results(df):
         go.Bar(
                 name = "p(C)",
                 x = [0.2, 0.4, 0.6, 0.8],
-                y = [df["p(C)"][0], df["p(C)"][1], df["p(C)"][2], df["p(C)"][3]],
+                y = [df["C"][0], df["C"][1], df["C"][2], df["C"][3]],
                 customdata = n_original,
                 hovertemplate = "Percentage: %{y:.2f}%<br>Number of observations: %{customdata}<extra></extra>",
                 marker_color="rgb(26, 118, 255)",
@@ -170,7 +170,7 @@ def PT_plot_og_results(df):
         tickfont=dict(size=16),  
     ),
     yaxis = dict(
-        title="Probability (%)",  
+        title="Share (%)",  
         title_font=dict(size=18), 
     ),
     title = dict(
@@ -219,15 +219,15 @@ def DE_plot_results(df):
     fig = go.Figure(data=[
         go.Bar(
             name = "Model answers",
-            x = ["p(A)", "p(B)", "p(C)"],
-            y = [df.loc["p(A)"].iloc[0], df.loc["p(B)"].iloc[0], df.loc["p(C)"].iloc[0]],
+            x = ["A", "B", "C"],
+            y = [df.loc["A"].iloc[0], df.loc["B"].iloc[0], df.loc["C"].iloc[0]],
             customdata = [n_observations, n_observations, n_observations], 
             hovertemplate = "Percentage: %{y:.2f}%<br>Number of observations: %{customdata}<extra></extra>",
             marker_color = "rgb(55, 83, 109)"
         ),
         go.Bar(
             name = "Original answers",
-            x = ["p(A)","p(B)", "p(C)"],
+            x = ["A", "B", "C"],
             y = [og_answers[0], og_answers[1], og_answers[2]],
             customdata = [n_original, n_original, n_original],
             hovertemplate = "Percentage: %{y:.2f}%<br>Number of observations: %{customdata}<extra></extra>",
@@ -242,7 +242,7 @@ def DE_plot_results(df):
         title_font=dict(size=18),  
     ),
     yaxis = dict(
-        title="Probability (%)",  
+        title="Share (%)",  
         title_font=dict(size=18), 
     ),
     title = dict(
