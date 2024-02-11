@@ -64,8 +64,8 @@ layout = [
                 title = "Description and motivation of the experiment"
             ),
         dbc.AccordionItem(
-                dcc.Markdown(
-                """In the experiment below, we examine how the three regarded Large Language Models react when confronted with this decision.        
+                dcc.Markdown("""
+                In the experiment below, we examine how the three regarded Large Language Models respond when confronted with this decision.        
                 To accomplish this, we used a total of 8 different prompts and presented each prompt 100 times for GPT-3.5-Turbo and, for cost reasons, 50 times for GPT-4-1106-Preview and LLama-2-70b.      
                 The prompts will be displayed underneath the graph, once the respective experiment configuration is selected.   
                 The phrasing of the prompts is designed to resemble the original format as close as possible, while still being instructive enough to produce meaningful results.    
@@ -73,10 +73,16 @@ layout = [
                 On top of the Decoy Effect itself, we also regarded the aspect of *priming* and *renaming and reordering* the answer options.       
                 In the case of *priming*, we specifically told the models to take the role of a market researcher knowing about the Decoy Effect in product pricing. With this, we 
                 wanted to research, whether the extent to which the models' answers might adhere to the Decoy Effect, would change.       
-                In the second case, we changed the order and names of the answers options, to research whether the extent to which the models' answers might reflect
-                certain decision-making patterns present in humans, for example the A-bias, would change.     
-                As in all experiments, all prompts were presented to the models over a range of different temperature parameters.                
-                """),
+                In the second case, we changed the order and names of the answer options, to research whether the extent to which the models' answers might reflect
+                certain decision-making patterns present in humans, for example the A-bias, would change.   
+
+                This leads to the aforementioned total of 8 different experiment configurations:
+
+                - Decoy options present vs Decoy option removed (2 options)
+                - Primed vs unprimed prompt (2 options)
+                - Original order vs adjusted answer options (2 options)
+                
+                As in all experiments, all prompts were presented to the models over a range of different temperature parameters."""),
                 title = "Implementation of the experiment"
             ),
         dbc.AccordionItem(
