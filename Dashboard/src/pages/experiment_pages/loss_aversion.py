@@ -12,6 +12,7 @@ dash.register_page(__name__, path='/loss-aversion', name='Loss Aversion', locati
 # Function for getting data
 def get_loss_aversion_data(selected_temperature):
     df = pd.read_csv('data/Output/Loss_aversion_experiment_with_llama.csv', index_col=0)
+    # Filter data based on selected temperature and results from real experiment
     df = df[(df['Temperature'] == selected_temperature)|
             (df['Model'] == 'Real Experiment')] 
     

@@ -21,9 +21,10 @@ def get_sunk_cost_data_1(selected_temperature, selected_sunk_cost):
 # Function for getting data of Sunk Cost Experiment 2
 def get_sunk_cost_data_2(selected_temperature, selected_model):
     df = pd.read_csv('data/Output/Sunk_cost_experiment_2_with_llama.csv', index_col=0)
+    # Filter data based on selected temperature and model 
     df = df[(df['Temperature'] == selected_temperature) & 
             (df['Model'] == selected_model) |
-            (df['Model'] == 'Real Experiment')]
+            (df['Model'] == 'Real Experiment')]  # Results from real experiment
     
     return df
 
@@ -164,7 +165,7 @@ layout = [
             [
                 dbc.AccordionItem(
                     [
-                        html.P("Participants are presented with a hypothetical scenario where they have purchased tickets to two different events: a theater performance and a rock concert. The theater ticket costs $90, while the rock concert ticket costs $30. Weeks later, as they are about to attend the rock concert, they realize that both events are scheduled for the same evening. The tickets are non-transferable and cannot be exchanged. Participants must choose which event to attend, knowing they will miss out on the other."),
+                        html.P("Participants are presented with a hypothetical scenario where they have purchased tickets to two different events: a theater performance and a rock concert. The theater ticket costs $90, while the rock concert ticket costs $30. Weeks later, they realize that both events are scheduled for the same evening. They think they will enjoy the rock concert more than the theater performance. The tickets are non-transferable and cannot be exchanged. Participants must choose which event to attend, knowing they will miss out on the other."),
                     ],
                     title="Description of Experiment",
                 ),

@@ -40,8 +40,8 @@ def plot_results(df, x_axis, groupby, iterations, temperature):
 
 
 def plot_results_numeric(df):
-    # Create traces for each cell
     
+    # Create traces for each cell
     traces = []
     for column in df.columns:
         for i in range(len(df)):
