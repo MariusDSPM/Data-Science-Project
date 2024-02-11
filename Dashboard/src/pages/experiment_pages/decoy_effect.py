@@ -33,38 +33,68 @@ DE_experiment_prompts_dict = DE_dictionaries[0]
 layout = [
     html.H1("Decoy Effect Experiment", className="page-heading"), 
     html.Hr(),
-    html.P(["""The decoy effect describes a phenomenon, in which  consumers preferences between two products change, once a third option is added. This third option is designed 
-            to be asymmetrically dominated, meaning that it is entirely inferior to one of the previous options, but only partially inferior to the other. Once this asymetrically 
-            dominated option, the Decoy, is present, more people will now tend to choose the dominating option than before. A decoy product can therefore be used to influence consumer's
-            decision making and increase saless of a specific product merely through the presence of an additional alternative.""",
-            html.Br(),
-            html.Br(),
-            """Our experiment aims to recreate the findings of Ariely in his 2008 book *Predictably Irrational*. There, he asked 100 students from MIT's Sloan School of Management 
-            to choose between the following options:""",
-            html.Br(),
-            html.Br(),
-            "A: One-year subscription to Economist.com. Includes online access to all articles from The Economist since 1997, priced at 59$.",
-            html.Br(),
-            "B: One-year subscription to the print edition of The Economist, priced at 125$.",
-            html.Br(),
-            "C: One-year subscription to the print edition of The Economist and online access to all articles from The Economist since 1997, priced at 125$.",
-            html.Br(),
-            html.Br(),
-            "In this example, option B serves as the decoy option.",
-            html.Br(), 
-            "When presented with ", html.B("all three options"), " Ariely found, that ", html.B("84%"), " of the participants chose option ", html.B("C"), " while only ", html.B("16%"), " chose option ", html.B("A"),".",
-            html.Br(),
-            "However, once ", html.B("option B was removed"), " and the choice had to be made only between A and C, ", html.B("68%"), " of the participants chose option ", html.B("A"), " while only ", html.B("32%"), " chose option ", html.B("C"),".",
-            html.Br(),
-            html.Br(),
-            """In the experiments below, we examine how various Large Language Models react to this kind of experiment. We therefore queried 3 different models over a range of possible 
-            temperature values using either primed or unprimed prompts. On top of that, we investigated to what extent the models' responses change, when we rename and reorder the 
-            answer options. In the case of primed prompts, we instructed the model to be a market researcher, who knows about the Decoy Effect in product pricing."""]),
-            html.Br(),
-            html.B("Note: "), """For both openAI models, setting a temperature of 0 is possible. However, for the Llama model, a temperature of 0 is not a valid input parameter.
-            The minimum temperature value for the Llama model is 0.01. Therefore, although it is possible to select both values for every model, 0 only works for the
-            openAI models, while 0.01 only works for the Llama model.""",
-            html.Br(),
+    html.Br(),
+    dbc.Accordion(
+         [
+        dbc.AccordionItem(
+            dcc.Markdown("""
+                The decoy effect, also known as the asymmetric dominance effect, describes a phenomenon, in which consumers' preferences between two products change,
+                once a third option is added.   
+                This third option is designed to be asymmetrically dominated, meaning that it is entirely inferior to one of the previous options,
+                but only partially inferior to the other.   
+                Once this asymetrically dominated option, the Decoy, is present, more people will now tend to choose the dominating option than before.     
+                A decoy product can therefore be used to influence consumer's decision making and increase sales of a specific product merely 
+                through the presence of an additional alternative.       
+                Our experiment aims to recreate the experiment of Dan Ariely in his 2008 book *Predictably Irrational*, which was based on a true story by the *The Economist* magazine:
+                
+                There, he asked 100 students from MIT's Sloan School of Management to choose between the following options:   
+                
+                A: One-year subscription to Economist.com. Includes online access to all articles from The Economist since 1997, priced at 59$        
+                B: One-year subscription to the print edition of The Economist, priced at 125$       
+                C: One-year subscription to the print edition of The Economist and online access to all articles from The Economist since 1997, priced at 125$       
+                In this example, option B serves as the decoy option.
+
+                When presented with **all three options** Ariely found, that **84%** of the participants chose option **C**, while only **16%**  chose option **A**.
+                However, once **option B was removed** and the choice had to be made only between A and C, **68%** of the participants chose option **A**, while only **32%** chose option **C**.   
+                Obviously, the presence and absence of the Decoy option had a significant impact on the participants' choices. 
+                This suggests, that utilizing the Decoy Effect can be a valuable tool for Marketing purposes, for example in developing pricing strategies.    
+                Since one of the key questions of this research is, whether Large Language Models can act as surrogates in the field of market research, it is especially interesting to see,
+                whether those LLMs too exhibit this pattern in their decision-making process. On top of that, the study design being multiple choice between 3 or less options
+                can easily be adapted to be conducted on LLMs. That is why we chose to conduct this specific experiment."""),
+                title = "Description and motivation of the experiment"
+            ),
+        dbc.AccordionItem(
+                dcc.Markdown("""
+                In the experiment below, we examine how the three regarded Large Language Models respond when confronted with this decision.        
+                To accomplish this, we used a total of 8 different prompts and presented each prompt 100 times for GPT-3.5-Turbo and, for cost reasons, 50 times for GPT-4-1106-Preview and LLama-2-70b.      
+                The prompts will be displayed underneath the graph, once the respective experiment configuration is selected.   
+                The phrasing of the prompts is designed to resemble the original format as close as possible, while still being instructive enough to produce meaningful results.    
+                To avoid getting an essay-like response, we limited the number of tokens and instructed the models to only answer with the letter of the option they would choose, without any reasoning.                   
+                On top of the Decoy Effect itself, we also regarded the aspect of *priming* and *renaming and reordering* the answer options.       
+                In the case of *priming*, we specifically told the models to take the role of a market researcher knowing about the Decoy Effect in product pricing. With this, we 
+                wanted to research, whether the extent to which the models' answers might adhere to the Decoy Effect, would change.       
+                In the second case, we changed the order and names of the answer options, to research whether the extent to which the models' answers might reflect
+                certain decision-making patterns present in humans, for example the A-bias, would change.   
+
+                This leads to the aforementioned total of 8 different experiment configurations:
+
+                - Decoy options present vs Decoy option removed (2 options)
+                - Primed vs unprimed prompt (2 options)
+                - Original order vs adjusted answer options (2 options)
+                
+                As in all experiments, all prompts were presented to the models over a range of different temperature parameters."""),
+                title = "Implementation of the experiment"
+            ),
+        dbc.AccordionItem(
+            dcc.Markdown("""
+                Ariely, Dan. Predictably Irrational : the Hidden Forces That Shape Our Decisions. New York :Harper Perennial, 2010.
+                """),
+                          title = "References"),                    
+         ],
+        start_collapsed=True,
+        ),
+        html.Br(),
+        html.Hr(),
     html.Div(
         children=[
             html.Div(

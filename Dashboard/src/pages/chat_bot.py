@@ -7,16 +7,20 @@ from replicate.client import Client
 
 
 
-dash.register_page(__name__, path='/chat-bot', name='Chat Bot', location='below-experiments')
+dash.register_page(__name__, path='/chat-bot', name='Chatbot', location='below-experiments')
 
 
 layout = dbc.Container(
     children=[
         html.H1("Chatbot", className="page-heading"),
-        html.P("""This chatbot provides a simple way of interacting with the language models through individual, quick queries. It is not designed to handle complex 
-               conversations, as it has no memory! Giving the chatbot a memory would quickly make its usage rather expensive. 
-               It serves as a tool to get a feeling of how the models' responses change when the input changes.
-               Therefore, you can freely select any temperature value in the range of 0.01 to 2 and experiment with the maximum number of tokens the model should generate."""),
+        html.Hr(),
+        dcc.Markdown("""This chatbot provides a simple way of interacting with the language models through individual, quick queries.   
+                     It is not designed to handle complex conversations, as it has **no memory**! Giving the chatbot a memory would quickly make
+                     its usage rather expensive.        
+                     It serves as a tool to, for example, get a feeling of how the models' responses to the same prompt change, when different values for
+                     temperature and maximum number of tokens are used.  
+                     Therefore, you can freely select any temperature value in the range of 0.01 to 2 and experiment with the maximum number
+                     of tokens the model should generate."""),
         html.Hr(),
         html.H6("To use the Chat Bot, you'll need to provide API keys to get access to the LLMs:"),
         html.Br(),
