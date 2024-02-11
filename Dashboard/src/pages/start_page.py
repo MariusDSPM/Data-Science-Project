@@ -48,7 +48,8 @@ layout = [html.H1("Do Large Language Models behave like a Human?", className="pa
                        * [Experiment Recreation](/experiment-recreation) - Recreate the conducted experiments yourself (*API keys required*)    
                        
                       On each experiment page, you can find a detailed description of the original experiment or phenomenon, the motivation for conducting the experiment, 
-                       as well as some information about the implementation. Each experiments' results are also visualized on the respective page. 
+                       as well as some information about the implementation. Each experiments' results are also visualized on the respective page.    
+                      The experiment overview page also provides some further insights into some rather technical aspects in this context of research. 
                        """               
             ),
           ]
