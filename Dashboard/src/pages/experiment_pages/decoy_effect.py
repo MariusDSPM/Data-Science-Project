@@ -78,11 +78,11 @@ layout = [
 
                 This leads to the aforementioned total of 8 different experiment configurations:
 
-                - Decoy options present vs Decoy option removed (2 options)
-                - Primed vs unprimed prompt (2 options)
-                - Original order vs adjusted answer options (2 options)
+                * Decoy options present vs Decoy option removed (2 options)
+                * Primed vs unprimed prompt (2 options)
+                * Original order vs adjusted answer options (2 options)
                 
-                As in all experiments, all prompts were presented to the models over a range of different temperature parameters."""),
+                As in all experiments, all prompts were presented to the models over a range of different temperature parameters with multiple queries for each value."""),
                 title = "Implementation of the experiment"
             ),
         dbc.AccordionItem(
