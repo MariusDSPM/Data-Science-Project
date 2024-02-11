@@ -54,7 +54,7 @@ def numeric_layout():
                                             persistence_type='session',
                                         ),
                                         dbc.Tooltip(
-                                                    "Each scenario will presented to the selected models",
+                                                    "Each scenario is presented to the selected models",
                                                     target="num-scenarios-numeric",
                                                 ),
                                         html.H6("Select number of requests"),
@@ -87,7 +87,7 @@ def numeric_layout():
                                             persistence_type='session',
                                         ),
                                         dbc.Tooltip(
-                                            "The instruction role is to guide the LLMs to answer the questions in a specific way. For example, to only answer with the letter of the answer options.",
+                                            "The instruction role is to guide the LLMs to answer the questions in a specific way. For example, to answer with a dollar amount only.",
                                             target="instruction-checklist-numeric",
                                         ),
                                         html.H6("Select language models"),
@@ -107,7 +107,7 @@ def numeric_layout():
                                         ),
                                         html.Div(
                                             [
-                                                html.H6("Select Temperature value"),
+                                                html.H6("Select temperature value"),
                                                 dcc.Slider(
                                                     id="individual-temperature-numeric",
                                                     min=0.01,
@@ -168,6 +168,7 @@ def update_num_scenarios(num_scenarios, instruction):
     
     answer_textarea_style = {'width': '100%', 'height': 30} 
     
+    # Generate scenarios textareas
     for i in range(num_scenarios):
         container.extend([
             html.Div(
@@ -185,6 +186,7 @@ def update_num_scenarios(num_scenarios, instruction):
             ),
         ])
         
+        # Add instruction textarea
         if "add_instruction" in instruction:
             container.extend([
                 html.Label(f"Instruction:", style={'textAlign': 'center', 'marginTop': '20px'}),
@@ -221,8 +223,10 @@ def update_cost_estimate(prompts, iterations, models):
         word_count = sum(len(sentence.split()) for sentence in sentences_list)
         return word_count
     
+    # Calculate the total number of tokens
     total_tokens = count_words(prompts) * iterations
     
+    # Calculate the estimated cost
     estimated_cost = 0
     if "gpt-3.5-turbo" in models:
         estimated_cost += GPT_3_5_INPUT_COST * (total_tokens / 1000) + GPT_3_5_OUTPUT_COST * (5/1000)
@@ -231,14 +235,13 @@ def update_cost_estimate(prompts, iterations, models):
     if "llama-2-70b" in models:
         estimated_cost += LLAMA_2_INPUT_COST * (total_tokens / 1000) + LLAMA_2_OUTPUT_COST * (5/1000)
     
-    
     cost_estimate = html.Div(
         [
             html.P(f"Estimated cost for Experiment: {estimated_cost:.2f} USD",
                     id='cost-estimate-numeric',
                     style={'text-align': 'center', 'marginBottom': '25px'}),
             dbc.Tooltip(
-                "The cost depends on the number of tokens used in the experiment, the number of iterations, and the selected models. The cost is estimated based on the current token prices of the models. The cost for using the Replicate API (LLama-2-70b) can only be estimated and is approximately the same as for GPT-4-1101-Preview.",
+                "The costs depends on the number of tokens used in the experiment, the number of iterations, and the selected models. The costs are estimated based on the current token prices of the models. The costs of using the Replicate API (LLama-2-70b) can only be estimated and are approximately the same as for GPT-4-1101-Preview.",
                 target="cost-estimate-numeric",
             )
         ]
@@ -314,16 +317,16 @@ def update_individual_experiment(n_clicks, prompts, models, iterations, temperat
             html.H2("Results:", style={'margin-top': '50px', 'margin-bottom': '30px'}),
             html.Br(),
             dbc.Alert(
-                "The share of correct answers (Correct Answers / Iterations) is below 50% for at least one experiment. This might indicate that the models were not able to answer the questions correctly. Scroll down to see the raw answers of the models. You should change the experiment configuration and run the experiment again.",
+                "The share of correct answers (correct answers / iterations) is below 50% for at least one experiment. This might indicate that the models were not able to answer the questions correctly. Scroll down to see the raw answers of the models. You should change the experiment configuration and run the experiment again.",
                 color="warning"
             ) if experiment.low_answers_share_warning else None,
             output_table,
         ]
         
-        # Generate loading message
+        # Generate alert if the experiment finished running
         loading = dbc.Alert("The experiment finished running. Please check the results below.", color="success")
         
-        # Function to generate nested html
+        # Function to generate nested html to display raw model answers
         def generate_nested_html(dictionary):
             items = []
             for key, value in dictionary.items():

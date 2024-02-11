@@ -134,7 +134,7 @@ def answer_option_layout():
                                             persistence_type='session',
                                         ),
                                         dbc.Tooltip(
-                                            "Each scenario with the corresponding answer options will presented to the selected models",
+                                            "Each scenario with the corresponding answer options is presented to the selected models",
                                             target="num-scenarios",
                                         ),
                                         html.H6("Select number of answer options"),
@@ -150,7 +150,7 @@ def answer_option_layout():
                                             persistence_type='session',
                                         ),
                                         dbc.Tooltip(
-                                            "Choose the number of answer options (A, B, C etc.) for each scenario.",
+                                            "Choose the number of answer options (A, B, C, etc.) for each scenario.",
                                             target="num-answer-options",
                                         ),
                                         html.H6("Select number of requests"),
@@ -183,7 +183,7 @@ def answer_option_layout():
                                             persistence_type='session',
                                         ),
                                         dbc.Tooltip(
-                                            "The instruction role is to guide the LLMs to answer the questions in a specific way. For example, to only answer with the letter of the answer options.",
+                                            "The instruction role is to guide the LLMs to answer the questions in a specific way. For example, to answer only with the letter of the answer options.",
                                             target="instruction-checklist",
                                         ),
                                         html.Div(id='shuffle-checklist-container'),
@@ -204,7 +204,7 @@ def answer_option_layout():
                                         ),
                                         html.Div(
                                             [
-                                                html.H6("Select Temperature value"),
+                                                html.H6("Select temperature value"),
                                                 dcc.Slider(
                                                     id="individual-temperature",
                                                     min=0.01,
@@ -288,6 +288,7 @@ def update_num_scenarios(num_scenarios, num_options, instruction):
     placeholder_text = ['Win a car.', 'Win a house.', 'Win a boat.', 'Win a plane.', 'Win a bike.', 'Win a motorcycle.']
     answer_textarea_style = {'width': '100%', 'height': 30} 
     
+    # Generate scenarios textareas
     for i in range(num_scenarios):
         container.extend([
             html.Div(
@@ -304,6 +305,7 @@ def update_num_scenarios(num_scenarios, num_options, instruction):
                 style={'width': '100%', 'textAlign': 'center', 'marginBottom': '20px'},
             ),
         ])
+        # Generate answer options textareas
         for j in range(num_options):
             container.extend([
                 html.H6(f"Answer option {answer_option_labels[j]}:", style={'marginTop': '10px'}),
@@ -317,6 +319,7 @@ def update_num_scenarios(num_scenarios, num_options, instruction):
             ])
             count += 1
         
+        # Generate instruction textarea
         if "add_instruction" in instruction:
             container.extend([
                 html.Label(f"Instruction:", style={'textAlign': 'center', 'marginTop': '20px'}),
@@ -407,9 +410,11 @@ def update_cost_estimate(prompts, answers, iterations, models, shuffle_checklist
         word_count = sum(len(sentence.split()) for sentence in sentences_list)
         return word_count
     
+    # Calculate total tokens (if shuffle options is selected, multiply by 3)
     multiplier = 3 if "shuffle_options" in shuffle_checklist else 1
     total_tokens = (count_words(prompts) + count_words(answers)) * iterations * multiplier
     
+    # Calculate estimated cost
     estimated_cost = 0
     if "gpt-3.5-turbo" in models:
         estimated_cost += GPT_3_5_INPUT_COST * (total_tokens / 1000) + GPT_3_5_OUTPUT_COST * (1/1000)
@@ -425,14 +430,13 @@ def update_cost_estimate(prompts, answers, iterations, models, shuffle_checklist
                     id='cost-estimate',
                     style={'text-align': 'center', 'marginBottom': '25px'}),
             dbc.Tooltip(
-                "The cost depends on the number of tokens used in the experiment, the number of iterations, and the selected models. The cost is estimated based on the current token prices of the models. The cost for using the Replicate API (LLama-2-70b) can only be estimated and is approximately the same as for GPT-4-1101-Preview.",
+                "The costs depends on the number of tokens used in the experiment, the number of iterations, and the selected models. The costs are estimated based on the current token prices of the models. The costs of using the Replicate API (LLama-2-70b) can only be estimated and are approximately the same as for GPT-4-1101-Preview.",
                 target="cost-estimate",
             )
         ]
     )
     
     return [cost_estimate]
-
 
 
 
@@ -446,6 +450,7 @@ def update_cost_estimate(prompts, answers, iterations, models, shuffle_checklist
     ]
 )
 def update_shuffle_checklist(num_scenarios):
+    # If there is only one scenario, show the shuffle checklist
     if num_scenarios == 1:
         return [[dbc.Checklist(
                     id="shuffle-checklist",
@@ -499,6 +504,7 @@ def update_individual_experiment(n_clicks, prompts, models, iterations, temperat
     # Check if button was clicked
     if n_clicks is not None:  
         
+        # Check if shuffle option is selected
         if shuffle_checklist is not None:
             if "shuffle_options" in shuffle_checklist:
                 shuffle_option = True
@@ -542,16 +548,18 @@ def update_individual_experiment(n_clicks, prompts, models, iterations, temperat
             persistence_type='session',
         )
 
+        # Generate the results
         results = [
             html.H2("Results:", style={'margin-top': '50px', 'margin-bottom': '30px'}),
             html.Br(),
             dbc.Alert(
-                "The share of correct answers (Correct Answers / Iterations) is below 50% for at least one experiment. This might indicate that the models were not able to answer the questions correctly. Scroll down to see the raw answers of the models. You should change the experiment configuration and run the experiment again.",
+                "The share of correct answers (correct answers / iterations) is below 50% for at least one experiment. This might indicate that the models were not able to answer the questions correctly. Scroll down to see the raw answers of the models. You should change the experiment configuration and run the experiment again.",
                 color="warning"
             ) if experiment.low_answers_share_warning else None,
             output_table
         ]
         
+        # Generate graph settings
         graph_settings = html.Div(
             [
                 html.Div([html.H3("Graph Settings")], style={'margin-bottom': '20px'}),
@@ -575,9 +583,11 @@ def update_individual_experiment(n_clicks, prompts, models, iterations, temperat
             ]
         )
         
+        # Generate alert for finished experiment
         loading = dbc.Alert("The experiment finished running. Please check the results below.", color="success")
         
-        # Function to generate nested html
+        
+        # Function to generate nested html to display raw model answers
         def generate_nested_html(dictionary):
             items = []
             for key, value in dictionary.items():
@@ -614,6 +624,7 @@ def graph_settings(x_axis, data):
     
     df = pd.DataFrame(data)
     
+    # Generate groupby container
     if x_axis == "Model":
         groupby_container = html.Div(
             [

@@ -17,16 +17,16 @@ layout = [
     html.P(["""This page allows you to conduct your own individual experiment. 
            You can choose your own scenarios and models to run the experiment yourself.
            When the experiment is finished, you will be able to see the results of the experiment 
-           in a table and graph. You can also download the table as a CSV file.""",
+           in a table and a graph. You can also download the table as a CSV file.""",
            html.Br(),
            html.Br(),
-           """We offer two different types of experiments: Answer Options and Numeric. 
-           In the first one, you can choose the answer options (A, B, C etc.) from which the 
-           model can choose. In the second one, you can choose an experiment where the models give a 
+           """We offer two different types of experiment: Answer Options and Numeric. 
+           In the first, you can choose the answer options (A, B, C, etc.) for the model to choose from.
+           In the second, you can choose an experiment where the models give a 
            dollar amount as an answer.""",
            html.Br(),
            html.Br(),
-           """You have a variety of options to choose from. Hover over the settings to see what they do.""",],
+           """You have a variety of options to choose from. Move your mouse over the settings to see what they do.""",],
     ),
     html.Hr(),
     html.H6("To run your own individual experiment, you'll need to provide API keys to get access to the LLMs:"),

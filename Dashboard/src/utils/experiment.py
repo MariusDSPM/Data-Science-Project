@@ -8,6 +8,9 @@ from replicate.client import Client
 
 class Experiment:
     
+    """Class to run an experiment with OpenAI's GPT-3.5 and GPT-4 models and Replicate's Llama-2-70b model."""
+    
+    # Constants
     GPT_3_5_DELAY = 60/3500
     GPT_4_DELAY = 60/500
     LLAMA_DELAY = 1/50
@@ -39,8 +42,10 @@ class Experiment:
         
     def run(self):
         
+        # Set API keys
         self.set_api_keys()
         
+        # Check experiment type
         if self.experiment_type == 'answer_options':
             if self.shuffle_options:
                 self.shuffle_answers()
@@ -50,11 +55,13 @@ class Experiment:
             self.experiment_prompts = self.prompts
             self.max_tokens_openai = 5
             self.max_tokens_llama = 5
-            
+
+        # Process instructions
         self.process_instructions()
         
         results_list = []
-    
+
+        # Iterate through models, prompts, and instructions
         for model in self.models:
             for i, (prompt, instruction) in enumerate(zip(self.experiment_prompts, self.instructions)):
                 if model == 'llama-2-70b':
@@ -68,7 +75,7 @@ class Experiment:
                 else:
                     self.raw_model_answers_dict[model][i] = self.model_answers
                 
-                # Create a dictionary to store results
+                # Create a dictionary to store results for DataFrame
                 result_dict = {
                     'Model': model,
                     'Scenario': i+1,
@@ -135,15 +142,18 @@ class Experiment:
     
     
     def create_prompts(self):
+        # Split answers into sublists
         len_answer_sublists = len(self.answers) // self.num_options
         split_answer_lists = [self.answers[i * self.num_options:(i + 1) * self.num_options] for i in range(len_answer_sublists)]
         
         self.experiment_prompts = []
         
+        # Combine prompts and answers to one string
         for prompt, answers in zip(self.prompts, split_answer_lists):
             
             experiment_prompts = f"""{prompt}\nA: {answers[0]}\nB: {answers[1]}"""
-    
+
+            # Add additional answer options if there are more than 2
             for i, label in enumerate(self.answer_option_labels[2:]):
                 experiment_prompts += f"""\n{label}: {answers[i+2]}"""
                 
@@ -151,8 +161,10 @@ class Experiment:
             
     
     def process_instructions(self):
+        # Check if the instruction checklist contains "add_instruction"
         if "add_instruction" in self.instruction_checklist:
             self.instructions = [text if text is not None else "" for text in self.instructions]
+        # If not, set instructions to empty strings
         else:
             self.instructions = ["" for _ in range(len(self.prompts))]
             
@@ -163,6 +175,7 @@ class Experiment:
         
         result_dict['Correct Answers'] = len_correct
         
+        # Check if the share of correct answers is less than 50%
         if (len_correct / self.iterations) < 0.5:
             self.low_answers_share_warning = True
         
@@ -186,6 +199,7 @@ class Experiment:
         
         result_dict['Correct Answers'] = len_correct
         
+        # Check if the share of correct answers is less than 50%
         if (len_correct / self.iterations) < 0.5:
             self.low_answers_share_warning = True
         
@@ -281,7 +295,7 @@ class Experiment:
         
         for i in range(num_shuffles-1):
             shuffled_answers2 = shuffled_answers1.copy()
-            while shuffled_answers1 == shuffled_answers2:
+            while shuffled_answers1 == shuffled_answers2:  # Make sure the answers are different
                 random.shuffle(shuffled_answers1)
             self.answers += shuffled_answers1
         
