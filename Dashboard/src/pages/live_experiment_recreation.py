@@ -44,12 +44,15 @@ layout = [
            * Decoy Effect
            * Transaction Utility 1: Spare hockey game ticket
            * Transaction Utility 2: Hockey game ticket with alternative numbers
-           * Transaction Utility 3: Beer from hotel vs. grocery store \n
-            You can choose the desired experiment configuration from the dropdowns and the prompt will automatically be adjusted. After that, you will
-            need to select the number of desired requests (i.e. how often the LLM should answer the same prompt) and a temperature value. 
-            After hitting "Run the experiment", the results will automatically be visualized and you can download the raw results in form of a csv-file.
-            The prompt, along with a cost estimate, will also be displayed, once the experiment is done. If you are uncertain about the aspect of costs, you can revisit
-            our [Overview page](/overview) or go to https://openai.com/pricing for further information."""),
+           * Transaction Utility 3: Beer from hotel vs. grocery store 
+           
+           You can choose the desired experiment configuration from the dropdowns and the prompt will automatically be adjusted and displayed.     
+           Factoring in the selected number of iterations (i.e. how often the LLM should answer the same prompt) as well as the token count of 
+           prompt and expected output, a cost estimate for runnig the experiment will also be displayed. If you are uncertain about the aspect of costs,
+           you can revisit our [Overview page](/overview) or go to https://openai.com/pricing for further information.     
+           Once you select the desired temperature value, you can start the experiment by clicking the "Run the experiment" button.    
+           Afterwards, the results will automatically be visualized and you can download the raw results in form of a csv-file."""),
+            
         
             html.Div(
             [
@@ -163,16 +166,18 @@ layout = [
                          ],
             style={'display': 'flex', 'flexDirection': 'column', 'align-items': 'center', 'width': '50%', 'align-self': 'center'},
             ),
-            dcc.Graph(id="prospect1-graph-output", style={'width': '70%', 'height': '60vh'})
+            dcc.Loading(
+            dcc.Graph(id="prospect1-graph-output"),
+            ),
         ],
     style={'display': 'flex', 'flexDirection': 'row'}
     ),
     # Additional text section
-    dcc.Loading(html.Div(
+    html.Div(
             id='prospect1-prompt-output',
             style={'textAlign': 'center', 'margin': '20px'}),
-    ),
-    dcc.Store(id='prospect-data-store', storage_type='memory'),
+    dcc.Store(id='prospect1-id-store', storage_type='memory'),
+    dcc.Store(id='prospect1-data-store', storage_type='memory'),
     html.Button("Download CSV", id="pt1-csv-button"),
         dcc.Download(id="prospect1-csv-download"),
     html.Br(),
@@ -267,15 +272,18 @@ layout = [
                          ],
             style={'display': 'flex', 'flexDirection': 'column', 'align-items': 'center', 'width': '50%', 'align-self': 'center'},
             ),
-            dcc.Graph(id="prospect2-graph-output", style={'width': '70%', 'height': '60vh'})
+            dcc.Loading(
+            dcc.Graph(id="prospect2-graph-output")
+            ),
         ],
     style={'display': 'flex', 'flexDirection': 'row'}
     ),
     # Additional text section
-    dcc.Loading(html.Div(
+    html.Div(
             id='prospect2-prompt-output',
             style={'textAlign': 'center', 'margin': '20px'}),
-    ),
+
+    dcc.Store(id='prospect2-id-store', storage_type='memory'),
     dcc.Store(id='prospect2-data-store', storage_type='memory'),
     html.Button("Download CSV", id="pt2-csv-button"),
         dcc.Download(id="prospect2-csv-download"),
@@ -317,7 +325,7 @@ layout = [
                          id = "decoy-reordering-dropdown",
                          options = [
                               {"label": "Original order", "value": 0},
-                              {"label": "Answer options reordered", "value": 1},
+                              {"label": "Answer options renamed & reordered", "value": 1},
                             ],
                       value=0,
                     style={'width': '75%', 'margin': 'auto', 'margin-bottom': '5px'},
@@ -375,15 +383,18 @@ layout = [
                          ],
             style={'display': 'flex', 'flexDirection': 'column', 'align-items': 'center', 'width': '50%', 'align-self': 'center'},
             ),
-            dcc.Graph(id="decoy-graph-output", style={'width': '70%', 'height': '60vh'})
+            dcc.Loading(
+            dcc.Graph(id="decoy-graph-output")
+            ),
         ],
     style={'display': 'flex', 'flexDirection': 'row'}
     ),
     # Additional text section
-    dcc.Loading(html.Div(
+    html.Div(
             id='decoy-prompt-output',
-            style={'textAlign': 'center', 'margin': '20px'}),
-    ),
+            style={'textAlign': 'center', 'margin': '20px'}
+            ),
+    dcc.Store(id='decoy-id-store', storage_type='memory'),
     dcc.Store(id='decoy-data-store', storage_type='memory'),
     html.Button("Download CSV", id="decoy-csv-button"),
         dcc.Download(id="decoy-csv-download"),
@@ -483,15 +494,19 @@ layout = [
                          ],
             style={'display': 'flex', 'flexDirection': 'column', 'align-items': 'center', 'width': '50%', 'align-self': 'center'},
             ),
-            dcc.Graph(id="tu1-graph-output", style={'width': '70%', 'height': '60vh'})
+            dcc.Loading(
+            dcc.Graph(id="tu1-graph-output")
+            ),
         ],
     style={'display': 'flex', 'flexDirection': 'row'}
     ),
     # Additional text section
-    dcc.Loading(html.Div(
+    html.Div(
             id='tu1-prompt-output',
-            style={'textAlign': 'center', 'margin': '20px'}),
-    ),
+            style={'textAlign': 'center', 'margin': '20px'}
+            ),
+
+    dcc.Store(id='tu1-id-store', storage_type='memory'),
     dcc.Store(id='tu1-data-store', storage_type='memory'),
     html.Button("Download CSV", id="tu1-csv-button"),
         dcc.Download(id="tu1-csv-download"),
@@ -505,7 +520,7 @@ layout = [
     dcc.Markdown("""To look up the original study design of the second Transaction Utility experiment, as well as the implementation for the LLMs, 
                  you can visit the [Transaction Utility page](/transaction-utility)."""),
     html.Br(),
-    html.H3("Scenario 1: Price scaled by factor Pi"),
+    html.H3("Scenario 1: Prices scaled by factor Pi"),
     html.Br(),
     html.Div(
         children=[
@@ -594,18 +609,21 @@ layout = [
                          ],
             style={'display': 'flex', 'flexDirection': 'column', 'align-items': 'center', 'width': '50%', 'align-self': 'center'},
             ),
-            dcc.Graph(id="tu3-graph-output", style={'width': '70%', 'height': '60vh'})
+            dcc.Loading(
+            dcc.Graph(id="tu3-graph-output")
+            ),
         ],
     style={'display': 'flex', 'flexDirection': 'row'}
     ),
     # Additional text section
-    dcc.Loading(html.Div(
+    html.Div(
             id='tu3-prompt-output',
-            style={'textAlign': 'center', 'margin': '20px'}),
-    ),
-    dcc.Store(id='tu3-data-store1', storage_type='memory'),
-    html.Button("Download CSV", id="tu3-csv-button1"),
-        dcc.Download(id="tu3-csv-download1"),
+            style={'textAlign': 'center', 'margin': '20px'}
+            ),    
+    dcc.Store(id='tu3-id-store', storage_type='memory'),
+    dcc.Store(id='tu3-data-store', storage_type='memory'),
+    html.Button("Download CSV", id="tu3-csv-button"),
+        dcc.Download(id="tu3-csv-download"),
     html.Br(),
     html.Hr(), 
 
@@ -699,15 +717,18 @@ layout = [
                          ],
             style={'display': 'flex', 'flexDirection': 'column', 'align-items': 'center', 'width': '50%', 'align-self': 'center'},
             ),
-            dcc.Graph(id="tu3-graph-output2", style={'width': '70%', 'height': '60vh'})
+            dcc.Loading(
+            dcc.Graph(id="tu3-graph-output2")
+            ),
         ],
     style={'display': 'flex', 'flexDirection': 'row'}
     ),
     # Additional text section
-    dcc.Loading(html.Div(
+    html.Div(
             id='tu3-prompt-output2',
-            style={'textAlign': 'center', 'margin': '20px'}),
-    ),
+            style={'textAlign': 'center', 'margin': '20px'}
+            ),
+    dcc.Store(id='tu3-id-store2', storage_type='memory'),
     dcc.Store(id='tu3-data-store2', storage_type='memory'),
     html.Button("Download CSV", id="tu3-csv-button2"),
         dcc.Download(id="tu3-csv-download2"),
@@ -797,38 +818,34 @@ layout = [
                          ],
             style={'display': 'flex', 'flexDirection': 'column', 'align-items': 'center', 'width': '50%', 'align-self': 'center'},
             ),
-            dcc.Graph(id="tu2-graph-output", style={'width': '70%', 'height': '60vh'})
+            dcc.Loading(
+            dcc.Graph(id="tu2-graph-output")
+            ),
         ],
     style={'display': 'flex', 'flexDirection': 'row'}
     ),
     # Additional text section
-    dcc.Loading(html.Div(
+    html.Div(
             id='tu2-prompt-output',
-            style={'textAlign': 'center', 'margin': '20px'}),
-    ),
+            style={'textAlign': 'center', 'margin': '20px'}
+            ),    
+    dcc.Store(id='tu2-id-store', storage_type='memory'),
     dcc.Store(id='tu2-data-store', storage_type='memory'),
     html.Button("Download CSV", id="tu2-csv-button"),
         dcc.Download(id="tu2-csv-download"),
 
 ]
 
-#  Callback for Individual Prospect Theory Experiment
+######  Callback for Individual Prospect Theory prompt and costs #####
 @dash.callback(
-    [Output("prospect1-graph-output", "figure"),
-     Output('prospect1-prompt-output', 'children'),
-     Output('prospect-data-store', 'data')],
-    [Input("prospect1-update-button", "n_clicks")],
-    [State("prospect1-scenario-dropdown", "value"),
-     State("prospect1-model-dropdown", "value"),
-     State("prospect1-priming-dropdown", "value"),
-     State("prospect1-iteration-input", "value"),
-     State("prospect1-temperature-slider", "value"),
-     State("openai-api-key", "value"),
-     State("replicate-api-token", "value")]
+    [Output('prospect1-prompt-output', 'children'),    
+     Output('prospect1-id-store', 'data'),],
+    [Input("prospect1-scenario-dropdown", "value"),
+     Input("prospect1-model-dropdown", "value"),
+     Input("prospect1-priming-dropdown", "value"),
+     Input("prospect1-iteration-input", "value")]
      )
-def update_prospect_live(n_clicks, selected_scenario, selected_model, selected_priming, selected_iterations, selected_temperature, openai_key, replicate_token):
-    # Check if the button was clicked
-    if n_clicks is not None:
+def update_prospect_prompt(selected_scenario, selected_model, selected_priming, selected_iterations):
         if selected_scenario == 1 and selected_model == "gpt-3.5-turbo" and selected_priming == 0:
             experiment_id = "PT_1_1"
         elif selected_scenario == 2 and selected_model == "gpt-3.5-turbo" and selected_priming == 0:
@@ -879,27 +896,45 @@ def update_prospect_live(n_clicks, selected_scenario, selected_model, selected_p
             experiment_id = "PT_3_8"
         else:
             experiment_id = None
-        
+
+        text = PT_experiment_prompts_dict[experiment_id]
+        costs = cost_estimate(text, selected_model, selected_iterations)
+        prompt = html.P([f"The prompt used in this experiment is: {PT_experiment_prompts_dict[experiment_id]}",
+                         html.Br(),
+                        f"The total costs of running this experiment are estimated to be ${np.round(costs, 6)}."])
+        return prompt, experiment_id
+    
+# Callback to run experiment
+@dash.callback(
+    [Output("prospect1-graph-output", "figure"),
+     Output('prospect1-data-store', 'data')],
+     Input("prospect1-update-button", "n_clicks"),
+    [State("prospect1-model-dropdown", "value"),
+     State("prospect1-iteration-input", "value"),
+     State("prospect1-temperature-slider", "value"),
+     State("openai-api-key", "value"),
+     State("replicate-api-token", "value"),
+     State('prospect1-id-store', 'data')]
+     )    
+
+def prospect_run_experiment(n_clicks, selected_model, selected_iterations, selected_temperature, openai_key, replicate_token, experiment_id):
+    if n_clicks is not None:  
         # Run Experiment for selected parameters
         if selected_model == "llama-2-70b":
             results, probs = PT_run_experiment_llama_dashboard(experiment_id, selected_iterations, selected_temperature, replicate_token)
         else:
             results, probs = PT_run_experiment_dashboard(experiment_id, selected_iterations, selected_temperature, openai_key)
         n_clicks = None
-        text = PT_experiment_prompts_dict[experiment_id]
-        costs = cost_estimate(text, selected_model, selected_iterations)
-        prompt = html.P([f"The prompt used in this experiment is: {PT_experiment_prompts_dict[experiment_id]}",
-                         html.Br(),
-                        f"The total costs of running this experiment are estimated to be ${np.round(costs, 6)}."])
-        return PT_plot_results(probs), prompt, results.to_json(orient='split')
+        return PT_plot_results(probs), results.to_json(date_format='iso', orient='split')
+
     
 # Callback for PT download
 @dash.callback(
     Output("prospect1-csv-download", "data"),
     [Input("pt1-csv-button", "n_clicks")],
-    [State('prospect-data-store', 'data')]
+    [State('prospect1-data-store', 'data')]
 )
-def download_csv(n_clicks, stored_data):
+def prospect_download_csv(n_clicks, stored_data):
     if n_clicks:
         # Convert stored data back to dataframe
         stored_df = pd.read_json(StringIO(stored_data), orient='split')
@@ -908,26 +943,17 @@ def download_csv(n_clicks, stored_data):
         return dash.no_update
     
 
-    
-
-
-# Callback for Prospect Theory 2
+##### Callback for Prospect Theory 2 prompt and costs #####
 @dash.callback(
-    [Output("prospect2-graph-output", "figure"),
-     Output('prospect2-prompt-output', 'children'),
-     Output('prospect2-data-store', 'data')], 
-    [Input("prospect2-update-button", "n_clicks")],
-    [State("prospect2-scenario-dropdown", "value"),
-     State("prospect2-configuration-dropdown", "value"),
-     State("prospect2-model-dropdown", "value"),
-     State("prospect2-iteration-input", "value"),
-     State("prospect2-temperature-slider", "value"),
-     State("openai-api-key", "value"),
-     State("replicate-api-token", "value")]
-     )
-def update_prospect2_live(n_clicks, selected_scenario, selected_configuration, selected_model, selected_iterations, selected_temperature, openai_key, replicate_token):
-        # Check if button was clicked
-    if n_clicks is not None:
+     [Output('prospect2-prompt-output', 'children'),
+     Output('prospect2-id-store', 'data')], 
+    [Input("prospect2-scenario-dropdown", "value"),
+     Input("prospect2-configuration-dropdown", "value"),
+     Input("prospect2-model-dropdown", "value"),
+     Input("prospect2-iteration-input", "value")]
+)
+
+def update_prospect2_prompt(selected_scenario, selected_configuration, selected_model, selected_iterations):
         if selected_scenario == 1 and selected_model == "gpt-3.5-turbo" and selected_configuration == 1:
             experiment_id = "PT2_1_1_1"
         elif selected_scenario == 1 and selected_model == "gpt-3.5-turbo" and selected_configuration == 2:
@@ -1075,18 +1101,34 @@ def update_prospect2_live(n_clicks, selected_scenario, selected_configuration, s
         else:
             experiment_id = None
 
+        text = PT2_experiment_prompts_dict[experiment_id]
+        costs = cost_estimate(text, selected_model, selected_iterations)
+        prompt = html.P([f"The prompt used in this experiment is: {PT2_experiment_prompts_dict[experiment_id]}",
+                         html.Br(),
+                        f"The total costs of running this experiment are estimated to be ${np.round(costs, 6)}."])
+        return prompt, experiment_id
+
+# Callback to run PT2 experiment
+@dash.callback(
+    [Output("prospect2-graph-output", "figure"),
+     Output('prospect2-data-store', 'data')],
+    [Input("prospect2-update-button", "n_clicks")],
+    [State("prospect2-model-dropdown", "value"),
+    State("prospect2-iteration-input", "value"),
+    State("prospect2-temperature-slider", "value"),
+    State("openai-api-key", "value"),
+    State("replicate-api-token", "value"),
+    State('prospect2-id-store', 'data')]
+)
+def prospect2_run_experiment(n_clicks, selected_model, selected_iterations, selected_temperature, openai_key, replicate_token, experiment_id):
+    if n_clicks is not None:  
         # Run Experiment for selected parameters
         if selected_model == "llama-2-70b":
             results, probs = PT2_run_experiment_llama_dashboard(experiment_id, selected_iterations, selected_temperature, replicate_token)
         else:
             results, probs = PT2_run_experiment_dashboard(experiment_id, selected_iterations, selected_temperature, openai_key)
         n_clicks = None
-        text = PT2_experiment_prompts_dict[experiment_id]
-        costs = cost_estimate(text, selected_model, selected_iterations)
-        prompt = html.P([f"The prompt used in this experiment is: {PT2_experiment_prompts_dict[experiment_id]}",
-                         html.Br(),
-                        f"The total costs of running this experiment are estimated to be ${np.round(costs, 6)}."])
-        return PT2_plot_results(probs), prompt, results.to_json(orient='split')
+        return PT2_plot_results(probs), results.to_json(date_format='iso', orient='split')
     
 # Callback for PT2 download
 @dash.callback(
@@ -1104,85 +1146,96 @@ def download_csv(n_clicks, stored_data):
 
     
     
-# Callback for Decoy Effect
+##### Callback for Decoy Effect prompt and costs #####
+@dash.callback(
+    [Output('decoy-prompt-output', 'children'),
+     Output('decoy-id-store', 'data')],
+    [Input("decoy-scenario-dropdown", "value"),
+     Input("decoy-priming-dropdown", "value"),
+     Input("decoy-reordering-dropdown", "value"),
+     Input("decoy-model-dropdown", "value"),
+     Input("decoy-iteration-input", "value")]
+     )
+
+def update_decoy_prompt(selected_scenario, selected_priming, selected_reordering, selected_model, selected_iterations):
+    if selected_scenario == 1 and selected_model == "gpt-3.5-turbo" and selected_priming == 0 and selected_reordering == 0:
+        experiment_id = "DE_1_1"
+    elif selected_scenario == 2 and selected_model == "gpt-3.5-turbo" and selected_priming == 0 and selected_reordering == 0:
+        experiment_id = "DE_1_2"
+    elif selected_scenario == 1 and selected_model == "gpt-3.5-turbo" and selected_priming == 1 and selected_reordering == 0:
+        experiment_id = "DE_1_3"
+    elif selected_scenario == 2 and selected_model == "gpt-3.5-turbo" and selected_priming == 1 and selected_reordering == 0:
+        experiment_id = "DE_1_4"
+    elif selected_scenario == 1 and selected_model == "gpt-3.5-turbo" and selected_priming == 0 and selected_reordering == 1:
+        experiment_id = "DE_1_5"
+    elif selected_scenario == 2 and selected_model == "gpt-3.5-turbo" and selected_priming == 0 and selected_reordering == 1:
+        experiment_id = "DE_1_6"
+    elif selected_scenario == 1 and selected_model == "gpt-3.5-turbo" and selected_priming == 1 and selected_reordering == 1:
+        experiment_id = "DE_1_7"
+    elif selected_scenario == 2 and selected_model == "gpt-3.5-turbo" and selected_priming == 1 and selected_reordering == 1:
+        experiment_id = "DE_1_8"
+    elif selected_scenario == 1 and selected_model == "gpt-4-1106-preview" and selected_priming == 0 and selected_reordering == 0:
+        experiment_id = "DE_2_1"
+    elif selected_scenario == 2 and selected_model == "gpt-4-1106-preview" and selected_priming == 0 and selected_reordering == 0:
+        experiment_id = "DE_2_2"
+    elif selected_scenario == 1 and selected_model == "gpt-4-1106-preview" and selected_priming == 1 and selected_reordering == 0:
+        experiment_id = "DE_2_3"
+    elif selected_scenario == 2 and selected_model == "gpt-4-1106-preview" and selected_priming == 1 and selected_reordering == 0:
+        experiment_id = "DE_2_4"
+    elif selected_scenario == 1 and selected_model == "gpt-4-1106-preview" and selected_priming == 0 and selected_reordering == 1:
+        experiment_id = "DE_2_5"
+    elif selected_scenario == 2 and selected_model == "gpt-4-1106-preview" and selected_priming == 0 and selected_reordering == 1:
+        experiment_id = "DE_2_6"
+    elif selected_scenario == 1 and selected_model == "gpt-4-1106-preview" and selected_priming == 1 and selected_reordering == 1:
+        experiment_id = "DE_2_7"
+    elif selected_scenario == 2 and selected_model == "gpt-4-1106-preview" and selected_priming == 1 and selected_reordering == 1:
+        experiment_id = "DE_2_8"
+    elif selected_scenario == 1 and selected_model == "llama-2-70b" and selected_priming == 0 and selected_reordering == 0:
+        experiment_id = "DE_3_1"
+    elif selected_scenario == 2 and selected_model == "llama-2-70b" and selected_priming == 0 and selected_reordering == 0:
+        experiment_id = "DE_3_2"
+    elif selected_scenario == 1 and selected_model == "llama-2-70b" and selected_priming == 1 and selected_reordering == 0:
+        experiment_id = "DE_3_3"
+    elif selected_scenario == 2 and selected_model == "llama-2-70b" and selected_priming == 1 and selected_reordering == 0:
+        experiment_id = "DE_3_4"
+    elif selected_scenario == 1 and selected_model == "llama-2-70b" and selected_priming == 0 and selected_reordering == 1:
+        experiment_id = "DE_3_5"
+    elif selected_scenario == 2 and selected_model == "llama-2-70b" and selected_priming == 0 and selected_reordering == 1:
+        experiment_id = "DE_3_6"
+    elif selected_scenario == 1 and selected_model == "llama-2-70b" and selected_priming == 1 and selected_reordering == 1:
+        experiment_id = "DE_3_7"
+    elif selected_scenario == 2 and selected_model == "llama-2-70b" and selected_priming == 1 and selected_reordering == 1:
+        experiment_id = "DE_3_8"
+
+    text = DE_experiment_prompts_dict[experiment_id]
+    costs = cost_estimate(text, selected_model, selected_iterations)
+    prompt = html.P([f"The prompt used in this experiment is: {DE_experiment_prompts_dict[experiment_id]}",
+                         html.Br(),
+                        f"The total costs of running this experiment are estimated to be ${np.round(costs, 6)}."])
+    return prompt, experiment_id
+
+# Callback to run DE experiment
 @dash.callback(
     [Output("decoy-graph-output", "figure"),
-     Output('decoy-prompt-output', 'children'),
      Output('decoy-data-store', 'data')],
     [Input("decoy-update-button", "n_clicks")],
-    [State("decoy-scenario-dropdown", "value"),
-     State("decoy-priming-dropdown", "value"),
-     State("decoy-reordering-dropdown", "value"),
-     State("decoy-model-dropdown", "value"),
+    [State("decoy-model-dropdown", "value"),
      State("decoy-iteration-input", "value"),
      State("decoy-temperature-slider", "value"),
      State("openai-api-key", "value"),
-     State("replicate-api-token", "value")]
-     )
-def update_decoy_live(n_clicks, selected_scenario, selected_priming, selected_reordering, selected_model, selected_iterations, selected_temperature, openai_key, replicate_token):
-    # Check if button was clicked
-    if n_clicks is not None:
-        if selected_scenario == 1 and selected_model == "gpt-3.5-turbo" and selected_priming == 0 and selected_reordering == 0:
-            experiment_id = "DE_1_1"
-        elif selected_scenario == 2 and selected_model == "gpt-3.5-turbo" and selected_priming == 0 and selected_reordering == 0:
-            experiment_id = "DE_1_2"
-        elif selected_scenario == 1 and selected_model == "gpt-3.5-turbo" and selected_priming == 1 and selected_reordering == 0:
-            experiment_id = "DE_1_3"
-        elif selected_scenario == 2 and selected_model == "gpt-3.5-turbo" and selected_priming == 1 and selected_reordering == 0:
-            experiment_id = "DE_1_4"
-        elif selected_scenario == 1 and selected_model == "gpt-3.5-turbo" and selected_priming == 0 and selected_reordering == 1:
-            experiment_id = "DE_1_5"
-        elif selected_scenario == 2 and selected_model == "gpt-3.5-turbo" and selected_priming == 0 and selected_reordering == 1:
-            experiment_id = "DE_1_6"
-        elif selected_scenario == 1 and selected_model == "gpt-3.5-turbo" and selected_priming == 1 and selected_reordering == 1:
-            experiment_id = "DE_1_7"
-        elif selected_scenario == 2 and selected_model == "gpt-3.5-turbo" and selected_priming == 1 and selected_reordering == 1:
-            experiment_id = "DE_1_8"
-        elif selected_scenario == 1 and selected_model == "gpt-4-1106-preview" and selected_priming == 0 and selected_reordering == 0:
-            experiment_id = "DE_2_1"
-        elif selected_scenario == 2 and selected_model == "gpt-4-1106-preview" and selected_priming == 0 and selected_reordering == 0:
-            experiment_id = "DE_2_2"
-        elif selected_scenario == 1 and selected_model == "gpt-4-1106-preview" and selected_priming == 1 and selected_reordering == 0:
-            experiment_id = "DE_2_3"
-        elif selected_scenario == 2 and selected_model == "gpt-4-1106-preview" and selected_priming == 1 and selected_reordering == 0:
-            experiment_id = "DE_2_4"
-        elif selected_scenario == 1 and selected_model == "gpt-4-1106-preview" and selected_priming == 0 and selected_reordering == 1:
-            experiment_id = "DE_2_5"
-        elif selected_scenario == 2 and selected_model == "gpt-4-1106-preview" and selected_priming == 0 and selected_reordering == 1:
-            experiment_id = "DE_2_6"
-        elif selected_scenario == 1 and selected_model == "gpt-4-1106-preview" and selected_priming == 1 and selected_reordering == 1:
-            experiment_id = "DE_2_7"
-        elif selected_scenario == 2 and selected_model == "gpt-4-1106-preview" and selected_priming == 1 and selected_reordering == 1:
-            experiment_id = "DE_2_8"
-        elif selected_scenario == 1 and selected_model == "llama-2-70b" and selected_priming == 0 and selected_reordering == 0:
-            experiment_id = "DE_3_1"
-        elif selected_scenario == 2 and selected_model == "llama-2-70b" and selected_priming == 0 and selected_reordering == 0:
-            experiment_id = "DE_3_2"
-        elif selected_scenario == 1 and selected_model == "llama-2-70b" and selected_priming == 1 and selected_reordering == 0:
-            experiment_id = "DE_3_3"
-        elif selected_scenario == 2 and selected_model == "llama-2-70b" and selected_priming == 1 and selected_reordering == 0:
-            experiment_id = "DE_3_4"
-        elif selected_scenario == 1 and selected_model == "llama-2-70b" and selected_priming == 0 and selected_reordering == 1:
-            experiment_id = "DE_3_5"
-        elif selected_scenario == 2 and selected_model == "llama-2-70b" and selected_priming == 0 and selected_reordering == 1:
-            experiment_id = "DE_3_6"
-        elif selected_scenario == 1 and selected_model == "llama-2-70b" and selected_priming == 1 and selected_reordering == 1:
-            experiment_id = "DE_3_7"
-        elif selected_scenario == 2 and selected_model == "llama-2-70b" and selected_priming == 1 and selected_reordering == 1:
-            experiment_id = "DE_3_8"
-        
+     State("replicate-api-token", "value"),
+     State('decoy-id-store', 'data')]
+)
+def decoy_run_experiment(n_clicks, selected_model, selected_iterations, selected_temperature, openai_key, replicate_token, experiment_id):
+    if n_clicks is not None:      
         # Run Experiment for selected parameters
         if selected_model == "llama-2-70b":
             results, probs = DE_run_experiment_llama_dashboard(experiment_id, selected_iterations, selected_temperature, replicate_token)
         else:
             results, probs = DE_run_experiment_dashboard(experiment_id, selected_iterations, selected_temperature, openai_key)
         n_clicks = None
-        text = DE_experiment_prompts_dict[experiment_id]
-        costs = cost_estimate(text, selected_model, selected_iterations)
-        prompt = html.P([f"The prompt used in this experiment is: {DE_experiment_prompts_dict[experiment_id]}",
-                         html.Br(),
-                        f"The total costs of running this experiment are estimated to be ${np.round(costs, 6)}."])
-        return DE_plot_results(probs), prompt, results.to_json(orient='split')
+
+        return DE_plot_results(probs), results.to_json(orient='split')
     
 # Callback for DE download
 @dash.callback(
@@ -1198,109 +1251,121 @@ def download_csv(n_clicks, stored_data):
     else:
         return dash.no_update
     
-# Callback for Transaction Utility
+    
+##### Callback for Transaction Utility prompt and costs #####
+@dash.callback(
+    [Output('tu1-prompt-output', 'children'),
+     Output('tu1-id-store', 'data')],
+    [Input("tu1-initial-cost-dropdown", "value"),
+     Input("tu1-current-cost-dropdown", "value"),
+     Input("tu1-buyer-dropdown", "value"),
+     Input("tu1-language-model-dropdown", "value"),
+     Input("tu1-iteration-input", "value")]
+     )
+
+def update_tu1_prompt(selected_initial_cost, selected_current_cost, selected_buyer, selected_model, selected_iterations):
+
+    if selected_initial_cost == 0 and selected_current_cost == 5 and selected_buyer == "friend" and selected_model == "gpt-3.5-turbo":
+        experiment_id = "TU_1_1_1_1"
+    elif selected_initial_cost == 0 and selected_current_cost == 5 and selected_buyer == "stranger" and selected_model == "gpt-3.5-turbo":
+        experiment_id = "TU_1_1_1_2"
+    elif selected_initial_cost == 0 and selected_current_cost == 10 and selected_buyer == "friend" and selected_model == "gpt-3.5-turbo":
+        experiment_id = "TU_1_1_2_1"
+    elif selected_initial_cost == 0 and selected_current_cost == 10 and selected_buyer == "stranger" and selected_model == "gpt-3.5-turbo":
+        experiment_id = "TU_1_1_2_2"
+    elif selected_initial_cost == 5 and selected_current_cost == 5 and selected_buyer == "friend" and selected_model == "gpt-3.5-turbo":
+        experiment_id = "TU_1_2_1_1"
+    elif selected_initial_cost == 5 and selected_current_cost == 5 and selected_buyer == "stranger" and selected_model == "gpt-3.5-turbo":
+        experiment_id = "TU_1_2_1_2"
+    elif selected_initial_cost == 5 and selected_current_cost == 10 and selected_buyer == "friend" and selected_model == "gpt-3.5-turbo":
+        experiment_id = "TU_1_2_2_1"
+    elif selected_initial_cost == 5 and selected_current_cost == 10 and selected_buyer == "stranger" and selected_model == "gpt-3.5-turbo":
+        experiment_id = "TU_1_2_2_2"
+    elif selected_initial_cost == 10 and selected_current_cost == 5 and selected_buyer == "friend" and selected_model == "gpt-3.5-turbo":
+        experiment_id = "TU_1_3_1_1"
+    elif selected_initial_cost == 10 and selected_current_cost == 5 and selected_buyer == "stranger" and selected_model == "gpt-3.5-turbo":
+        experiment_id = "TU_1_3_1_2"
+    elif selected_initial_cost == 10 and selected_current_cost == 10 and selected_buyer == "friend" and selected_model == "gpt-3.5-turbo":
+        experiment_id = "TU_1_3_2_1"
+    elif selected_initial_cost == 10 and selected_current_cost == 10 and selected_buyer == "stranger" and selected_model == "gpt-3.5-turbo":
+        experiment_id = "TU_1_3_2_2"
+    elif selected_initial_cost == 0 and selected_current_cost == 5 and selected_buyer == "friend" and selected_model == "gpt-4-1106-preview":
+        experiment_id = "TU_2_1_1_1"
+    elif selected_initial_cost == 0 and selected_current_cost == 5 and selected_buyer == "stranger" and selected_model == "gpt-4-1106-preview":
+        experiment_id = "TU_2_1_1_2"
+    elif selected_initial_cost == 0 and selected_current_cost == 10 and selected_buyer == "friend" and selected_model == "gpt-4-1106-preview":
+        experiment_id = "TU_2_1_2_1"
+    elif selected_initial_cost == 0 and selected_current_cost == 10 and selected_buyer == "stranger" and selected_model == "gpt-4-1106-preview":
+        experiment_id = "TU_2_1_2_2"
+    elif selected_initial_cost == 5 and selected_current_cost == 5 and selected_buyer == "friend" and selected_model == "gpt-4-1106-preview":
+        experiment_id = "TU_2_2_1_1"
+    elif selected_initial_cost == 5 and selected_current_cost == 5 and selected_buyer == "stranger" and selected_model == "gpt-4-1106-preview":
+        experiment_id = "TU_2_2_1_2"
+    elif selected_initial_cost == 5 and selected_current_cost == 10 and selected_buyer == "friend" and selected_model == "gpt-4-1106-preview":
+        experiment_id = "TU_2_2_2_1"
+    elif selected_initial_cost == 5 and selected_current_cost == 10 and selected_buyer == "stranger" and selected_model == "gpt-4-1106-preview":
+        experiment_id = "TU_2_2_2_2"
+    elif selected_initial_cost == 10 and selected_current_cost == 5 and selected_buyer == "friend" and selected_model == "gpt-4-1106-preview":
+        experiment_id = "TU_2_3_1_1"
+    elif selected_initial_cost == 10 and selected_current_cost == 5 and selected_buyer == "stranger" and selected_model == "gpt-4-1106-preview":
+        experiment_id = "TU_2_3_1_2"
+    elif selected_initial_cost == 10 and selected_current_cost == 10 and selected_buyer == "friend" and selected_model == "gpt-4-1106-preview":
+        experiment_id = "TU_2_3_2_1"
+    elif selected_initial_cost == 10 and selected_current_cost == 10 and selected_buyer == "stranger" and selected_model == "gpt-4-1106-preview":
+        experiment_id = "TU_2_3_2_2"
+    elif selected_initial_cost == 0 and selected_current_cost == 5 and selected_buyer == "friend" and selected_model == "llama-2-70b":
+        experiment_id = "TU_3_1_1_1"
+    elif selected_initial_cost == 0 and selected_current_cost == 5 and selected_buyer == "stranger" and selected_model == "llama-2-70b":
+        experiment_id = "TU_3_1_1_2"
+    elif selected_initial_cost == 0 and selected_current_cost == 10 and selected_buyer == "friend" and selected_model == "llama-2-70b":
+        experiment_id = "TU_3_1_2_1"
+    elif selected_initial_cost == 0 and selected_current_cost == 10 and selected_buyer == "stranger" and selected_model == "llama-2-70b":
+        experiment_id = "TU_3_1_2_2"
+    elif selected_initial_cost == 5 and selected_current_cost == 5 and selected_buyer == "friend" and selected_model == "llama-2-70b":
+        experiment_id = "TU_3_2_1_1"
+    elif selected_initial_cost == 5 and selected_current_cost == 5 and selected_buyer == "stranger" and selected_model == "llama-2-70b":
+        experiment_id = "TU_3_2_1_2"
+    elif selected_initial_cost == 5 and selected_current_cost == 10 and selected_buyer == "friend" and selected_model == "llama-2-70b":
+        experiment_id = "TU_3_2_2_1"
+    elif selected_initial_cost == 5 and selected_current_cost == 10 and selected_buyer == "stranger" and selected_model == "llama-2-70b":
+        experiment_id = "TU_3_2_2_2"
+    elif selected_initial_cost == 10 and selected_current_cost == 5 and selected_buyer == "friend" and selected_model == "llama-2-70b":
+        experiment_id = "TU_3_3_1_1"
+    elif selected_initial_cost == 10 and selected_current_cost == 5 and selected_buyer == "stranger" and selected_model == "llama-2-70b":
+        experiment_id = "TU_3_3_1_2"
+    elif selected_initial_cost == 10 and selected_current_cost == 10 and selected_buyer == "friend" and selected_model == "llama-2-70b":
+        experiment_id = "TU_3_3_2_1"
+    elif selected_initial_cost == 10 and selected_current_cost == 10 and selected_buyer == "stranger" and selected_model == "llama-2-70b":
+        experiment_id = "TU_3_3_2_2"
+
+    text = TU_experiment_prompts_dict[experiment_id]
+    costs = cost_estimate(text, selected_model, selected_iterations)
+    prompt = html.P([f"The prompt used in this experiment is: {TU_experiment_prompts_dict[experiment_id]}",
+                    html.Br(),
+                    f"The total costs of running this experiment are estimated to be ${np.round(costs, 6)}."])
+    return prompt, experiment_id
+    
+# Callback to run TU1 experiment
 @dash.callback(
     [Output("tu1-graph-output", "figure"),
-     Output('tu1-prompt-output', 'children'),
      Output('tu1-data-store', 'data')],
     [Input("tu1-update-button", "n_clicks")],
-    [State("tu1-initial-cost-dropdown", "value"),
-     State("tu1-current-cost-dropdown", "value"),
-     State("tu1-buyer-dropdown", "value"),
-     State("tu1-language-model-dropdown", "value"),
+    [State("tu1-language-model-dropdown", "value"),
      State("tu1-iteration-input", "value"),
      State("tu1-temperature-slider", "value"),
      State("openai-api-key", "value"),
-     State("replicate-api-token", "value")]
+     State("replicate-api-token", "value"),
+     State("tu1-id-store", "data")]
      )
-
-def update_tu1_live(n_clicks, selected_initial_cost, selected_current_cost, selected_buyer, selected_model, selected_iterations, selected_temperature, openai_key, replicate_token):
+def tu1_run_experiment(n_clicks, selected_model, selected_iterations, selected_temperature, openai_key, replicate_token, experiment_id):
     if n_clicks is not None:
-        if selected_initial_cost == 0 and selected_current_cost == 5 and selected_buyer == "friend" and selected_model == "gpt-3.5-turbo":
-            experiment_id = "TU_1_1_1_1"
-        elif selected_initial_cost == 0 and selected_current_cost == 5 and selected_buyer == "stranger" and selected_model == "gpt-3.5-turbo":
-            experiment_id = "TU_1_1_1_2"
-        elif selected_initial_cost == 0 and selected_current_cost == 10 and selected_buyer == "friend" and selected_model == "gpt-3.5-turbo":
-            experiment_id = "TU_1_1_2_1"
-        elif selected_initial_cost == 0 and selected_current_cost == 10 and selected_buyer == "stranger" and selected_model == "gpt-3.5-turbo":
-            experiment_id = "TU_1_1_2_2"
-        elif selected_initial_cost == 5 and selected_current_cost == 5 and selected_buyer == "friend" and selected_model == "gpt-3.5-turbo":
-            experiment_id = "TU_1_2_1_1"
-        elif selected_initial_cost == 5 and selected_current_cost == 5 and selected_buyer == "stranger" and selected_model == "gpt-3.5-turbo":
-            experiment_id = "TU_1_2_1_2"
-        elif selected_initial_cost == 5 and selected_current_cost == 10 and selected_buyer == "friend" and selected_model == "gpt-3.5-turbo":
-            experiment_id = "TU_1_2_2_1"
-        elif selected_initial_cost == 5 and selected_current_cost == 10 and selected_buyer == "stranger" and selected_model == "gpt-3.5-turbo":
-            experiment_id = "TU_1_2_2_2"
-        elif selected_initial_cost == 10 and selected_current_cost == 5 and selected_buyer == "friend" and selected_model == "gpt-3.5-turbo":
-            experiment_id = "TU_1_3_1_1"
-        elif selected_initial_cost == 10 and selected_current_cost == 5 and selected_buyer == "stranger" and selected_model == "gpt-3.5-turbo":
-            experiment_id = "TU_1_3_1_2"
-        elif selected_initial_cost == 10 and selected_current_cost == 10 and selected_buyer == "friend" and selected_model == "gpt-3.5-turbo":
-            experiment_id = "TU_1_3_2_1"
-        elif selected_initial_cost == 10 and selected_current_cost == 10 and selected_buyer == "stranger" and selected_model == "gpt-3.5-turbo":
-            experiment_id = "TU_1_3_2_2"
-        elif selected_initial_cost == 0 and selected_current_cost == 5 and selected_buyer == "friend" and selected_model == "gpt-4-1106-preview":
-            experiment_id = "TU_2_1_1_1"
-        elif selected_initial_cost == 0 and selected_current_cost == 5 and selected_buyer == "stranger" and selected_model == "gpt-4-1106-preview":
-            experiment_id = "TU_2_1_1_2"
-        elif selected_initial_cost == 0 and selected_current_cost == 10 and selected_buyer == "friend" and selected_model == "gpt-4-1106-preview":
-            experiment_id = "TU_2_1_2_1"
-        elif selected_initial_cost == 0 and selected_current_cost == 10 and selected_buyer == "stranger" and selected_model == "gpt-4-1106-preview":
-            experiment_id = "TU_2_1_2_2"
-        elif selected_initial_cost == 5 and selected_current_cost == 5 and selected_buyer == "friend" and selected_model == "gpt-4-1106-preview":
-            experiment_id = "TU_2_2_1_1"
-        elif selected_initial_cost == 5 and selected_current_cost == 5 and selected_buyer == "stranger" and selected_model == "gpt-4-1106-preview":
-            experiment_id = "TU_2_2_1_2"
-        elif selected_initial_cost == 5 and selected_current_cost == 10 and selected_buyer == "friend" and selected_model == "gpt-4-1106-preview":
-            experiment_id = "TU_2_2_2_1"
-        elif selected_initial_cost == 5 and selected_current_cost == 10 and selected_buyer == "stranger" and selected_model == "gpt-4-1106-preview":
-            experiment_id = "TU_2_2_2_2"
-        elif selected_initial_cost == 10 and selected_current_cost == 5 and selected_buyer == "friend" and selected_model == "gpt-4-1106-preview":
-            experiment_id = "TU_2_3_1_1"
-        elif selected_initial_cost == 10 and selected_current_cost == 5 and selected_buyer == "stranger" and selected_model == "gpt-4-1106-preview":
-            experiment_id = "TU_2_3_1_2"
-        elif selected_initial_cost == 10 and selected_current_cost == 10 and selected_buyer == "friend" and selected_model == "gpt-4-1106-preview":
-            experiment_id = "TU_2_3_2_1"
-        elif selected_initial_cost == 10 and selected_current_cost == 10 and selected_buyer == "stranger" and selected_model == "gpt-4-1106-preview":
-            experiment_id = "TU_2_3_2_2"
-        elif selected_initial_cost == 0 and selected_current_cost == 5 and selected_buyer == "friend" and selected_model == "llama-2-70b":
-            experiment_id = "TU_3_1_1_1"
-        elif selected_initial_cost == 0 and selected_current_cost == 5 and selected_buyer == "stranger" and selected_model == "llama-2-70b":
-            experiment_id = "TU_3_1_1_2"
-        elif selected_initial_cost == 0 and selected_current_cost == 10 and selected_buyer == "friend" and selected_model == "llama-2-70b":
-            experiment_id = "TU_3_1_2_1"
-        elif selected_initial_cost == 0 and selected_current_cost == 10 and selected_buyer == "stranger" and selected_model == "llama-2-70b":
-            experiment_id = "TU_3_1_2_2"
-        elif selected_initial_cost == 5 and selected_current_cost == 5 and selected_buyer == "friend" and selected_model == "llama-2-70b":
-            experiment_id = "TU_3_2_1_1"
-        elif selected_initial_cost == 5 and selected_current_cost == 5 and selected_buyer == "stranger" and selected_model == "llama-2-70b":
-            experiment_id = "TU_3_2_1_2"
-        elif selected_initial_cost == 5 and selected_current_cost == 10 and selected_buyer == "friend" and selected_model == "llama-2-70b":
-            experiment_id = "TU_3_2_2_1"
-        elif selected_initial_cost == 5 and selected_current_cost == 10 and selected_buyer == "stranger" and selected_model == "llama-2-70b":
-            experiment_id = "TU_3_2_2_2"
-        elif selected_initial_cost == 10 and selected_current_cost == 5 and selected_buyer == "friend" and selected_model == "llama-2-70b":
-            experiment_id = "TU_3_3_1_1"
-        elif selected_initial_cost == 10 and selected_current_cost == 5 and selected_buyer == "stranger" and selected_model == "llama-2-70b":
-            experiment_id = "TU_3_3_1_2"
-        elif selected_initial_cost == 10 and selected_current_cost == 10 and selected_buyer == "friend" and selected_model == "llama-2-70b":
-            experiment_id = "TU_3_3_2_1"
-        elif selected_initial_cost == 10 and selected_current_cost == 10 and selected_buyer == "stranger" and selected_model == "llama-2-70b":
-            experiment_id = "TU_3_3_2_2"
-
         # Run Experiment for selected parameters
         if selected_model == "llama-2-70b":
             results = TU_run_experiment_llama_dashboard(experiment_id, selected_iterations, selected_temperature, replicate_token)
         else:
             results= TU_run_experiment_dashboard(experiment_id, selected_iterations, selected_temperature, openai_key)
         n_clicks = None
-        text = TU_experiment_prompts_dict[experiment_id]
-        costs = cost_estimate(text, selected_model, selected_iterations)
-        prompt = html.P([f"The prompt used in this experiment is: {TU_experiment_prompts_dict[experiment_id]}",
-                         html.Br(),
-                        f"The total costs of running this experiment are estimated to be ${np.round(costs, 6)}."])
-        return TU_plot_results(results), prompt, results.to_json(orient='split')
+        return TU_plot_results(results), results.to_json(orient='split') 
     
 # Callback for TU1 download
 @dash.callback(
@@ -1317,114 +1382,124 @@ def download_csv(n_clicks, stored_data):
         return dash.no_update
     
     
-# Callback for Transaction Utility 3: Scenario 1
+##### Callback for Transaction Utility 3: Scenario 1 prompt and costs #####
+@dash.callback(
+    [Output('tu3-prompt-output', 'children'),
+     Output('tu3-id-store', 'data')],
+    [Input("tu3-initial-cost-dropdown", "value"),
+     Input("tu3-current-cost-dropdown", "value"),
+     Input("tu3-buyer-dropdown", "value"),
+     Input("tu3-language-model-dropdown", "value"),
+     Input("tu3-iteration-input", "value")]
+     )
+def update_tu3_prompt(selected_initial_cost, selected_current_cost, selected_buyer, selected_model, selected_iterations):
+    if selected_initial_cost == 0 and selected_current_cost == 15.71 and selected_buyer == "friend" and selected_model == "gpt-3.5-turbo":
+        experiment_id = "TU3_1_1_1_1_1"
+    elif selected_initial_cost == 0 and selected_current_cost == 15.71 and selected_buyer == "stranger" and selected_model == "gpt-3.5-turbo":
+        experiment_id = "TU3_1_1_1_1_2"
+    elif selected_initial_cost == 0 and selected_current_cost == 31.42 and selected_buyer == "friend" and selected_model == "gpt-3.5-turbo":
+        experiment_id = "TU3_1_1_1_2_1"
+    elif selected_initial_cost == 0 and selected_current_cost == 31.42 and selected_buyer == "stranger" and selected_model == "gpt-3.5-turbo":
+        experiment_id = "TU3_1_1_1_2_2"
+    elif selected_initial_cost == 15.71 and selected_current_cost == 15.71 and selected_buyer == "friend" and selected_model == "gpt-3.5-turbo":
+        experiment_id = "TU3_1_1_2_1_1"
+    elif selected_initial_cost == 15.71 and selected_current_cost == 15.71 and selected_buyer == "stranger" and selected_model == "gpt-3.5-turbo":
+        experiment_id = "TU3_1_1_2_1_2"
+    elif selected_initial_cost == 15.71 and selected_current_cost == 31.42 and selected_buyer == "friend" and selected_model == "gpt-3.5-turbo":
+        experiment_id = "TU3_1_1_2_2_1"
+    elif selected_initial_cost == 15.71 and selected_current_cost == 31.42 and selected_buyer == "stranger" and selected_model == "gpt-3.5-turbo":
+        experiment_id = "TU3_1_1_2_2_2"
+    elif selected_initial_cost == 31.42 and selected_current_cost == 15.71 and selected_buyer == "friend" and selected_model == "gpt-3.5-turbo":
+        experiment_id = "TU3_1_1_3_1_1"
+    elif selected_initial_cost == 31.42 and selected_current_cost == 15.71 and selected_buyer == "stranger" and selected_model == "gpt-3.5-turbo":
+        experiment_id = "TU3_1_1_3_1_2"
+    elif selected_initial_cost == 31.42 and selected_current_cost == 31.42 and selected_buyer == "friend" and selected_model == "gpt-3.5-turbo":
+        experiment_id = "TU3_1_1_3_2_1"
+    elif selected_initial_cost == 31.42 and selected_current_cost == 31.42 and selected_buyer == "stranger" and selected_model == "gpt-3.5-turbo":
+        experiment_id = "TU3_1_1_3_2_2"
+    elif selected_initial_cost == 0 and selected_current_cost == 15.71 and selected_buyer == "friend" and selected_model == "gpt-4-1106-preview":
+        experiment_id = "TU3_2_1_1_1_1"
+    elif selected_initial_cost == 0 and selected_current_cost == 15.71 and selected_buyer == "stranger" and selected_model == "gpt-4-1106-preview":
+        experiment_id = "TU3_2_1_1_1_2"
+    elif selected_initial_cost == 0 and selected_current_cost == 31.42 and selected_buyer == "friend" and selected_model == "gpt-4-1106-preview":
+        experiment_id = "TU3_2_1_1_2_1"
+    elif selected_initial_cost == 0 and selected_current_cost == 31.42 and selected_buyer == "stranger" and selected_model == "gpt-4-1106-preview":
+        experiment_id = "TU3_2_1_1_2_2"
+    elif selected_initial_cost == 15.71 and selected_current_cost == 15.71 and selected_buyer == "friend" and selected_model == "gpt-4-1106-preview":
+        experiment_id = "TU3_2_1_2_1_1"
+    elif selected_initial_cost == 15.71 and selected_current_cost == 15.71 and selected_buyer == "stranger" and selected_model == "gpt-4-1106-preview":
+        experiment_id = "TU3_2_1_2_1_2"
+    elif selected_initial_cost == 15.71 and selected_current_cost == 31.42 and selected_buyer == "friend" and selected_model == "gpt-4-1106-preview":
+        experiment_id = "TU3_2_1_2_2_1"
+    elif selected_initial_cost == 15.71 and selected_current_cost == 31.42 and selected_buyer == "stranger" and selected_model == "gpt-4-1106-preview":
+        experiment_id = "TU3_2_1_2_2_2"
+    elif selected_initial_cost == 31.42 and selected_current_cost == 15.71 and selected_buyer == "friend" and selected_model == "gpt-4-1106-preview":
+        experiment_id = "TU3_2_1_3_1_1"
+    elif selected_initial_cost == 31.42 and selected_current_cost == 15.71 and selected_buyer == "stranger" and selected_model == "gpt-4-1106-preview":
+        experiment_id = "TU3_2_1_3_1_2"
+    elif selected_initial_cost == 31.42 and selected_current_cost == 31.42 and selected_buyer == "friend" and selected_model == "gpt-4-1106-preview":
+        experiment_id = "TU3_2_1_3_2_1"
+    elif selected_initial_cost == 31.42 and selected_current_cost == 31.42 and selected_buyer == "stranger" and selected_model == "gpt-4-1106-preview":
+        experiment_id = "TU3_2_1_3_2_2"
+    elif selected_initial_cost == 0 and selected_current_cost == 15.71 and selected_buyer == "friend" and selected_model == "llama-2-70b":
+        experiment_id = "TU3_3_1_1_1_1"
+    elif selected_initial_cost == 0 and selected_current_cost == 15.71 and selected_buyer == "stranger" and selected_model == "llama-2-70b":
+        experiment_id = "TU3_3_1_1_1_2"
+    elif selected_initial_cost == 0 and selected_current_cost == 31.42 and selected_buyer == "friend" and selected_model == "llama-2-70b":
+        experiment_id = "TU3_3_1_1_2_1"
+    elif selected_initial_cost == 0 and selected_current_cost == 31.42 and selected_buyer == "stranger" and selected_model == "llama-2-70b":
+        experiment_id = "TU3_3_1_1_2_2"
+    elif selected_initial_cost == 15.71 and selected_current_cost == 15.71 and selected_buyer == "friend" and selected_model == "llama-2-70b":
+        experiment_id = "TU3_3_1_2_1_1"
+    elif selected_initial_cost == 15.71 and selected_current_cost == 15.71 and selected_buyer == "stranger" and selected_model == "llama-2-70b":
+        experiment_id = "TU3_3_1_2_1_2"
+    elif selected_initial_cost == 15.71 and selected_current_cost == 31.42 and selected_buyer == "friend" and selected_model == "llama-2-70b":
+        experiment_id = "TU3_3_1_2_2_1"
+    elif selected_initial_cost == 15.71 and selected_current_cost == 31.42 and selected_buyer == "stranger" and selected_model == "llama-2-70b":
+        experiment_id = "TU3_3_1_2_2_2"
+    elif selected_initial_cost == 31.42 and selected_current_cost == 15.71 and selected_buyer == "friend" and selected_model == "llama-2-70b":
+        experiment_id = "TU3_3_1_3_1_1"
+    elif selected_initial_cost == 31.42 and selected_current_cost == 15.71 and selected_buyer == "stranger" and selected_model == "llama-2-70b":
+        experiment_id = "TU3_3_1_3_1_2"
+    elif selected_initial_cost == 31.42 and selected_current_cost == 31.42 and selected_buyer == "friend" and selected_model == "llama-2-70b":
+        experiment_id = "TU3_3_1_3_2_1"
+    elif selected_initial_cost == 31.42 and selected_current_cost == 31.42 and selected_buyer == "stranger" and selected_model == "llama-2-70b":
+        experiment_id = "TU3_3_1_3_2_2"
+
+    text = TU3_experiment_prompts_dict[experiment_id]
+    costs = cost_estimate(text, selected_model, selected_iterations)
+    prompt = html.P([f"The prompt used in this experiment is: {TU3_experiment_prompts_dict[experiment_id]}",
+                     html.Br(),
+                    f"The total costs of running this experiment are estimated to be ${np.round(costs, 6)}."])
+    return prompt, experiment_id
+    
+# Callback to run TU3 experiment
 @dash.callback(
     [Output("tu3-graph-output", "figure"),
-     Output('tu3-prompt-output', 'children'),
-     Output('tu3-data-store1', 'data')],
+     Output('tu3-data-store', 'data')],
     [Input("tu3-update-button", "n_clicks")],
-    [State("tu3-initial-cost-dropdown", "value"),
-     State("tu3-current-cost-dropdown", "value"),
-     State("tu3-buyer-dropdown", "value"),
-     State("tu3-language-model-dropdown", "value"),
+    [State("tu3-language-model-dropdown", "value"),
      State("tu3-iteration-input", "value"),
      State("tu3-temperature-slider", "value"),
      State("openai-api-key", "value"),
-     State("replicate-api-token", "value")]
-     )
-def update_tu3_live(n_clicks, selected_initial_cost, selected_current_cost, selected_buyer, selected_model, selected_iterations, selected_temperature, openai_key, replicate_token):
-    if n_clicks is not None:
-        if selected_initial_cost == 0 and selected_current_cost == 15.71 and selected_buyer == "friend" and selected_model == "gpt-3.5-turbo":
-            experiment_id = "TU3_1_1_1_1_1"
-        elif selected_initial_cost == 0 and selected_current_cost == 15.71 and selected_buyer == "stranger" and selected_model == "gpt-3.5-turbo":
-            experiment_id = "TU3_1_1_1_1_2"
-        elif selected_initial_cost == 0 and selected_current_cost == 31.42 and selected_buyer == "friend" and selected_model == "gpt-3.5-turbo":
-            experiment_id = "TU3_1_1_1_2_1"
-        elif selected_initial_cost == 0 and selected_current_cost == 31.42 and selected_buyer == "stranger" and selected_model == "gpt-3.5-turbo":
-            experiment_id = "TU3_1_1_1_2_2"
-        elif selected_initial_cost == 15.71 and selected_current_cost == 15.71 and selected_buyer == "friend" and selected_model == "gpt-3.5-turbo":
-            experiment_id = "TU3_1_1_2_1_1"
-        elif selected_initial_cost == 15.71 and selected_current_cost == 15.71 and selected_buyer == "stranger" and selected_model == "gpt-3.5-turbo":
-            experiment_id = "TU3_1_1_2_1_2"
-        elif selected_initial_cost == 15.71 and selected_current_cost == 31.42 and selected_buyer == "friend" and selected_model == "gpt-3.5-turbo":
-            experiment_id = "TU3_1_1_2_2_1"
-        elif selected_initial_cost == 15.71 and selected_current_cost == 31.42 and selected_buyer == "stranger" and selected_model == "gpt-3.5-turbo":
-            experiment_id = "TU3_1_1_2_2_2"
-        elif selected_initial_cost == 31.42 and selected_current_cost == 15.71 and selected_buyer == "friend" and selected_model == "gpt-3.5-turbo":
-            experiment_id = "TU3_1_1_3_1_1"
-        elif selected_initial_cost == 31.42 and selected_current_cost == 15.71 and selected_buyer == "stranger" and selected_model == "gpt-3.5-turbo":
-            experiment_id = "TU3_1_1_3_1_2"
-        elif selected_initial_cost == 31.42 and selected_current_cost == 31.42 and selected_buyer == "friend" and selected_model == "gpt-3.5-turbo":
-            experiment_id = "TU3_1_1_3_2_1"
-        elif selected_initial_cost == 31.42 and selected_current_cost == 31.42 and selected_buyer == "stranger" and selected_model == "gpt-3.5-turbo":
-            experiment_id = "TU3_1_1_3_2_2"
-        elif selected_initial_cost == 0 and selected_current_cost == 15.71 and selected_buyer == "friend" and selected_model == "gpt-4-1106-preview":
-            experiment_id = "TU3_2_1_1_1_1"
-        elif selected_initial_cost == 0 and selected_current_cost == 15.71 and selected_buyer == "stranger" and selected_model == "gpt-4-1106-preview":
-            experiment_id = "TU3_2_1_1_1_2"
-        elif selected_initial_cost == 0 and selected_current_cost == 31.42 and selected_buyer == "friend" and selected_model == "gpt-4-1106-preview":
-            experiment_id = "TU3_2_1_1_2_1"
-        elif selected_initial_cost == 0 and selected_current_cost == 31.42 and selected_buyer == "stranger" and selected_model == "gpt-4-1106-preview":
-            experiment_id = "TU3_2_1_1_2_2"
-        elif selected_initial_cost == 15.71 and selected_current_cost == 15.71 and selected_buyer == "friend" and selected_model == "gpt-4-1106-preview":
-            experiment_id = "TU3_2_1_2_1_1"
-        elif selected_initial_cost == 15.71 and selected_current_cost == 15.71 and selected_buyer == "stranger" and selected_model == "gpt-4-1106-preview":
-            experiment_id = "TU3_2_1_2_1_2"
-        elif selected_initial_cost == 15.71 and selected_current_cost == 31.42 and selected_buyer == "friend" and selected_model == "gpt-4-1106-preview":
-            experiment_id = "TU3_2_1_2_2_1"
-        elif selected_initial_cost == 15.71 and selected_current_cost == 31.42 and selected_buyer == "stranger" and selected_model == "gpt-4-1106-preview":
-            experiment_id = "TU3_2_1_2_2_2"
-        elif selected_initial_cost == 31.42 and selected_current_cost == 15.71 and selected_buyer == "friend" and selected_model == "gpt-4-1106-preview":
-            experiment_id = "TU3_2_1_3_1_1"
-        elif selected_initial_cost == 31.42 and selected_current_cost == 15.71 and selected_buyer == "stranger" and selected_model == "gpt-4-1106-preview":
-            experiment_id = "TU3_2_1_3_1_2"
-        elif selected_initial_cost == 31.42 and selected_current_cost == 31.42 and selected_buyer == "friend" and selected_model == "gpt-4-1106-preview":
-            experiment_id = "TU3_2_1_3_2_1"
-        elif selected_initial_cost == 31.42 and selected_current_cost == 31.42 and selected_buyer == "stranger" and selected_model == "gpt-4-1106-preview":
-            experiment_id = "TU3_2_1_3_2_2"
-        elif selected_initial_cost == 0 and selected_current_cost == 15.71 and selected_buyer == "friend" and selected_model == "llama-2-70b":
-            experiment_id = "TU3_3_1_1_1_1"
-        elif selected_initial_cost == 0 and selected_current_cost == 15.71 and selected_buyer == "stranger" and selected_model == "llama-2-70b":
-            experiment_id = "TU3_3_1_1_1_2"
-        elif selected_initial_cost == 0 and selected_current_cost == 31.42 and selected_buyer == "friend" and selected_model == "llama-2-70b":
-            experiment_id = "TU3_3_1_1_2_1"
-        elif selected_initial_cost == 0 and selected_current_cost == 31.42 and selected_buyer == "stranger" and selected_model == "llama-2-70b":
-            experiment_id = "TU3_3_1_1_2_2"
-        elif selected_initial_cost == 15.71 and selected_current_cost == 15.71 and selected_buyer == "friend" and selected_model == "llama-2-70b":
-            experiment_id = "TU3_3_1_2_1_1"
-        elif selected_initial_cost == 15.71 and selected_current_cost == 15.71 and selected_buyer == "stranger" and selected_model == "llama-2-70b":
-            experiment_id = "TU3_3_1_2_1_2"
-        elif selected_initial_cost == 15.71 and selected_current_cost == 31.42 and selected_buyer == "friend" and selected_model == "llama-2-70b":
-            experiment_id = "TU3_3_1_2_2_1"
-        elif selected_initial_cost == 15.71 and selected_current_cost == 31.42 and selected_buyer == "stranger" and selected_model == "llama-2-70b":
-            experiment_id = "TU3_3_1_2_2_2"
-        elif selected_initial_cost == 31.42 and selected_current_cost == 15.71 and selected_buyer == "friend" and selected_model == "llama-2-70b":
-            experiment_id = "TU3_3_1_3_1_1"
-        elif selected_initial_cost == 31.42 and selected_current_cost == 15.71 and selected_buyer == "stranger" and selected_model == "llama-2-70b":
-            experiment_id = "TU3_3_1_3_1_2"
-        elif selected_initial_cost == 31.42 and selected_current_cost == 31.42 and selected_buyer == "friend" and selected_model == "llama-2-70b":
-            experiment_id = "TU3_3_1_3_2_1"
-        elif selected_initial_cost == 31.42 and selected_current_cost == 31.42 and selected_buyer == "stranger" and selected_model == "llama-2-70b":
-            experiment_id = "TU3_3_1_3_2_2"
-        
+     State("replicate-api-token", "value"),
+     State("tu3-id-store", "data")]
+        )
+def tu3_run_experiment(n_clicks, selected_model, selected_iterations, selected_temperature, openai_key, replicate_token, experiment_id):
+    if n_clicks is not None:        
         # Run Experiment for selected parameters
         if selected_model == "llama-2-70b":
             results = TU3_run_experiment_llama_dashboard(experiment_id, selected_iterations, selected_temperature, replicate_token)
         else:
-            results= TU3_run_experiment_dashboard(experiment_id, selected_iterations, selected_temperature, openai_key)
+            results = TU3_run_experiment_dashboard(experiment_id, selected_iterations, selected_temperature, openai_key)
         n_clicks = None
-        text = TU3_experiment_prompts_dict[experiment_id]
-        costs = cost_estimate(text, selected_model, selected_iterations)
-        prompt = html.P([f"The prompt used in this experiment is: {TU3_experiment_prompts_dict[experiment_id]}",
-                         html.Br(),
-                        f"The total costs of running this experiment are estimated to be ${np.round(costs, 6)}."])
-        return TU3_plot_results(results), prompt, results.to_json(orient='split')
+        return TU3_plot_results(results), results.to_json(orient='split')
     
 # Callback for TU3 Scenario 1 download
 @dash.callback(
-    Output("tu3-csv-download1", "data"),
-    [Input("tu3-csv-button1", "n_clicks")],
-    [State('tu3-data-store1', 'data')]
+    Output("tu3-csv-download", "data"),
+    [Input("tu3-csv-button", "n_clicks")],
+    [State('tu3-data-store', 'data')]
 )
 def download_csv(n_clicks, stored_data):
     if n_clicks:
@@ -1436,110 +1511,121 @@ def download_csv(n_clicks, stored_data):
     
     
 
-# Callback for Transaction Utility 3: Scenario 2
+##### Callback for Transaction Utility 3: Scenario 2 prompt and costs #####
+@dash.callback(
+    [Output('tu3-prompt-output2', 'children'),
+     Output('tu3-id-store2', 'data')],
+    [Input("tu3-initial-cost-dropdown2", "value"),
+     Input("tu3-current-cost-dropdown2", "value"),
+     Input("tu3-buyer-dropdown2", "value"),
+     Input("tu3-language-model-dropdown2", "value"),
+     Input("tu3-iteration-input2", "value")]
+)   
+def update_tu3_2_live(selected_initial_cost, selected_current_cost, selected_buyer, selected_model, selected_iterations):
+    # Get experiment id based on selected parameters
+    if selected_initial_cost == 0 and selected_current_cost == 50 and selected_buyer == "friend" and selected_model == "gpt-3.5-turbo":
+        experiment_id = "TU3_1_2_1_1_1"
+    elif selected_initial_cost == 0 and selected_current_cost == 50 and selected_buyer == "stranger" and selected_model == "gpt-3.5-turbo":
+        experiment_id = "TU3_1_2_1_1_2"
+    elif selected_initial_cost == 0 and selected_current_cost == 100 and selected_buyer == "friend" and selected_model == "gpt-3.5-turbo":
+        experiment_id = "TU3_1_2_1_2_1"
+    elif selected_initial_cost == 0 and selected_current_cost == 100 and selected_buyer == "stranger" and selected_model == "gpt-3.5-turbo":
+        experiment_id = "TU3_1_2_1_2_2"
+    elif selected_initial_cost == 50 and selected_current_cost == 50 and selected_buyer == "friend" and selected_model == "gpt-3.5-turbo":
+        experiment_id = "TU3_1_2_2_1_1"
+    elif selected_initial_cost == 50 and selected_current_cost == 50 and selected_buyer == "stranger" and selected_model == "gpt-3.5-turbo":
+        experiment_id = "TU3_1_2_2_1_2"
+    elif selected_initial_cost == 50 and selected_current_cost == 100 and selected_buyer == "friend" and selected_model == "gpt-3.5-turbo":
+        experiment_id = "TU3_1_2_2_2_1"
+    elif selected_initial_cost == 50 and selected_current_cost == 100 and selected_buyer == "stranger" and selected_model == "gpt-3.5-turbo":
+        experiment_id = "TU3_1_2_2_2_2"
+    elif selected_initial_cost == 100 and selected_current_cost == 50 and selected_buyer == "friend" and selected_model == "gpt-3.5-turbo":
+        experiment_id = "TU3_1_2_3_1_1"
+    elif selected_initial_cost == 100 and selected_current_cost == 50 and selected_buyer == "stranger" and selected_model == "gpt-3.5-turbo":
+        experiment_id = "TU3_1_2_3_1_2"
+    elif selected_initial_cost == 100 and selected_current_cost == 100 and selected_buyer == "friend" and selected_model == "gpt-3.5-turbo":
+        experiment_id = "TU3_1_2_3_2_1"
+    elif selected_initial_cost == 100 and selected_current_cost == 100 and selected_buyer == "stranger" and selected_model == "gpt-3.5-turbo":
+        experiment_id = "TU3_1_2_3_2_2"
+    elif selected_initial_cost == 0 and selected_current_cost == 50 and selected_buyer == "friend" and selected_model == "gpt-4-1106-preview":
+        experiment_id = "TU3_2_2_1_1_1"
+    elif selected_initial_cost == 0 and selected_current_cost == 50 and selected_buyer == "stranger" and selected_model == "gpt-4-1106-preview":
+        experiment_id = "TU3_2_2_1_1_2"
+    elif selected_initial_cost == 0 and selected_current_cost == 100 and selected_buyer == "friend" and selected_model == "gpt-4-1106-preview":
+        experiment_id = "TU3_2_2_1_2_1"
+    elif selected_initial_cost == 0 and selected_current_cost == 100 and selected_buyer == "stranger" and selected_model == "gpt-4-1106-preview":
+        experiment_id = "TU3_2_2_1_2_2"
+    elif selected_initial_cost == 50 and selected_current_cost == 50 and selected_buyer == "friend" and selected_model == "gpt-4-1106-preview":
+        experiment_id = "TU3_2_2_2_1_1"
+    elif selected_initial_cost == 50 and selected_current_cost == 50 and selected_buyer == "stranger" and selected_model == "gpt-4-1106-preview":
+        experiment_id = "TU3_2_2_2_1_2"
+    elif selected_initial_cost == 50 and selected_current_cost == 100 and selected_buyer == "friend" and selected_model == "gpt-4-1106-preview":
+        experiment_id = "TU3_2_2_2_2_1"
+    elif selected_initial_cost == 50 and selected_current_cost == 100 and selected_buyer == "stranger" and selected_model == "gpt-4-1106-preview":
+        experiment_id = "TU3_2_2_2_2_2"
+    elif selected_initial_cost == 100 and selected_current_cost == 50 and selected_buyer == "friend" and selected_model == "gpt-4-1106-preview":
+        experiment_id = "TU3_2_2_3_1_1"
+    elif selected_initial_cost == 100 and selected_current_cost == 50 and selected_buyer == "stranger" and selected_model == "gpt-4-1106-preview":
+        experiment_id = "TU3_2_2_3_1_2"
+    elif selected_initial_cost == 100 and selected_current_cost == 100 and selected_buyer == "friend" and selected_model == "gpt-4-1106-preview":
+        experiment_id = "TU3_2_2_3_2_1"
+    elif selected_initial_cost == 100 and selected_current_cost == 100 and selected_buyer == "stranger" and selected_model == "gpt-4-1106-preview":
+        experiment_id = "TU3_2_2_3_2_2"
+    elif selected_initial_cost == 0 and selected_current_cost == 50 and selected_buyer == "friend" and selected_model == "llama-2-70b":
+        experiment_id = "TU3_3_2_1_1_1"
+    elif selected_initial_cost == 0 and selected_current_cost == 50 and selected_buyer == "stranger" and selected_model == "llama-2-70b":
+        experiment_id = "TU3_3_2_1_1_2"
+    elif selected_initial_cost == 0 and selected_current_cost == 100 and selected_buyer == "friend" and selected_model == "llama-2-70b":
+        experiment_id = "TU3_3_2_1_2_1"
+    elif selected_initial_cost == 0 and selected_current_cost == 100 and selected_buyer == "stranger" and selected_model == "llama-2-70b":
+        experiment_id = "TU3_3_2_1_2_2"
+    elif selected_initial_cost == 50 and selected_current_cost == 50 and selected_buyer == "friend" and selected_model == "llama-2-70b":
+        experiment_id = "TU3_3_2_2_1_1"
+    elif selected_initial_cost == 50 and selected_current_cost == 50 and selected_buyer == "stranger" and selected_model == "llama-2-70b":
+        experiment_id = "TU3_3_2_2_1_2"
+    elif selected_initial_cost == 50 and selected_current_cost == 100 and selected_buyer == "friend" and selected_model == "llama-2-70b":
+        experiment_id = "TU3_3_2_2_2_1"
+    elif selected_initial_cost == 50 and selected_current_cost == 100 and selected_buyer == "stranger" and selected_model == "llama-2-70b":
+        experiment_id = "TU3_3_2_2_2_2"
+    elif selected_initial_cost == 100 and selected_current_cost == 50 and selected_buyer == "friend" and selected_model == "llama-2-70b":
+        experiment_id = "TU3_3_2_3_1_1"
+    elif selected_initial_cost == 100 and selected_current_cost == 50 and selected_buyer == "stranger" and selected_model == "llama-2-70b":
+        experiment_id = "TU3_3_2_3_1_2"
+    elif selected_initial_cost == 100 and selected_current_cost == 100 and selected_buyer == "friend" and selected_model == "llama-2-70b":
+        experiment_id = "TU3_3_2_3_2_1"
+    elif selected_initial_cost == 100 and selected_current_cost == 100 and selected_buyer == "stranger" and selected_model == "llama-2-70b":
+        experiment_id = "TU3_3_2_3_2_2"
+
+    text = TU3_experiment_prompts_dict[experiment_id]
+    costs = cost_estimate(text, selected_model, selected_iterations)
+    prompt = html.P([f"The prompt used in this experiment is: {TU3_experiment_prompts_dict[experiment_id]}",
+                    html.Br(),
+                    f"The total costs of running this experiment are estimated to be ${np.round(costs, 6)}."])
+    return prompt, experiment_id
+
+# Callback to run TU3 Scenario 2 experiment
 @dash.callback(
     [Output("tu3-graph-output2", "figure"),
-     Output('tu3-prompt-output2', 'children'),
      Output('tu3-data-store2', 'data')],
     [Input("tu3-update-button2", "n_clicks")],
-    [State("tu3-initial-cost-dropdown2", "value"),
-     State("tu3-current-cost-dropdown2", "value"),
-     State("tu3-buyer-dropdown2", "value"),
-     State("tu3-language-model-dropdown2", "value"),
+    [State("tu3-language-model-dropdown2", "value"),
      State("tu3-iteration-input2", "value"),
      State("tu3-temperature-slider2", "value"),
      State("openai-api-key", "value"),
-     State("replicate-api-token", "value")]
-     )
-def update_tu3_2_live(n_clicks, selected_initial_cost, selected_current_cost, selected_buyer, selected_model, selected_iterations, selected_temperature, openai_key, replicate_token):
-    # Check if button was clicked
-    if n_clicks is not None:
-        # Get experiment id based on selected parameters
-        if selected_initial_cost == 0 and selected_current_cost == 50 and selected_buyer == "friend" and selected_model == "gpt-3.5-turbo":
-            experiment_id = "TU3_1_2_1_1_1"
-        elif selected_initial_cost == 0 and selected_current_cost == 50 and selected_buyer == "stranger" and selected_model == "gpt-3.5-turbo":
-            experiment_id = "TU3_1_2_1_1_2"
-        elif selected_initial_cost == 0 and selected_current_cost == 100 and selected_buyer == "friend" and selected_model == "gpt-3.5-turbo":
-            experiment_id = "TU3_1_2_1_2_1"
-        elif selected_initial_cost == 0 and selected_current_cost == 100 and selected_buyer == "stranger" and selected_model == "gpt-3.5-turbo":
-            experiment_id = "TU3_1_2_1_2_2"
-        elif selected_initial_cost == 50 and selected_current_cost == 50 and selected_buyer == "friend" and selected_model == "gpt-3.5-turbo":
-            experiment_id = "TU3_1_2_2_1_1"
-        elif selected_initial_cost == 50 and selected_current_cost == 50 and selected_buyer == "stranger" and selected_model == "gpt-3.5-turbo":
-            experiment_id = "TU3_1_2_2_1_2"
-        elif selected_initial_cost == 50 and selected_current_cost == 100 and selected_buyer == "friend" and selected_model == "gpt-3.5-turbo":
-            experiment_id = "TU3_1_2_2_2_1"
-        elif selected_initial_cost == 50 and selected_current_cost == 100 and selected_buyer == "stranger" and selected_model == "gpt-3.5-turbo":
-            experiment_id = "TU3_1_2_2_2_2"
-        elif selected_initial_cost == 100 and selected_current_cost == 50 and selected_buyer == "friend" and selected_model == "gpt-3.5-turbo":
-            experiment_id = "TU3_1_2_3_1_1"
-        elif selected_initial_cost == 100 and selected_current_cost == 50 and selected_buyer == "stranger" and selected_model == "gpt-3.5-turbo":
-            experiment_id = "TU3_1_2_3_1_2"
-        elif selected_initial_cost == 100 and selected_current_cost == 100 and selected_buyer == "friend" and selected_model == "gpt-3.5-turbo":
-            experiment_id = "TU3_1_2_3_2_1"
-        elif selected_initial_cost == 100 and selected_current_cost == 100 and selected_buyer == "stranger" and selected_model == "gpt-3.5-turbo":
-            experiment_id = "TU3_1_2_3_2_2"
-        elif selected_initial_cost == 0 and selected_current_cost == 50 and selected_buyer == "friend" and selected_model == "gpt-4-1106-preview":
-            experiment_id = "TU3_2_2_1_1_1"
-        elif selected_initial_cost == 0 and selected_current_cost == 50 and selected_buyer == "stranger" and selected_model == "gpt-4-1106-preview":
-            experiment_id = "TU3_2_2_1_1_2"
-        elif selected_initial_cost == 0 and selected_current_cost == 100 and selected_buyer == "friend" and selected_model == "gpt-4-1106-preview":
-            experiment_id = "TU3_2_2_1_2_1"
-        elif selected_initial_cost == 0 and selected_current_cost == 100 and selected_buyer == "stranger" and selected_model == "gpt-4-1106-preview":
-            experiment_id = "TU3_2_2_1_2_2"
-        elif selected_initial_cost == 50 and selected_current_cost == 50 and selected_buyer == "friend" and selected_model == "gpt-4-1106-preview":
-            experiment_id = "TU3_2_2_2_1_1"
-        elif selected_initial_cost == 50 and selected_current_cost == 50 and selected_buyer == "stranger" and selected_model == "gpt-4-1106-preview":
-            experiment_id = "TU3_2_2_2_1_2"
-        elif selected_initial_cost == 50 and selected_current_cost == 100 and selected_buyer == "friend" and selected_model == "gpt-4-1106-preview":
-            experiment_id = "TU3_2_2_2_2_1"
-        elif selected_initial_cost == 50 and selected_current_cost == 100 and selected_buyer == "stranger" and selected_model == "gpt-4-1106-preview":
-            experiment_id = "TU3_2_2_2_2_2"
-        elif selected_initial_cost == 100 and selected_current_cost == 50 and selected_buyer == "friend" and selected_model == "gpt-4-1106-preview":
-            experiment_id = "TU3_2_2_3_1_1"
-        elif selected_initial_cost == 100 and selected_current_cost == 50 and selected_buyer == "stranger" and selected_model == "gpt-4-1106-preview":
-            experiment_id = "TU3_2_2_3_1_2"
-        elif selected_initial_cost == 100 and selected_current_cost == 100 and selected_buyer == "friend" and selected_model == "gpt-4-1106-preview":
-            experiment_id = "TU3_2_2_3_2_1"
-        elif selected_initial_cost == 100 and selected_current_cost == 100 and selected_buyer == "stranger" and selected_model == "gpt-4-1106-preview":
-            experiment_id = "TU3_2_2_3_2_2"
-        elif selected_initial_cost == 0 and selected_current_cost == 50 and selected_buyer == "friend" and selected_model == "llama-2-70b":
-            experiment_id = "TU3_3_2_1_1_1"
-        elif selected_initial_cost == 0 and selected_current_cost == 50 and selected_buyer == "stranger" and selected_model == "llama-2-70b":
-            experiment_id = "TU3_3_2_1_1_2"
-        elif selected_initial_cost == 0 and selected_current_cost == 100 and selected_buyer == "friend" and selected_model == "llama-2-70b":
-            experiment_id = "TU3_3_2_1_2_1"
-        elif selected_initial_cost == 0 and selected_current_cost == 100 and selected_buyer == "stranger" and selected_model == "llama-2-70b":
-            experiment_id = "TU3_3_2_1_2_2"
-        elif selected_initial_cost == 50 and selected_current_cost == 50 and selected_buyer == "friend" and selected_model == "llama-2-70b":
-            experiment_id = "TU3_3_2_2_1_1"
-        elif selected_initial_cost == 50 and selected_current_cost == 50 and selected_buyer == "stranger" and selected_model == "llama-2-70b":
-            experiment_id = "TU3_3_2_2_1_2"
-        elif selected_initial_cost == 50 and selected_current_cost == 100 and selected_buyer == "friend" and selected_model == "llama-2-70b":
-            experiment_id = "TU3_3_2_2_2_1"
-        elif selected_initial_cost == 50 and selected_current_cost == 100 and selected_buyer == "stranger" and selected_model == "llama-2-70b":
-            experiment_id = "TU3_3_2_2_2_2"
-        elif selected_initial_cost == 100 and selected_current_cost == 50 and selected_buyer == "friend" and selected_model == "llama-2-70b":
-            experiment_id = "TU3_3_2_3_1_1"
-        elif selected_initial_cost == 100 and selected_current_cost == 50 and selected_buyer == "stranger" and selected_model == "llama-2-70b":
-            experiment_id = "TU3_3_2_3_1_2"
-        elif selected_initial_cost == 100 and selected_current_cost == 100 and selected_buyer == "friend" and selected_model == "llama-2-70b":
-            experiment_id = "TU3_3_2_3_2_1"
-        elif selected_initial_cost == 100 and selected_current_cost == 100 and selected_buyer == "stranger" and selected_model == "llama-2-70b":
-            experiment_id = "TU3_3_2_3_2_2"
+     State("replicate-api-token", "value"),
+     State("tu3-id-store2", "data")]
+        )
 
+def tu3_run_experiment2(n_clicks, selected_model, selected_iterations, selected_temperature, openai_key, replicate_token, experiment_id):
+    if n_clicks is not None:        
         # Run Experiment for selected parameters
         if selected_model == "llama-2-70b":
             results = TU3_run_experiment_llama_dashboard(experiment_id, selected_iterations, selected_temperature, replicate_token)
         else:
-            results= TU3_run_experiment_dashboard(experiment_id, selected_iterations, selected_temperature, openai_key)
+            results = TU3_run_experiment_dashboard(experiment_id, selected_iterations, selected_temperature, openai_key)
         n_clicks = None
-        text = TU3_experiment_prompts_dict[experiment_id]
-        costs = cost_estimate(text, selected_model, selected_iterations)
-        prompt = html.P([f"The prompt used in this experiment is: {TU3_experiment_prompts_dict[experiment_id]}",
-                         html.Br(),
-                        f"The total costs of running this experiment are estimated to be ${np.round(costs, 6)}."])
-        return TU3_plot_results(results), prompt, results.to_json(orient='split')
+        return TU3_plot_results(results), results.to_json(orient='split')
+    
     
 # Callback for TU3 Scenario 2 download
 @dash.callback(
@@ -1556,83 +1642,95 @@ def download_csv(n_clicks, stored_data):
         return dash.no_update
     
 
-# Callback for Transaction Utility 2
+##### Callback for Transaction Utility 2 prompt and costs #####
+@dash.callback(
+    [Output('tu2-prompt-output', 'children'),
+     Output('tu2-id-store', 'data')],
+    [Input("tu2-place-dropdown", "value"),
+     Input("tu2-income-dropdown", "value"),
+     Input("tu2-language-model-dropdown", "value"),
+     Input("tu2-iteration-input", "value")]
+)
+def update_tu2_prompt(selected_place, selected_income, selected_model, selected_iterations):
+    if selected_model == "gpt-3.5-turbo" and selected_place == "hotel" and selected_income == "0":
+        experiment_id = "TU2_1_1_1"
+    elif selected_model == "gpt-3.5-turbo" and selected_place == "hotel" and selected_income == "$50k":
+        experiment_id = "TU2_1_1_2"
+    elif selected_model == "gpt-3.5-turbo" and selected_place == "hotel" and selected_income == "$70k":
+        experiment_id = "TU2_1_1_3"
+    elif selected_model == "gpt-3.5-turbo" and selected_place == "hotel" and selected_income == "$120k":
+        experiment_id = "TU2_1_1_4"
+    elif selected_model == "gpt-3.5-turbo" and selected_place == "grocery" and selected_income == "0":
+        experiment_id = "TU2_1_2_1"
+    elif selected_model == "gpt-3.5-turbo" and selected_place == "grocery" and selected_income == "$50k":
+        experiment_id = "TU2_1_2_2"
+    elif selected_model == "gpt-3.5-turbo" and selected_place == "grocery" and selected_income == "$70k":
+        experiment_id = "TU2_1_2_3"
+    elif selected_model == "gpt-3.5-turbo" and selected_place == "grocery" and selected_income == "$120k":
+        experiment_id = "TU2_1_2_4"
+    elif selected_model == "gpt-4-1106-preview" and selected_place == "hotel" and selected_income == "0":
+        experiment_id = "TU2_2_1_1"
+    elif selected_model == "gpt-4-1106-preview" and selected_place == "hotel" and selected_income == "$50k":
+        experiment_id = "TU2_2_1_2"
+    elif selected_model == "gpt-4-1106-preview" and selected_place == "hotel" and selected_income == "$70k":
+        experiment_id = "TU2_2_1_3"
+    elif selected_model == "gpt-4-1106-preview" and selected_place == "hotel" and selected_income == "$120k":
+        experiment_id = "TU2_2_1_4"
+    elif selected_model == "gpt-4-1106-preview" and selected_place == "grocery" and selected_income == "0":
+        experiment_id = "TU2_2_2_1"
+    elif selected_model == "gpt-4-1106-preview" and selected_place == "grocery" and selected_income == "$50k":
+        experiment_id = "TU2_2_2_2"
+    elif selected_model == "gpt-4-1106-preview" and selected_place == "grocery" and selected_income == "$70k":
+        experiment_id = "TU2_2_2_3"
+    elif selected_model == "gpt-4-1106-preview" and selected_place == "grocery" and selected_income == "$120k":
+        experiment_id = "TU2_2_2_4"
+    elif selected_model == "llama-2-70b" and selected_place == "hotel" and selected_income == "0":
+        experiment_id = "TU2_3_1_1"
+    elif selected_model == "llama-2-70b" and selected_place == "hotel" and selected_income == "$50k":
+        experiment_id = "TU2_3_1_2"
+    elif selected_model == "llama-2-70b" and selected_place == "hotel" and selected_income == "$70k":
+        experiment_id = "TU2_3_1_3"
+    elif selected_model == "llama-2-70b" and selected_place == "hotel" and selected_income == "$120k":
+        experiment_id = "TU2_3_1_4"
+    elif selected_model == "llama-2-70b" and selected_place == "grocery" and selected_income == "0":
+        experiment_id = "TU2_3_2_1"
+    elif selected_model == "llama-2-70b" and selected_place == "grocery" and selected_income == "$50k":
+        experiment_id = "TU2_3_2_2"
+    elif selected_model == "llama-2-70b" and selected_place == "grocery" and selected_income == "$70k":
+        experiment_id = "TU2_3_2_3"
+    elif selected_model == "llama-2-70b" and selected_place == "grocery" and selected_income == "$120k":
+        experiment_id = "TU2_3_2_4"
+
+
+    text = TU2_experiment_prompts_dict[experiment_id]
+    costs = cost_estimate(text, selected_model, selected_iterations)
+    prompt = html.P([f"The prompt used in this experiment is: {TU2_experiment_prompts_dict[experiment_id]}",
+                    html.Br(),
+                    f"The total costs of running this experiment are estimated to be ${np.round(costs, 6)}."])
+    return prompt, experiment_id
+    
+# Callback to run TU2 experiment
 @dash.callback(
     [Output("tu2-graph-output", "figure"),
-     Output('tu2-prompt-output', 'children'),
      Output('tu2-data-store', 'data')],
     [Input("tu2-update-button", "n_clicks")],
-    [State("tu2-place-dropdown", "value"),
-     State("tu2-income-dropdown", "value"),
-     State("tu2-language-model-dropdown", "value"),
+    [State("tu2-language-model-dropdown", "value"),
      State("tu2-iteration-input", "value"),
      State("tu2-temperature-slider", "value"),
      State("openai-api-key", "value"),
-     State("replicate-api-token", "value")]
-     )
-def update_tu2_live(n_clicks, selected_place, selected_income, selected_model, selected_iterations, selected_temperature, openai_key, replicate_token):
-    if n_clicks is not None: 
-        if selected_model == "gpt-3.5-turbo" and selected_place == "hotel" and selected_income == "0":
-            experiment_id = "TU2_1_1_1"
-        elif selected_model == "gpt-3.5-turbo" and selected_place == "hotel" and selected_income == "$50k":
-            experiment_id = "TU2_1_1_2"
-        elif selected_model == "gpt-3.5-turbo" and selected_place == "hotel" and selected_income == "$70k":
-            experiment_id = "TU2_1_1_3"
-        elif selected_model == "gpt-3.5-turbo" and selected_place == "hotel" and selected_income == "$120k":
-            experiment_id = "TU2_1_1_4"
-        elif selected_model == "gpt-3.5-turbo" and selected_place == "grocery" and selected_income == "0":
-            experiment_id = "TU2_1_2_1"
-        elif selected_model == "gpt-3.5-turbo" and selected_place == "grocery" and selected_income == "$50k":
-            experiment_id = "TU2_1_2_2"
-        elif selected_model == "gpt-3.5-turbo" and selected_place == "grocery" and selected_income == "$70k":
-            experiment_id = "TU2_1_2_3"
-        elif selected_model == "gpt-3.5-turbo" and selected_place == "grocery" and selected_income == "$120k":
-            experiment_id = "TU2_1_2_4"
-        elif selected_model == "gpt-4-1106-preview" and selected_place == "hotel" and selected_income == "0":
-            experiment_id = "TU2_2_1_1"
-        elif selected_model == "gpt-4-1106-preview" and selected_place == "hotel" and selected_income == "$50k":
-            experiment_id = "TU2_2_1_2"
-        elif selected_model == "gpt-4-1106-preview" and selected_place == "hotel" and selected_income == "$70k":
-            experiment_id = "TU2_2_1_3"
-        elif selected_model == "gpt-4-1106-preview" and selected_place == "hotel" and selected_income == "$120k":
-            experiment_id = "TU2_2_1_4"
-        elif selected_model == "gpt-4-1106-preview" and selected_place == "grocery" and selected_income == "0":
-            experiment_id = "TU2_2_2_1"
-        elif selected_model == "gpt-4-1106-preview" and selected_place == "grocery" and selected_income == "$50k":
-            experiment_id = "TU2_2_2_2"
-        elif selected_model == "gpt-4-1106-preview" and selected_place == "grocery" and selected_income == "$70k":
-            experiment_id = "TU2_2_2_3"
-        elif selected_model == "gpt-4-1106-preview" and selected_place == "grocery" and selected_income == "$120k":
-            experiment_id = "TU2_2_2_4"
-        elif selected_model == "llama-2-70b" and selected_place == "hotel" and selected_income == "0":
-            experiment_id = "TU2_3_1_1"
-        elif selected_model == "llama-2-70b" and selected_place == "hotel" and selected_income == "$50k":
-            experiment_id = "TU2_3_1_2"
-        elif selected_model == "llama-2-70b" and selected_place == "hotel" and selected_income == "$70k":
-            experiment_id = "TU2_3_1_3"
-        elif selected_model == "llama-2-70b" and selected_place == "hotel" and selected_income == "$120k":
-            experiment_id = "TU2_3_1_4"
-        elif selected_model == "llama-2-70b" and selected_place == "grocery" and selected_income == "0":
-            experiment_id = "TU2_3_2_1"
-        elif selected_model == "llama-2-70b" and selected_place == "grocery" and selected_income == "$50k":
-            experiment_id = "TU2_3_2_2"
-        elif selected_model == "llama-2-70b" and selected_place == "grocery" and selected_income == "$70k":
-            experiment_id = "TU2_3_2_3"
-        elif selected_model == "llama-2-70b" and selected_place == "grocery" and selected_income == "$120k":
-            experiment_id = "TU2_3_2_4"
-
+     State("replicate-api-token", "value"),
+     State("tu2-id-store", "data")]
+        )
+def tu2_run_experiment(n_clicks, selected_model, selected_iterations, selected_temperature, openai_key, replicate_token, experiment_id):
+    if n_clicks is not None:
         # Run Experiment for selected parameters
         if selected_model == "llama-2-70b":
             results = TU2_run_experiment_llama_dashboard(experiment_id, selected_iterations, selected_temperature, replicate_token)
         else:
             results= TU2_run_experiment_dashboard(experiment_id, selected_iterations, selected_temperature, openai_key)
         n_clicks = None
-        text = TU2_experiment_prompts_dict[experiment_id]
-        costs = cost_estimate(text, selected_model, selected_iterations)
-        prompt = html.P([f"The prompt used in this experiment is: {TU2_experiment_prompts_dict[experiment_id]}",
-                         html.Br(),
-                        f"The total costs of running this experiment are estimated to be ${np.round(costs, 6)}."])
-        return TU2_plot_results(results), prompt, results.to_json(orient='split')
+        return TU2_plot_results(results), results.to_json(orient='split')
+
     
 # Callback for TU2 download
 @dash.callback(

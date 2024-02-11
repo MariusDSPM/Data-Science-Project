@@ -63,10 +63,10 @@ def PT_plot_results(df):
         title_font=dict(size=18), 
     ),
     title = dict(
-        text=f"Distribution of answers for temperature {temperature}, using model {model}",
+        text=f"Distribution of {model}'s answers for temperature {temperature}",
         x = 0.5, # Center alignment horizontally
         y = 0.87,  # Vertical alignment
-        font=dict(size=22),  
+        font=dict(size=18),  
     ),
     legend=dict(
         x=1.01,  
@@ -116,10 +116,10 @@ def PT2_plot_results(df):
         title_font=dict(size=18), 
     ),
     title = dict(
-        text=f"Distribution of answers for temperature {temperature}, using model {model}",
+        text=f"Distribution of {model}'s answers for temperature {temperature}",
         x = 0.5, # Center alignment horizontally
         y = 0.87,  # Vertical alignment
-        font=dict(size=22),  
+        font=dict(size=18),  
     ),
     legend=dict(
         x=1.01,  
@@ -177,7 +177,7 @@ def PT_plot_og_results(df):
         text=f"Distribution of original answers per scenario",
         x = 0.5, 
         y = 0.87,  
-        font=dict(size=22),  
+        font=dict(size=18),  
     ),
     width = 1000,
     margin=dict(t=100),
@@ -246,10 +246,10 @@ def DE_plot_results(df):
         title_font=dict(size=18), 
     ),
     title = dict(
-        text=f"Distribution of answers for temperature {temperature}, using model {model}",
+        text=f"Distribution of {model}'s answers for temperature {temperature}",
         x = 0.5, # Center alignment horizontally
         y = 0.87,  # Vertical alignment
-        font=dict(size=22),  
+        font=dict(size=18),  
     ),
     legend=dict(
         x=1.01,  
@@ -334,12 +334,12 @@ def TU_plot_results(df):
             tickfont_size = 16,
      ),
     yaxis = dict(
-        title = "Percentage",
+        title = "Share (%)",
         titlefont_size = 18,
         tickfont_size = 16,
     ),
     title = dict(
-    text =  f"Distribution of answers for temperature {temperature} using model {model}",
+    text=f"Distribution of {model}'s answers for temperature {temperature}",
     x = 0.5, 
     y = 0.95,
     font_size = 18,
