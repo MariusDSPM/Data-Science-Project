@@ -51,20 +51,4 @@ layout = [html.H1("Do Large Language Models behave like a Human?", className="pa
                        as well as some information about the implementation. Each experiments' results are also visualized on the respective page. 
                        """               
             ),
-          dcc.Markdown("""
-                      **Stuff worth mentioning in Experiment overview (to be deleted)**
-                      * What are LLMs? Which ones did we use?
-                      * What is replicate? Why did we use it? Possibility to run llama remotely  
-                      * previous literature findings?
-                      * Instruction role: Sometimes instructions + prompt + instructions (at least in TU)
-                      * Prompt engineering
-                      * What is a token? Token ~ word count?
-                      * What parameters did we (not) use? e.g. top_p
-                      * Temperature range 0-5 in llama vs 0-2 in openai
-                      * max_tokens as hard cut-off limit (already mentioned as hoverinfo in chatbot)
-                      * Maybe table of prices?                         
-                      * Further reading  
-                      * Individual experience during the project?         
-                      * workflow: how detailed? 
-                       """)
           ]
