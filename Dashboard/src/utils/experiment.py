@@ -212,7 +212,7 @@ class Experiment:
             self.low_answers_share_warning = True
         
         # Remove commas and dollar signs, convert to float
-        prices = [item.replace(',', '') for item in valid_prices]
+        prices = [item.replace(',', '').rstrip('.') for item in valid_prices]
         prices = [float(item.replace('$', '')) for item in prices if item != '$']
         
         # Store answers of corresponding model and scenario in a dictionary

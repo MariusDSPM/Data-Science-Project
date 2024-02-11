@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import dash
 from dash import Input, Output, dcc, html
+import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 
 
@@ -153,12 +154,47 @@ def plot_sunk_cost_2(selected_temperature, selected_model):
 # Sunk Cost Fallacy Page
 layout = [
     html.H1("Sunk Cost Fallacy", className="page-heading"),
-    html.P('Description of how the experiments were conducted: ...'),
+    html.Hr(),
     
     # Experiment 1
     html.H3("Experiment 1"),
+    html.Br(),
+    html.Div(
+        dbc.Accordion(
+            [
+                dbc.AccordionItem(
+                    [
+                        html.P("Participants are presented with a hypothetical scenario where they have purchased tickets to two different events: a theater performance and a rock concert. The theater ticket costs $90, while the rock concert ticket costs $30. Weeks later, as they are about to attend the rock concert, they realize that both events are scheduled for the same evening. The tickets are non-transferable and cannot be exchanged. Participants must choose which event to attend, knowing they will miss out on the other."),
+                    ],
+                    title="Description of Experiment",
+                ),
+                dbc.AccordionItem(
+                    [
+                        html.P("By analyzing LLMs' choices, researchers gain insights into how LLMs prioritize experiences, weigh opportunity costs, and allocate resources, shedding light on the complexities of LLM decision-making under constraints."),
+                        html.P("Furthermore, the cost of the theater performance is varied to examine how LLMs respond to different sunk costs. Raising the cost of the theater performance ticket to $250 or $10,000 provides an intriguing variable to observe whether LLMs' decision-making changes significantly in the face of a higher initial investment, potentially highlighting the influence of sunk costs on choices."), 
+                        html.P("To mitigate the problem that the experimental text from the literature was part of the training data of the LLMs, the experimental text was changed. Soman (2001) conducted the experiment with time investments. Arkes and Blumer (1985) dealt with cost for a ski trip.")
+                    ],
+                    title="Motivation for Experiment",
+                ),
+                dbc.AccordionItem(
+                    [
+                        'Soman, D. 2001. The mental accounting of sunk time costs: why time is not like money. Journal of Behavioral Decision Making 14(3): 169–185.',
+                        html.Br(),  
+                        html.Br(),
+                        'Arkes, H.R., and C. Blumer. 1985. The psychology of sunk cost. Organizational Behavior and Human Decision Processes 35(1): 124–140.'
+                    ],
+                    title="References",
+                ),
+            ],
+            always_open=True
+        ),
+        style={'margin-bottom': '50px'}
+    ),  # End of Accordion
+    
+    html.H5('Prompt used in the experiment:'),
+    html.Br(),
     html.P(id='experiment-1-prompt'),
-
+    
     html.Div(
         style={'display': 'flex', 'justify-content': 'space-between', 'align-items': 'center'},
         children=[
@@ -192,9 +228,42 @@ layout = [
             dcc.Graph(id="sunk-cost-plot-1-output", style={'width': '65%', 'height': '70vh'}),
         ]
     ),
-    
+    html.Hr(),
+    html.Br(),
     # Experiment 2
     html.H3("Experiment 2"),
+    html.Br(),
+    html.Div(
+        dbc.Accordion(
+            [
+                dbc.AccordionItem(
+                    [
+                        html.P("Participants are presented with a scenario involving a case of Bordeaux wine purchased in the futures market for $20 a bottle, which now sells at auction for $75. They are asked to choose the option that best reflects their perception of the cost of drinking one bottle from the case."),
+                    ],
+                    title="Description of Experiment",
+                ),
+                dbc.AccordionItem(
+                    [
+                        html.P("This experiment explores LLMs' understanding of sunk costs, opportunity costs, and perceived value in consumption decisions. By analyzing LLMs' responses, researchers can gain insights into how LLMs conceptualize the costs associated with consuming goods they have already invested in, shedding light on decision-making biases and rationality in economic behavior."),
+                        html.P("Furthermore, the order of the answer options has been shuffled two times, offering researchers insights into the impact of response order on LLMs' decision-making tendencies, thereby uncovering potential biases in LLMs' responses."), 
+                    ],
+                    title="Motivation for Experiment",
+                ),
+                dbc.AccordionItem(
+                    [
+                        'Thaler, R.H., 2015. Misbehaving: The making of behavioral economics. WW Norton & Company.',
+                    ],
+                    title="References",
+                ),
+            ],
+            always_open=True
+        ),
+        style={'margin-bottom': '50px'}
+    ),  # End of Accordion
+    
+    html.H5('Prompts used in the experiment:'),
+    html.Br(),
+    
     html.P(["""Suppose you bought a case of good Bordeaux in the futures \
             market for $20 a bottle. The wine now sells at auction for about $75. \
                 You have decided to drink a bottle. Which of the following best captures \
@@ -218,28 +287,28 @@ layout = [
 
         html.Div([
             html.H6('Answer Option Order 2', style={'margin-top': '15px'}),
-            html.P(["A: $75",
+            html.P(["A: $75 [...]",
                     html.Br(),  # Line break
-                    "B: -$55",
+                    "B: -$55 [...]",
                     html.Br(),  # Line break
-                    "C: $0",
+                    "C: $0 [...]",
                     html.Br(),  # Line break
-                    "D: $20",
+                    "D: $20 [...]",
                     html.Br(),  # Line break
-                    "E: $20, plus interest"]),
+                    "E: $20, plus interest."]),
         ], style={'width': '20%', 'display': 'inline-block', 'margin-bottom': '60px', 'vertical-align': 'top'}),
 
         html.Div([
             html.H6('Answer Option Order 3', style={'margin-top': '15px'}),
-            html.P(["A: -$55",
+            html.P(["A: -$55 [...]",
                     html.Br(),  # Line break
-                    "B: $75",
+                    "B: $75 [...]",
                     html.Br(),  # Line break
-                    "C: $20 plus interest",
+                    "C: $20 plus interest.",
                     html.Br(),  # Line break
-                    "D: $0",
+                    "D: $0 [...]",
                     html.Br(),  # Line break
-                    "E: $20"]),
+                    "E: $20 [...]"]),
         ], style={'width': '20%', 'display': 'inline-block', 'margin-bottom': '60px', 'vertical-align': 'top'}),
     ]),
         
