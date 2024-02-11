@@ -7,7 +7,7 @@ from replicate.client import Client
 
 
 
-dash.register_page(__name__, path='/chat-bot', name='Chat Bot', location='below-experiments')
+dash.register_page(__name__, path='/chat-bot', name='Chatbot', location='below-experiments')
 
 
 layout = dbc.Container(
