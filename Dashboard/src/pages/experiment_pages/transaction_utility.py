@@ -10,6 +10,7 @@ import pandas as pd
 import numpy as np
 from collections import Counter
 from utils.plotting_functions import TU_plot_results, TU2_plot_results, TU3_plot_results, extract_dollar_amounts
+import dash_bootstrap_components as dbc
 
 # TU3 will actually be second, since it is a continuation of TU1
 
@@ -66,15 +67,93 @@ with open("data/Input/TU3_dictionaries.pkl", "rb") as file:
     TU3_dictionaries = pickle.load(file)
 TU3_experiment_prompts_dict = TU3_dictionaries[0]
 
+configurations1 = pd.DataFrame(
+    {
+        "Initial_cost": [0, 0, 0, 0, 5, 5, 5, 5, 10, 10, 10, 10],
+        "Orientation_price": [5, 5, 10, 10, 5, 5, 10, 10, 5, 5, 10, 10],
+        "Buyer": ["Friend", "Stranger", "Friend", "Stranger", "Friend", "Stranger", "Friend", "Stranger", "Friend", "Stranger", "Friend", "Stranger"],
+        "Configuration": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],  
 
-
+    }
+)
+table = dbc.Table.from_dataframe(configurations1, striped=True, bordered=True, hover=True)
 
 ### Layout ###
 layout = [
-    html.H1("Transaction Utility Experiment", className="page-heading"),
-    html.Hr(),
-    
-    html.H2("Experiment 1: Hockey game tickets"),
+    html.H1("Transaction Utility experiments", className="page-heading"),
+     html.Hr(),
+     dbc.Accordion(
+         [
+        dbc.AccordionItem(
+            dcc.Markdown(["""
+                          Richard Thaler differentiates between two forms of utility: *Acquisition utility* and *Transaction utility*. The first aspect depends on the value
+                          of the product received relative to the money spent, while the second aspect relies solely on the perceived advantages of the transaction itself.
+                          The assessment of transaction utility depends on the price an individual pays relative to some reference price. The total utility of a transaction,
+                          although a rather abstract concept, then results as the sum of acquisition and transaction utility.    
+                          Therefore, the reference price is crucial for assessing the perceived overall utility of a purchase. Thaler describes, that one important
+                          determinant that drives the reference price is fairness, which in turn depends on the costs of the seller. Extentious overpricing would hence
+                          be perceived as unfair and decrease transaction utility, even if acquisition utility is high.    
+                          One prominent example that illustrates this phenomenon is water at the Airport. While the acquisition utility may be high, because individuals are 
+                          thirsty and satisfying this need is crucial and definitely worth paying $6 for, people will still feel ripped off, because water is usually not
+                          that expensive. Therefore the transaction utility of this deal would be rather low.    
+                          As mentioned before, individuals' expectations about the seller's costs are a key determinant that drives the expectation of a fair reference price.
+                          
+                          In order to research to what extent buyers' expectation about the seller's costs influence individuals perception of a fair price, Thaler presented 
+                          first-year MBA students with the following scenario: 
+
+                          *"Imagine that you are going to a sold-out Cornell hockey playoff game, and you have an extra ticket to sell or give away.
+                          The price marked on the ticket is $5 but you were given your tickets for free by a friend/which is what you paid for each ticket/
+                          but you paid $10 each for your tickets when you bought them from another student. You get to the game early to make sure you get rid of the ticket.
+                          An informal survey of people selling tickets indicates that the going price is $5. You find someone who wants the ticket and takes out his wallet to pay you.
+                          He asks how much you want for the ticket. Assume that there is no law against charging a price higher than that marked on the ticket.
+                          What price do you ask for if he is a friend?/he is a stranger?. What would you have said if instead you found the going market price was $10?"*
+
+                          The slashes indicate variations of the question. The basic idea was, that the price people would charge a friend would be a good approximation for the
+                          perceived fair price. Thaler found, that the modal answers in the friend condition were mostly equal to the initial costs (seller's costs), thus indicating
+                          that seller's costs will significantly shape individuals' perception of a fair price.
+
+                          This experiment was chosen as the first *open answer style* experiment, because answers can be expected to be strongly influenced by the anchors,
+                          in form of reference prices, as given in the prompts. This is also reflected in the original results. Therefore, prior to the experiment, a clear
+                          expectation of what the answers will look like was given, which makes post-processing the results more efficient.     
+                          Furthermore, although consumers will most likely not be aware of the concept itself, online product reviews, on which the LLMs might have been trained
+                          can be expected to be influenced by this phenomenon (e.g. through overpricing). Therefore, we can expect the model answers to also reflect this trait.
+                          """]),
+                    title = "Experiment Description"),
+        dbc.AccordionItem(
+                    dcc.Markdown(["""
+                                  In the experiment below, we try to recreate the original study by Thaler published in 1985 with Large Language Models as respondents.
+                                  In order to do so, we created 12 different prompts, and presented each prompt 100 times for GPT-3.5-Turbo and, for cost reasons,
+                                  50 times for GPT-4-1106-Preview and LLama-2-70b.   
+                                  When creating the prompts we tried to keep the phrasing as close to the original design as possible,
+                                  while still being instructive enough to get answers that actually respond to our question and can be used for further analysis.    
+                                  The number of maximum tokens was set to 2 for the openAI models and 10 for the LLama model, since the latter tended to start answers with blank spaces
+                                  but still answer the question afterwards. On top of that, we saw that almost all answers that actually respond to the question at hand start with a 
+                                  dollar sign. Other answers were often explanations of why a certain price was asked, or explanations as to why the question can not be answered
+                                  with the given information. Therefore, we only regarded answers starting with a dollar sign as valid answers to analyze the distribution of.
+                                  
+                                  The aforementioned 12 different prompts resulted from the following input combinations:
+
+                                  * Initial ticket price: Free, $5, $10 (3 options)
+                                  * Current market price: $5, $10 (2 options)
+                                  * Buyer type: Friend, Stranger (2 options)
+                                         
+                                  As in all experiments, the prompts were presented to each model over a range of different temperature values. 
+
+                            """]),
+                    title = "Implementation of the experiment"),
+        dbc.AccordionItem(
+            dcc.Markdown("""
+                Thaler, Richard. “Mental Accounting and Consumer Choice.” Marketing Science, vol. 4, no. 3, 1985, pp. 199–214. JSTOR, http://www.jstor.org/stable/183904. Accessed 12 Feb. 2024.
+                """),
+                          title = "References"), 
+                    
+         ],
+        start_collapsed=True,
+        ),
+html.Br(),
+html.Hr(),
+html.H2("Experiment 1: Recreation of hockey ticket study"),
+html.Hr(),
     html.Br(),
     html.Div(
         children=[
@@ -151,10 +230,10 @@ layout = [
     ),
 
     ########## Experiment 3
-
-    html.H1("Experiment 2: Hockey game tickets with alternative prices", className="page-heading"),
     html.Hr(),
-    html.H2("Scenario 1: Prices multiplied by Pi"),
+    html.H2("Experiment 2: Hockey game tickets with alternative prices", className="page-heading"),
+    html.Hr(),
+    html.H3("Scenario 1: Prices multiplied by Pi"),
     html.Br(),
     html.Div(
         children=[
@@ -309,7 +388,8 @@ layout = [
 
     ########## Experiment 2
     html.Hr(),
-    html.H2("Experiment 2: Beer at the grocery store"),
+    html.H2("Experiment 3: Beer at the grocery store"),
+    html.Hr(),
     html.Br(),
     html.Div(
         children=[
