@@ -104,7 +104,7 @@ layout = [
                           by Kahneman and Tversky, as well as the work by Richard Thaler are considered to be of enormous importance in the field of Behavioral Economics and
                           Consumer Psychology.    
                           Furthermore, the original study design can be adapted and reapplied on Large Language models, without having to change a lot of
-                          the original study design. This is especially important, to maximize the comparability of the original results and the ones obtained by this research.                       
+                          the original setup. This is especially important, to maximize the comparability of the original results and the ones obtained by this research.                       
                           """]),
                     title = "Experiment Description"),
         dbc.AccordionItem(

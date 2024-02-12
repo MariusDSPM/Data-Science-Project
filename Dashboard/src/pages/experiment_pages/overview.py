@@ -41,28 +41,20 @@ layout = [html.H1("Overview", className="page-heading"),
                  require more prompt engineering, as well as additional post-processing steps to gain meaningful insights.        
                  A more detailed description of the experiments as well as the motivation behind it can be found on the respective experiment page.
                  """),
+          html.Hr(),
           dcc.Markdown("""
-                      **The general workflow of the experiments is as follows:**
+                      **The general workflow for conducting an experiment is:**
                       
-                      1. The experiment scenario is copied from the literature, 
-                      while trying to keep the scenario text as close as possible to the original.
-                      2. The LLMs are instructed to answer the experiments only with the respective 
-                      letter of the answer option or to name a dollar amount, depending on the experiment. 
-                      Answers that are not in the correct format are discarded.
-                      3. Each model is asked to answer the experiment 50 times for each temperature value.
-                      4. The answers are then evaluated and compared to the human answers.
-                       """
-                
-            ),
-                      dcc.Markdown("""
-                      **Stuff worth mentioning in Experiment overview (to be deleted)** 
-                      * previous literature findings?
-                      * What is a token? Token ~ word count?
-                      * Maybe table of prices?                         
-                      * Further reading  
-                      * Individual experience during the project?         
-                      * workflow: maybe more detailed? 
+                      1. Search the literature for either a well-known, or well-implementable experiment in the field of behavioral economics.
+                      2. Adapt the experiment design, most importantly the phrasing, to suit the context of querying LLMs. In doing so, it is important to stick
+                         as close to the original design as possible to maximize the comparability of results. 
+                      3. Before going into repeated interations, experiment with the prompt itself and the instruction role to optimize the expected answers.
+                      4. Run the experiment on a larger scale, i.e. let each model answer the same prompt at least 50 times for a given temperature value.
+                      5. Collect and post-process the results, i.e. filter out answers that are not in the right format and further analyze the remaining ones. 
+                      6. Visualize the results and compare them to the original findings.   
+                      
                        """),
+       
           dbc.Accordion([
               dbc.AccordionItem(
                   dcc.Markdown("""
@@ -105,9 +97,20 @@ layout = [html.H1("Overview", className="page-heading"),
                                are $0.0005/1000 Input tokens and $0.0015/Output tokens. For GPT-4 these costs are $0.03/1000 Input tokens and $0.06 for 1000 Output tokens.
                                While still being relatively cheap to use, the relative difference in costs is substantial.   
                                Since we used the Llama model through replicate, this also generated costs. Unfortunately, the usage is priced depending on the time the model
-                               takes to handle a given request, making cost estimates difficult. From our experience however, GPT-4 and Llama were roughly in the same price range.
+                               takes to handle a given request, making cost estimates difficult. From our experience however, GPT-4 and Llama were in the same price range.
                                For further information you can visit https://replicate.com/pricing and https://openai.com/pricing. 
-                               In applications were cost estimates are displayed in this application, they are generously rounded up to avoid any unexpected costs.
+                               In applications were cost estimates are displayed in this application, we used the simplification of equating word count to token count. 
+                               Throughout our work, cost estimates obtained by this approach were very close to the actual costs. On top of that, costs are generously rounded up, to
+                               prevent any unexpected surprises.
+
+                               **Post-processing**: The answers of Large Language Models are very rarely in a format that allows for direct comparison to previous empirical results.     
+                               Along with the aspect of *prompt engineering*, thorough post-processing is crucial for obtaining meaningful insights.    
+                               Therefore, at the beginning of each experiment, we visually inspected model answers for higher maximum token values to see what the models would *like* to answer.   
+                               This way, suitable post-processing functions can be implemented, once the expected format of the model answers is known.       
+                               For example in the context of the *Transaction Utility* experiments, we quickly saw that each answer containing valid information started with
+                               a dollar sign. Other answers often tended to be a rather creative explanation for the decision or an answer with no informative content at all.   
+                               Therefore, we disregarded all answers that did not start with a dollar sign. Of course, this approach has do be done with caution
+                               and re-evaluated for every experiment individually, since it is very important to not exclude answers that might have a systematic impact on the answer distribution.
                               """),
                title = "Technical aspects"),
           ], start_collapsed = True,
