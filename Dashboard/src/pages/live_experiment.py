@@ -24,8 +24,8 @@ layout = [
            In the first, you can choose the answer options (A, B, C, etc.) for the model to choose from.
            In the second, you can choose an experiment where the models give a 
            dollar amount as an answer. Note that you must instruct the models to respond only with the 
-           name of the selected response options (e.g., "A", "B") or, in the numerical experiment, 
-           with a dollar amount (e.g., "$5", "$59.99"). Otherwise, the answers cannot be counted automatically.
+           name of the selected response options (e.g. "A", "B") or, in the numerical experiment, 
+           with a dollar amount (e.g. "$5", "$59.99"). Otherwise, the answers cannot be counted automatically.
            You will receive a warning if the share of correct answers (i.e. answer that are in
            the correct format) is below 50%.""",
            html.Br(),
@@ -77,7 +77,7 @@ layout = [
                                 tab_id="answer_options",
                             ),
                             dbc.Tab(
-                                label="Numeric",
+                                label="Numeric ($)",
                                 tab_id="numeric",
                             ),
                         ],
