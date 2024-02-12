@@ -24,7 +24,7 @@ presets = {
         "num_scenarios": 1,
         "num_options": 3,
         "shuffle-checklist": [],
-        "iterations": 1,
+        "iterations": 50,
         "models": ["gpt-3.5-turbo"],
         "temperature": 1,
         "answer_texts": ['Win a car.', 'Win a house.', 'Win a boat.'],
@@ -286,7 +286,7 @@ def update_num_scenarios(num_scenarios, num_options, instruction):
     
     answer_option_labels = ['A', 'B', 'C', 'D', 'E', 'F']
     placeholder_text = ['Win a car.', 'Win a house.', 'Win a boat.', 'Win a plane.', 'Win a bike.', 'Win a motorcycle.']
-    answer_textarea_style = {'width': '100%', 'height': 30} 
+    answer_textarea_style = {'width': '100%', 'height': 60} 
     
     # Generate scenarios textareas
     for i in range(num_scenarios):
@@ -297,7 +297,7 @@ def update_num_scenarios(num_scenarios, num_options, instruction):
                     dbc.Textarea(
                         id={"type": "individual-prompt", "index": i},
                         value="You are a random pedestrian being chosen for a survey. The question is: Would you rather:",
-                        style={'width': '100%', 'height': 100},
+                        style={'width': '100%', 'height': 110},
                         persistence=True,
                         persistence_type='session',
                     ),
@@ -553,7 +553,7 @@ def update_individual_experiment(n_clicks, prompts, models, iterations, temperat
             html.H2("Results:", style={'margin-top': '50px', 'margin-bottom': '30px'}),
             html.Br(),
             dbc.Alert(
-                "The share of correct answers (correct answers / iterations) is below 50% for at least one experiment. This might indicate that the models were not able to answer the questions correctly. Scroll down to see the raw answers of the models. You should change the experiment configuration and run the experiment again.",
+                "The share of correct answers (correct answers / iterations) is below 50% for at least one experiment. This might indicate that the models were not able to answer the questions correctly. Scroll down to see the raw answers of the models. It is helpful to guide the model to answer in the required format by using the instruction role or by writing it in the scenario text.",
                 color="warning"
             ) if experiment.low_answers_share_warning else None,
             output_table

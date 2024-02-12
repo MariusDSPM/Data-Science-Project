@@ -317,7 +317,7 @@ def update_individual_experiment(n_clicks, prompts, models, iterations, temperat
             html.H2("Results:", style={'margin-top': '50px', 'margin-bottom': '30px'}),
             html.Br(),
             dbc.Alert(
-                "The share of correct answers (correct answers / iterations) is below 50% for at least one experiment. This might indicate that the models were not able to answer the questions correctly. Scroll down to see the raw answers of the models. You should change the experiment configuration and run the experiment again.",
+                "The share of correct answers (correct answers / iterations) is below 50% for at least one experiment. This might indicate that the models were not able to answer the questions correctly. Scroll down to see the raw answers of the models. It is helpful to guide the model to answer in the required format by using the instruction role or by writing it in the scenario text.",
                 color="warning"
             ) if experiment.low_answers_share_warning else None,
             output_table,
