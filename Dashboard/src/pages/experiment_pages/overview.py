@@ -43,7 +43,7 @@ layout = [html.H1("Overview", className="page-heading"),
                  """),
           html.Hr(),
           dcc.Markdown("""
-                      **The general for conducting an experiment is:**
+                      **The general workflow for conducting an experiment is:**
                       
                       1. Search the literature for either a well-known, or well-implementable experiment in the field of behavioral economics.
                       2. Adapt the experiment design, most importantly the phrasing, to suit the context of querying LLMs. In doing so, it is important to stick
