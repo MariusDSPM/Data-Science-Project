@@ -506,26 +506,31 @@ dbc.Accordion(
     [
     dbc.AccordionItem(
     dcc.Markdown(["""
-                 The Prospect Theory value function explains why individuals tend to assess the perceived value of e.g. a sum of multiple gains as larger, 
-                 than one individual sum of the same amount. Since Large Language Models are trained on human data, including for example customer reviews on sales platforms,
-                 they might reflect these patterns.
-        
-                 But how do LLMs react, if in the given scenarios, one individual is financially clearly better off than the other? And what if we did not deal with small,
-                 even numbers, but rather large and odd ones?
-        
-                Another ,key concept of prospect theory is decreasing sensitivity 
-                A loss of 50$ subtracted from a total amount of 1000$ will not hurt as much, as if we initially only had 100$, hence losing 50% of our total possession."
+                  In the previous experiment, we regarded whether or not LLMs abide by the rules of Prospect Theory and Mental Accounting. However, as mentioned on the Start Page,
+                  Large Language Models, among other sources, are trained on text data that is freely available on the internet. Parts of this might also include the original study,
+                  or at least discussions about it, by Thaler (1985).     
+                  Disregarding the actual outcome of the previous experiment, it is possible that the models' answers are influenced by the original study, if it 
+                  was in fact, to some extent, part of the training data.   
+                  Therefore, it is interesting to research how the models' answers might change, once we deviate from the original numbers used in the experiment.     
+                  Furthermore, oney key concept of the Prospect Theory experiment is, that in every situation, both described individuals do actually gain or lose the same amount of money.
+                  But how do LLMs react, if in the given scenarios, one individual is financially clearly better off than the other?     
+                  Another important notion of Prospect Theory is *decreasing sensitivity*. A loss of $50 subtracted from a total amount of $1000 will not hurt as much, as losing
+                  $50, when we initially only had $100. Will the models take this into consideration? And how will the answers change, if we do not deal with round numbers anymore?
 
-                In order to research these 2 aspects, we created 6 configurations for every scenario (1-4):
+                  To research this, we created 6 different configurations for each of the 4 scenarios as they are described in the previous experiment:
 
-                - Configuration 1: Original numbers scaled by factor Pi * 100
+                  * Configuration 1: Original numbers scaled by factor Pi * 100
+                  * Configuration 2: Original numbers scaled by factor Pi * 42
+                  * Configuration 3: A is better off by 25$
+                  * Configuration 4: A is better off by 50$
+                  * Configuration 5: B is better off by 25$
+                  * Configuration 6: B is better off by 50$
 
-                - Configuration 2: Original numbers scaled by factor Pi * 42
-
-                - Configuration 3: A is better off by 25$
-                - Configuration 4: A is better off by 50$
-                - Configuration 5: B is better off by 25$
-                - Configuration 6: B is better off by 50$
+                  Note, that in configurations 1 & 2 the numbers used in the prompt are scaled by the factor Pi to create odd numbers, but the relation between the numbers remains the same.
+                  Combining 4 scenarios with 6 configurations each resulted in a total of 24 prompts. Again, the exact prompts used in the experiment will be displayed below the graph.     
+                  Similar to all other experiments we presented each prompt 100 times for GPT-3.5-Turbo and, for cost reasons, 50 times for GPT-4-1106-Preview and LLama-2-70b. 
+                  On top of that, we only used the temperature values 0.5, 1 and 1.5, since we already regard broader ranges of temperature values in other experiments.
+                  The aspect of *Priming* will also not be considered in this experiment.
                  """]), title = "Description and implementation of the experiment")
     ],        
     start_collapsed=True,
