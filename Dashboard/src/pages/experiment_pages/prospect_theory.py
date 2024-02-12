@@ -69,30 +69,79 @@ layout = [
      dbc.Accordion(
          [
         dbc.AccordionItem(
-            html.P(["""According to Prospect Theory and Mental Accounting, financial gains and losses are booked into different fictitious accounts. On top of that, 
-                    relative to a reference point, losses weigh more heavily than gains and the perceived sum of two individual gains/losses will, in absolute terms, be larger than 
-                    one single gain/loss of the same amount. In the context of Marketing, four main rules can be derived by this theory:""",
-                    html.Br(),
-                    html.Br(),
-                    "1) Segregation of gains",
-                    html.Br(),
-                    "2) Integration of losses",
-                    html.Br(), 
-                    "3) Cancellation of losses against larger gains",
-                    html.Br(),
-                    "4) Segregation of silver linings",
-                    html.Br(),
-                    html.Br(),
-                    """One possible practical implication each of these rules hold, is each reflected in the different scenarios we examine below."""]),
+            dcc.Markdown(["""
+                          Prospect Theory, as described by Kahneman/Tversky (1979), is an important concept which holds numerous implications that can be utilized 
+                          in the context of Marketing and generally help to better understand consumer behavior.   
+                          It describes how individuals make decisions under uncertainty and how they perceive and process information in this situation.       
+                          According to Prospect Theory, perceived gains and losses are evaluated relative to a reference point, suggesting the effectiveness of *framing*
+                          in affecting consumers choices.   
+                          On top of that, losses weigh more heavily than gains, which leads to the so-called *Endowment Effect*.   
+                          Together with the notion of decreasing sensitivity, the representative S-shape of the Prospect Theory value function results.     
+                          This value function is concave for gains and convex for losses, implying that individuals are *risk-averse* for gains but *risk-seeking* for losses.    
+                          Furthermore, the difference between $50 and $60 is perveiced to be greater than the difference between $100 and $110. Although identical in 
+                          absolute numbers, the relative difference plays a bigger role in the individual's decision.
+
+                          **4 main principles** can be derived from this Theory that utilized for practical application: 
+
+                          **1) Segregation of gains:** Do not add up gains, but communicate them seperately.
+                          * The perceived value of gaining $50 twice will be higher than gaining $100 once. Communicate positive product characteristica separately. 
+
+                          **2) Integration of losses:** Do not communicate occurring losses separately, but add them up with other occurring losses or ideally gains.    
+                          * The perceived loss of losing $50 twice will be greater than losing $100 once. Credit cards pool multiple individual losses into one. 
+
+                          **3) Cancellation of losses against larger gains:** When confronted with mixed gains, clearly communicate the positive net outcome.     
+                          * Taxes are immediately deducted from paychecks. Initial losses in stock trading seem negligible, once the stock goes up. 
+                          * Consumers tend to book losses and gains into different fictitious accounts (*Mental Accounting*). Cancellation of losses against larger gains prevents this.
+
+                          **4) Segregation of silver linings:** Communicate the positive aspects of a product separately from the negative ones.    
+                          * Car dealerships often give *special* discounts on the almost final offer to persuade the customer to buy.
+
+                          The implications, that Prospect Theory holds are applied in a wide range fields and can be especially effective in the context of Marketing.     
+                          To research, whether Large Language Models also abide by the aforementioned principles, we recreated an experiment originally conducted by Richard Thaler in 1985.
+                          There, he confronted 87 students in an undergraduate statistics class at Cornell University with 4 different scenarios, each dealing with one of the
+                          above mentioned principles. The exact phrasing of the scenarios can be found below.    
+                          The experiment was chosen, especially because of the practical relevance, that Prospect Theory and Mental Accounting hold. On top of that, the original work
+                          by Kahneman and Tversky, as well as the work by Richard Thaler are considered to be of enormous importance in the field of Behavioral Economics and
+                          Consumer Psychology.    
+                          Furthermore, the original study design can be adapted and reapplied on Large Language models, without having to change a lot of
+                          the original study design. This is especially important, to maximize the comparability of the original results and the ones obtained by this research.                       
+                          """]),
                     title = "Experiment Description"),
         dbc.AccordionItem(
-                    html.P(["""In order to research how Large Language models react to this kind of experiment, we queried multiple models over different temperature values and used either primed 
-                    or unprimed prompts. The results of our experiments are visualized below. The original results are taken
-                    from Thaler, Richard (1985), “Mental Accounting and Consumer Choice,” Marketing Science, 4 (3), 199–214 and the prompts we query the Language Models with are
-                    constructed so that we can stay as close to the original phrasing as possible, while still instructing the models sufficiently well to produce meaningful results.
-                    For every scenario, the participants could decide on either Mister A, Mister B or a No-difference option.
-                    In the case of primed experiments, we instructed the model to be a market researcher, that knows about Prospect Theory and Mental Accounting."""]),
+                    dcc.Markdown(["""
+                                  The experiment below aims to research to what extent the Large Language models abide by the rules of Prospect Theory and Mental Accounting.    
+                                  To achieve this, we used a total of 8 different prompts and presented each prompt 100 times for GPT-3.5-Turbo and, for cost reasons,
+                                  50 times for GPT-4-1106-Preview and LLama-2-70b.      
+                                  The prompts used to query the LLMs as well as the original phrasing by Thaler (1985) will be displayed below and next to the graph.     
+                                  In constructing the prompts, we tried to stick to the original phrasing as close as possible, while still instructing the models sufficiently well
+                                  to produce meaningful results.   
+                                  As in all experiments, we limited the number of maximum tokens to be generated and used the instruction role to tell the models only to answer
+                                  with the letter of the option they would choose, without providing any reasoning.   
+                                  To achieve more meaningful results, the instruction text was also included in the prompts themselves.   
+                                  Furthermore, all prompts were presented to each language model over a range of temperature values. This was done to research how the models' answers
+                                  might change depending on this parameter, and if there may be an *optimal* temperature value that leads to an approximation of the original
+                                  results as obtained by Thaler.   
+                                  Similar to the Decoy Effect experiment, we again also regarded the aspect of *Priming*. Here, we specifically told the model, to take the role
+                                  of a market researcher, that focusses on Prospect Theory and Mental Accounting. Since *Priming* is proven to have a significant impact on human
+                                  decision making processes, it is especially interesting to see, if this phenomenon also occurs in the models' answers. 
+
+                                  Therefore, the aforementioned 8 different prompts resulted from:
+
+                                  * 4 scenarios (4 options)
+                                    * Integration of losses
+                                    * Segragation of gains
+                                    * Cancellation of losses against larger gains
+                                    * Segregation of silver linings
+                                  
+                                  
+                                 * Primed and unprimed prompts (2 options)                          
+                            """]),
                     title = "Implementation of the experiment"),
+        dbc.AccordionItem(
+            dcc.Markdown("""
+                Thaler, Richard. “Mental Accounting and Consumer Choice.” Marketing Science, vol. 4, no. 3, 1985, pp. 199–214. JSTOR, http://www.jstor.org/stable/183904. Accessed 12 Feb. 2024.
+                """),
+                          title = "References"), 
                     
          ],
         start_collapsed=True,
@@ -453,32 +502,35 @@ html.Hr(),
 ## Experiment 2
 html.H2("Experiment 2: Odd numbers and unfair scenarios"),
 html.Hr(),
-html.P(["""The Prospect Theory value function explains why individuals tend to assess the perceived value of e.g. a sum of multiple gains as larger, 
-        than one individual sum of the same amount. Since Large Language Models are trained on human data, including for example customer reviews on sales platforms,
-        they might reflect these patterns.""",
-        html.Br(), 
-        """But how do LLMs react, if in the given scenarios, one individual is financially clearly better off than the other? And what if we did not deal with small,
-        even numbers, but rather large and odd ones?""",
-        html.Br(),
-        "Another ", html.B("key concept of prospect theory is decreasing sensitivity"),":", 
-        " A loss of 50$ subtracted from a total amount of 1000$ will not hurt as much, as if we initially only had 100$, hence losing 50% of our total possession.", 
-        html.Br(),
-        html.Br(),
-        "In order to research these 2 aspects, we created 6 configurations for every scenario (1-4):",
-        html.Br(),
-        html.Br(),
-        "- Configuration 1: Original numbers scaled by factor Pi * 100",
-        html.Br(),
-        "- Configuration 2: Original numbers scaled by factor Pi * 42",
-        html.Br(),
-        "- Configuration 3: A is better off by 25$",
-        html.Br(),
-        "- Configuration 4: A is better off by 50$",
-        html.Br(),
-        "- Configuration 5: B is better off by 25$",
-        html.Br(),
-        "- Configuration 6: B is better off by 50$",
-        html.Br()]),
+dbc.Accordion(
+    [
+    dbc.AccordionItem(
+    dcc.Markdown(["""
+                 The Prospect Theory value function explains why individuals tend to assess the perceived value of e.g. a sum of multiple gains as larger, 
+                 than one individual sum of the same amount. Since Large Language Models are trained on human data, including for example customer reviews on sales platforms,
+                 they might reflect these patterns.
+        
+                 But how do LLMs react, if in the given scenarios, one individual is financially clearly better off than the other? And what if we did not deal with small,
+                 even numbers, but rather large and odd ones?
+        
+                Another ,key concept of prospect theory is decreasing sensitivity 
+                A loss of 50$ subtracted from a total amount of 1000$ will not hurt as much, as if we initially only had 100$, hence losing 50% of our total possession."
+
+                In order to research these 2 aspects, we created 6 configurations for every scenario (1-4):
+
+                - Configuration 1: Original numbers scaled by factor Pi * 100
+
+                - Configuration 2: Original numbers scaled by factor Pi * 42
+
+                - Configuration 3: A is better off by 25$
+                - Configuration 4: A is better off by 50$
+                - Configuration 5: B is better off by 25$
+                - Configuration 6: B is better off by 50$
+                 """]), title = "Description and implementation of the experiment")
+    ],        
+    start_collapsed=True,
+),
+
 html.Div(
         children = [
             html.Div(

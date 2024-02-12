@@ -69,7 +69,8 @@ layout = [
                 To accomplish this, we used a total of 8 different prompts and presented each prompt 100 times for GPT-3.5-Turbo and, for cost reasons, 50 times for GPT-4-1106-Preview and LLama-2-70b.      
                 The prompts will be displayed underneath the graph, once the respective experiment configuration is selected.   
                 The phrasing of the prompts is designed to resemble the original format as close as possible, while still being instructive enough to produce meaningful results.    
-                To avoid getting an essay-like response, we limited the number of tokens and instructed the models to only answer with the letter of the option they would choose, without any reasoning.                   
+                To avoid getting an essay-like response, we limited the number of tokens and instructed the models to only answer with the letter of the option they would choose, without any reasoning.    
+                This instruction was also appended to the prompts themselves to maximize the number of answers that suit the desired output.                   
                 On top of the Decoy Effect itself, we also regarded the aspect of *priming* and *renaming and reordering* the answer options.       
                 In the case of *priming*, we specifically told the models to take the role of a market researcher knowing about the Decoy Effect in product pricing. With this, we 
                 wanted to research, whether the extent to which the models' answers might adhere to the Decoy Effect, would change.       
