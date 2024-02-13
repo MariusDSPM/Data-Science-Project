@@ -84,15 +84,17 @@ layout = [
             [
                 dbc.AccordionItem(
                     [
-                        html.P("The experiment presented participants with two scenarios, each involving decisions under conditions of gain and loss. In the scenario with gains, participants were asked to choose between a sure gain option (Option A: A sure gain of $100) and a risky option (Option B: A 50% chance to gain $200 and a 50% chance to lose $0). In the scenario with losses, participants were presented with a similar choice between a sure loss option (Option A: A sure loss of $100) and a risky option (Option B: A 50% chance to lose $200 and a 50% chance to lose $0)."),
+                        html.P("The experiment presented participants with two scenarios, each involving decisions under conditions of gain and loss. In the scenario with gains, participants were asked to choose between a sure gain option (Option A: A sure gain of $100) and a risky option (Option B: A 50% chance to gain $200 and a 50% chance to lose $0). In the scenario with losses, participants were presented with a similar choice between a sure loss option (Option A: A sure loss of $100) and a risky option (Option B: A 50% chance to lose $200 and a 50% chance to lose $0). About two-thirds of the participants preferred the save option in the scenario with gains and the risky option in the scenario with losses."),
+                        html.P("The interesting aspect of this experiment lies in examining how LLMs weigh the certainty of outcomes against the potential for larger gains or losses. By comparing responses in scenarios involving gains and losses, researchers can gain insights into whether LLMs exhibit consistent risk preferences across different contexts.")
                     ],
-                    title="Description of Experiment",
+                    title="Description and motivation of the Experiment",
                 ),
                 dbc.AccordionItem(
                     [
-                        html.P("The interesting aspect of this experiment lies in examining how LLMs weigh the certainty of outcomes against the potential for larger gains or losses. By comparing responses in scenarios involving gains and losses, researchers can gain insights into whether LLMs exhibit consistent risk preferences across different contexts.")
+                        html.P('Each LLM was asked 50 times to choose between the two options in both scenarios. To guide the model to answer only with the label of the answer option, the instruction role was set to "Please answer by only giving the letter of the answer option A or B.". The temperature parameter was set to 0.5, 1 and 1.5.'),
+                        html.P('The phrasing of the prompts are exactly the same as the ones used in the real experiment. So it is possible that the experiment text was part of the training data for the models and the models are just memorizing the answers. This is a limitation of the experiment.')  
                     ],
-                    title="Motivation for Experiment",
+                    title="Implementation of the Experiment",
                 ),
                 dbc.AccordionItem(
                     [
@@ -101,7 +103,8 @@ layout = [
                     title="References",
                 ),
             ],
-            always_open=True
+            always_open=True,
+            start_collapsed=True,
         ),
         style={'margin-bottom': '50px'}
     ),  # End of Accordion
