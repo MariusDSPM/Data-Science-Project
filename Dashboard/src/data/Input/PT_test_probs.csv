@@ -1,2 +1,0 @@
-Experiment_id,Temp,p(A),p(B),p(C),Obs.,Model,Scenario,Priming,Original,Original_count
-PT_1_1,0.5,50.0,10.0,40.0,10,gpt-3.5-turbo,1,0,"[64.37, 18.39, 17.24]",87
