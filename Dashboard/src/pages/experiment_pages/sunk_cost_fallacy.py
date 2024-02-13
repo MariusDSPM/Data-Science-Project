@@ -166,7 +166,7 @@ layout = [
                 dbc.AccordionItem(
                     [
                         html.P("Participants are presented with a hypothetical scenario where they have purchased tickets to two different events: a theater performance and a rock concert. The theater ticket costs $90, while the rock concert ticket costs $30. Weeks later, they realize that both events are scheduled for the same evening. They think they will enjoy the rock concert more than the theater performance. The tickets are non-transferable and cannot be exchanged. Participants must choose which event to attend, knowing they will miss out on the other."),
-                        html.P("The majority of the participants chose the theater performance, despite being told that they would enjoy the rock concert more."),
+                        html.P("The majority of the participants would choose the theater performance, despite being told that they would enjoy the rock concert more."),
                         html.P("By analyzing LLMs' choices in this experiment, researchers gain insights into how LLMs prioritize experiences, weigh opportunity costs, and allocate resources, shedding light on the complexities of LLM decision-making under constraints."),
                     ],
                     title="Description and motivation of the experiment",
@@ -175,7 +175,7 @@ layout = [
                     [
                         html.P('Each LLM was asked 50 times to choose between the two options. To guide the model to answer only with the label of the answer option, the instruction role was set to "Please answer by only giving the letter of the answer option A or B.". The temperature parameter was set to 0.5, 1 and 1.5.'),
                         html.P("Furthermore, the cost of the theater performance is varied to examine how LLMs respond to different sunk costs. Raising the cost of the theater performance ticket to $250 or $10,000 provides an intriguing variable to observe whether LLMs' decision-making changes significantly in the face of a higher initial investment, potentially highlighting the influence of sunk costs on choices."), 
-                        html.P("To mitigate the problem that the experimental text from the literature was part of the training data of the LLMs, the experimental text was changed. Soman (2001) conducted the experiment with time investments. Arkes and Blumer (1985) dealt with cost for a ski trip.")
+                        html.P("To mitigate the problem that the experimental text from the literature was part of the training data of the LLMs, the experimental text was changed. Soman (2001) conducted the experiment with time investments. Arkes and Blumer (1985) dealt with cost for a ski trip. The experiment here is therefore a mixture of these two experiments and no real human results are available.")
                     ],
                     title="Implementation of the experiment",
                 ),
@@ -243,7 +243,7 @@ layout = [
                 dbc.AccordionItem(
                     [
                         html.P("Participants are presented with a scenario involving a case of Bordeaux wine purchased in the futures market for $20 a bottle, which now sells at auction for $75. They are asked to choose the option that best reflects their perception of the cost of drinking one bottle from the case (A: $0, B: $20, C: $20 plus interest, D: $75, E: -$55)."),
-                        html.P('The correct answer according to economic theory is $75. But the majority of the participants chose either option A or E, indicating that they perceive drinking the bottle was either free or saved them money. (Fun fact: Regarding answer option (e), Thaler (2015) writes: "When we included option (e), which we found greatly amusing, we were not sure anyone would select it. We wondered whether there were really people who are so sophisticated in their use of mental accounting that they can consider the drinking of an expensive bottle of wine as an act that saves them money.")'),
+                        html.P('The correct answer according to economic theory is $75. But the majority of the participants chose either option A or E, indicating that they perceive drinking the bottle was either free or saved them money. (Fun fact: Regarding answer option E, Thaler (2015) writes: "When we included option (e), which we found greatly amusing, we were not sure anyone would select it. We wondered whether there were really people who are so sophisticated in their use of mental accounting that they can consider the drinking of an expensive bottle of wine as an act that saves them money.")'),
                         html.P("This experiment explores LLMs' understanding of sunk costs, opportunity costs, and perceived value in consumption decisions. By analyzing LLMs' responses, researchers can gain insights into how LLMs conceptualize the costs associated with consuming goods they have already invested in, shedding light on decision-making biases and rationality in economic behavior."),
                     ],
                     title="Description and motivation of the experiment",
