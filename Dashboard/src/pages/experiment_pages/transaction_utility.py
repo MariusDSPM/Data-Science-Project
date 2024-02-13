@@ -137,7 +137,10 @@ layout = [
                                   * Current market price: $5, $10 (2 options)
                                   * Buyer type: Friend, Stranger (2 options)
                                          
-                                  As in all experiments, the prompts were presented to each model over a range of different temperature values. 
+                                  As in all experiments, the prompts were presented to each model over a range of different temperature values. However, the information about
+                                  the participant being a student was omitted, since it is not relevant for the experiment. Formulating concise prompts is crucial and irrelevant
+                                  information will not only lead to higher overall costs and can induce noise in the results. The instruction role was used to tell the model to
+                                  "Answer by only giving a single price in dollars and cents without an explanation", which was also included in the prompt itself.
 
                             """]),
                     title = "Implementation of the experiment"),
@@ -233,6 +236,38 @@ html.Hr(),
     html.Hr(),
     html.H2("Experiment 2: Hockey game tickets with alternative prices", className="page-heading"),
     html.Hr(),
+    dbc.Accordion([
+    dbc.AccordionItem(
+        dcc.Markdown(["""
+                      Analogous to the experiments concerning Prospect Theory and Mental Accounting we now purposely deviate from the original numbers used in the study.
+                      That is because LLMs have been trained on, not only, but also text data that is freely available on the internet. This data might therefore
+                      also include the original study along with its results. Therefore, we can expect that the  models' answers might be influenced by this.
+                      Disregarding whether or not the results of the previous experiment support this assumption, we now introduce two new price levels for the tickets:
+                      First, we scale all numbers mentioned in the prompt by the factor Pi, to see if odd numbers will produce different results, secondly we simply scale
+                      all numbers by the factor 10. As a result, we now get 2 scenarios with 12 configurations each, resulting in 24 different prompts:
+
+                      * Scenario 1: Prices multiplied by Pi
+                        * Initial ticket price: Free, $5 * Pi, $5 * Pi * 2 (3 options)
+                        * Current market price: $5 * Pi, $5 * Pi * 2 (2 options)
+                        * Buyer type: Friend, Stranger (2 options) 
+                      
+
+                      * Scenario 2: Prices multiplied by 10
+                        * Initial ticket price: Free, $50, $100 (3 options)
+                        * Current market price: $50, $100 (2 options)
+                        * Buyer type: Friend, Stranger (2 options)
+                      
+                      While the actual numbers mentioned in the prompts changed, the relation between the initial costs, the price marked on the ticket and the
+                      current market price were kept constant.    
+                      All prompts were presented to the Language Models over a range of different temperature values, querying GPT-3.5-Turbo 100 times and
+                      GPT-4-1106-Preview and LLama-2-70b 50 times each. The information about the participant being a student was omitted again. In the instruction role we told
+                      the model to "Answer by only giving a single price in dollars and cents without an explanation", which was also included in the prompt itself.
+                      """]), title = "Description and implementation of the experiment"
+    ),    
+], start_collapsed=True,
+),
+    html.Br(),
+    html.Hr(),
     html.H3("Scenario 1: Prices multiplied by Pi"),
     html.Br(),
     html.Div(
@@ -291,7 +326,7 @@ html.Hr(),
                                 max=2,
                                 marks={0.01: '0.01', 0.5: '0.5', 1: '1', 1.5: '1.5', 2: '2'},
                                 step = None,
-                                value=0.5,
+                                value=1,
                                 tooltip={'placement': 'top'},
                             ),
                         ],
@@ -368,7 +403,7 @@ html.Hr(),
                                 max=2,
                                 marks={0.01: '0.01', 0.5: '0.5', 1: '1', 1.5: '1.5', 2: '2'},
                                 step = None, # To only allow values as specified in marks
-                                value=0.5,
+                                value=1,
                                 tooltip={'placement': 'top'},
                             ),
                         ],
@@ -388,9 +423,68 @@ html.Hr(),
 
     ########## Experiment 2
     html.Hr(),
-    html.H2("Experiment 3: Beer at the grocery store"),
+    html.H2("Experiment 3: Beer consumption at the beach & income sensitivity"),
     html.Hr(),
-    html.Br(),
+     dbc.Accordion(
+         [
+        dbc.AccordionItem(
+            dcc.Markdown(["""
+                          The original experiment is also taken from Thaler's paper published in 1985 and aims to research the concept of transaction utility from a different
+                          perspective. While the previous experiment demonstrated how the conception of a fair price is influenced by the seller's costs, and the individuals
+                          had to name a price they would charge for a ticket, this experiment asks for a Willingness to Pay (WTP), making participants take the role of the buyer.
+                          The original phrasing, presented to participants who claimed to be regular beer-drinkers, is as follows:    
+                          
+                          *"You are lying on the beach on a hot day. All you have to drink is ice water. For the last hour you have been thinking about how much you would enjoy
+                           a nice cold bottle of your favorite brand of beer. A companion gets up to make a phone call and offers to bring back a beer from the only nearby place
+                           where beer is sold: a fancy resort hotel/a small, run-down grocery store. He says that the beer might be expensive and so asks how much you are willing
+                           to pay for the beer. He says that he will buy the beer if it costs as much or less than the price you state. But if it costs more than the price you state
+                           he will not buy it. You trust your friend and there is no possibility of bargaining with the bartender/store owner. What price do you tell him?"*
+
+                          The slashes indicate variations of the question. Thaler highlighted three important aspects of this experiment:    
+                          1: The consumption act itself is exactly the same. The same kind of beer will be consumed at the beach.    
+                          2: No strategic behavior is possible, since we can only name the WTP and the friend will make the purchase.    
+                          3: The place of consumption is the exact same, thus no additional utility out of e.g. the atmosphere of the fancy resort hotel is consumed.    
+
+                          Unfortunately, the paper does not report the original distribution of the answers but only states, that the **median WTP** for the **hotel was $2.65**
+                          and **$1.50 for the grocery store**. This clearly reflects the concept of transaction utility, since paying $2.65 for beer at a grocery store would be considered
+                          overpricing, while it seems an adequate price in a fancy resort hotel. Although the same beer will be consumed at the same place, significant differences
+                          in the stated WTPs occured.
+
+                          This experiment can be seen as a continuation of the hockey game ticket study, but with the roles reversed. As explained above, the human participants
+                          exhibited, perhaps unknowingly, the concept of transaction utility in their thought process. Therefore, it is interesting to see, whether these patterns
+                          will also be somehow reflected in the answers of Large Language Models, when they now have to state a Willingsness to Pay with no orientation price.
+                          """]),
+                    title = "Experiment Description"),
+        dbc.AccordionItem(
+                    dcc.Markdown(["""
+                                  As mentioned above, the original study does not report the distribution of the answers, but only the median WTPs. Therefore, comparing the 
+                                  models' answers to a ground truth is only possible to a limited extent. Furthermore, in this experiment, no orientation price is given in the
+                                  prompts, that might serve as an anchor to base the WTP on. Therefore, apart from only alternating the place of purchase, we also reserched
+                                  the aspect of *income sensitivity*. It can be expected, that the median, as well as the mean WTP for beer at both places of purchase
+                                  will be higher for individuals with a higher income. The exact levels of income were oriented on the numbers used by Brand et al. (2023).
+                                  In total, we used 8 different prompts, that we resulted from:
+
+                                  * Place of purchase: Fancy resort hotel, Run-down grocery store (2 options)
+                                  * Annual income: No information given, $50k, $70k, $120k (4 options)
+
+                                  All prompts were again presented to every Language model over a range of different temperature values. The number of repeated requests
+                                  per prompt and temperature value was 100 for GPT-3.5-Turbo and 50 for GPT-4-1106-Preview and LLama-2-70b. The prompts were designed to be 
+                                  as close to the original phrasing as possible, with the addition of the income information. As instruction we told the model to 
+                                  "Answer by only giving a single price in dollars and cents without an explanation", which was also included in the prompt itself.    
+                                  The configuration, which is comparable to the original results, is the one where no information about the income is given. 
+                            """]),
+                    title = "Implementation of the experiment"),
+        dbc.AccordionItem(
+            dcc.Markdown("""
+                Thaler, Richard. “Mental Accounting and Consumer Choice.” Marketing Science, vol. 4, no. 3, 1985, pp. 199–214. JSTOR, http://www.jstor.org/stable/183904. Accessed 12 Feb. 2024.
+                """),
+                          title = "References"), 
+                    
+         ],
+        start_collapsed=True,
+        ),
+html.Br(),
+html.Hr(),
     html.Div(
         children=[
             html.Div(

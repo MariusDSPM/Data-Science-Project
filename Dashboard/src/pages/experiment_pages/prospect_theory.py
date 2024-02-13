@@ -588,13 +588,7 @@ html.Div(
                             step = None,
                             value=0.5,
                             tooltip={'placement': 'top'},
-                            ),
-                        dbc.Tooltip(
-                        """Note: For this experiment we only regarded the temperature values 0.5, 1 and 1.5. Since the number of scenarios and configurations
-                        in this experiment is already quite large, this helped reduce costs, while still covering a broad range of temperature values, enabling 
-                        us to still get sufficiently meaningful results.""",
-                        target="prospect2-temperature-slider",
-                    ),                               
+                            ),                           
                         ],
                     ),
                     ],                 

@@ -31,7 +31,7 @@ from utils.plotting_functions import *
 
 dash.register_page(__name__, path='/experiment-recreation', name='Experiment Recreation', location='below-experiments')
 
-
+configurations = pd.read_csv("data/Input/configurations.csv", index_col = False)
 
 ### Layout ###
 layout = [
@@ -51,9 +51,16 @@ layout = [
            prompt and expected output, a cost estimate for runnig the experiment will also be displayed. If you are uncertain about the aspect of costs,
            you can revisit our [Overview page](/overview) or go to https://openai.com/pricing for further information.     
            Once you select the desired temperature value, you can start the experiment by clicking the "Run the experiment" button.    
-           Afterwards, the results will automatically be visualized and you can download the raw results in form of a csv-file."""),
+           Afterwards, the results will automatically be visualized and you can download the raw results in form of a csv-file.    
+                                   
+           In every experiment on this page, we used *Experiment IDs* to uniquely identify them. In the downloadable results dataframes from the experiments
+           below, this ID along with a column called *Configuration* will be included. In order to look up, which configuration and Experiment ID corresponds to
+           which study design, you can download the configuration info from the button below."""),
             
-        
+            # Download for experiment configurations
+            html.Button("Download configuration info", id="configuration-csv-button"),
+            dcc.Download(id="configuration-csv-download"),
+            html.Hr(),
             html.Div(
             [
                 dbc.Input(
@@ -835,6 +842,19 @@ layout = [
         dcc.Download(id="tu2-csv-download"),
 
 ]
+
+
+##### Callback for download of configuration csv #####
+@dash.callback(
+    Output("configuration-csv-download", "data"),
+    Input("configuration-csv-button", "n_clicks"),
+)
+def download_configuration_csv(n_clicks):
+    if n_clicks:
+        return dcc.send_data_frame(configurations.to_csv, "Configurations.csv")
+    else:
+        return dash.no_update
+
 
 ######  Callback for Individual Prospect Theory prompt and costs #####
 @dash.callback(
