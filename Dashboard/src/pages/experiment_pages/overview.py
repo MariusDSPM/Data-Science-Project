@@ -108,8 +108,8 @@ layout = [html.H1("Overview", className="page-heading"),
                                Therefore, at the beginning of each experiment, we visually inspected model answers for higher maximum token values to see what the models would *like* to answer.   
                                This way, suitable post-processing functions can be implemented, once the expected format of the model answers is known.       
                                For example in the context of the *Transaction Utility* experiments, we quickly saw that each answer containing valid information started with
-                               a dollar sign. Other answers often tended to be a rather creative explanation for the decision or an answer with no informative content at all.
-                               Therefore, we disregarded all answers that did not start with a dollar sign.    
+                               a dollar sign. Other answers often tended to be a rather creative explanation for the decision, lead up with a small greeting or an 
+                               answer with no informative content at all. Therefore, we disregarded all answers that did not start with a dollar sign.      
                                Of course, this approach has do be done with caution and re-evaluated for every experiment individually, since it is very important to not exclude answers
                                that might have a systematic impact on the answer distribution.
                               """),
