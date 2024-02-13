@@ -27,8 +27,8 @@ layout = [html.H1("Overview", className="page-heading"),
                             * Multiple choice style: These experiments are designed to test the sunk cost fallacy, a behavioural economic theory that describes
                             the tendency of people to continue an endeavour once an investment in money, effort, or time has been made.
                        * [Transaction Utility](/transaction-utility)
-                            * Open answer style: These experiments are designed to test the transaction utility theory, a behavioural economic theory that
-                            describes the way people choose between probabilistic alternatives that involve risk.
+                            * Open answer style: Additional to pure acquisition utility, consumers also derive a so-called transaction utility from a purchase.
+                              Is this concept also present in Large Language Models and reflected in their answers?
                        """
                 
             ),
@@ -108,9 +108,10 @@ layout = [html.H1("Overview", className="page-heading"),
                                Therefore, at the beginning of each experiment, we visually inspected model answers for higher maximum token values to see what the models would *like* to answer.   
                                This way, suitable post-processing functions can be implemented, once the expected format of the model answers is known.       
                                For example in the context of the *Transaction Utility* experiments, we quickly saw that each answer containing valid information started with
-                               a dollar sign. Other answers often tended to be a rather creative explanation for the decision or an answer with no informative content at all.   
-                               Therefore, we disregarded all answers that did not start with a dollar sign. Of course, this approach has do be done with caution
-                               and re-evaluated for every experiment individually, since it is very important to not exclude answers that might have a systematic impact on the answer distribution.
+                               a dollar sign. Other answers often tended to be a rather creative explanation for the decision or an answer with no informative content at all.
+                               Therefore, we disregarded all answers that did not start with a dollar sign.    
+                               Of course, this approach has do be done with caution and re-evaluated for every experiment individually, since it is very important to not exclude answers
+                               that might have a systematic impact on the answer distribution.
                               """),
                title = "Technical aspects"),
           ], start_collapsed = True,
