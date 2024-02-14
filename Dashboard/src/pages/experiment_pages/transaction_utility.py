@@ -88,7 +88,7 @@ layout = [
             dcc.Markdown(["""
                           Richard Thaler differentiates between two forms of utility: *Acquisition utility* and *Transaction utility*. The first aspect depends on the value
                           of the product received relative to the money spent, while the second aspect relies solely on the perceived advantages of the transaction itself.
-                          The assessment of transaction utility depends on the price an individual pays relative to some reference price. The total utility of a transaction,
+                          The assessment of transaction utility is influenced by the price an individual pays relative to some reference price. The total utility of a transaction,
                           although a rather abstract concept, then results as the sum of acquisition and transaction utility.    
                           Therefore, the reference price is crucial for assessing the perceived overall utility of a purchase. Thaler describes, that one important
                           determinant that drives the reference price is fairness, which in turn depends on the costs of the seller. Extentious overpricing would hence
@@ -139,7 +139,7 @@ layout = [
                                          
                                   As in all experiments, the prompts were presented to each model over a range of different temperature values. However, the information about
                                   the participant being a student was omitted, since it is not relevant for the experiment. Formulating concise prompts is crucial and irrelevant
-                                  information will not only lead to higher overall costs and can induce noise in the results. The instruction role was used to tell the model to
+                                  information will not only lead to higher overall costs but might induce noise in the results. The instruction role was used to tell the model to
                                   "Answer by only giving a single price in dollars and cents without an explanation", which was also included in the prompt itself.
 
                             """]),

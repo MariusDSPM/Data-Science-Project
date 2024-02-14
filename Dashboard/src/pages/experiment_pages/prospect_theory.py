@@ -512,7 +512,7 @@ dbc.Accordion(
                   Disregarding the actual outcome of the previous experiment, it is possible that the models' answers are influenced by the original study, if it 
                   was in fact, to some extent, part of the training data.   
                   Therefore, it is interesting to research how the models' answers might change, once we deviate from the original numbers used in the experiment.     
-                  Furthermore, oney key concept of the Prospect Theory experiment is, that in every situation, both described individuals do actually gain or lose the same amount of money.
+                  Furthermore, one key concept of the Prospect Theory experiment is, that in every situation, both described individuals do actually gain or lose the same amount of money.
                   But how do LLMs react, if in the given scenarios, one individual is financially clearly better off than the other?     
                   Another important notion of Prospect Theory is *decreasing sensitivity*. A loss of $50 subtracted from a total amount of $1000 will not hurt as much, as losing
                   $50, when we initially only had $100. Will the models take this into consideration? And how will the answers change, if we do not deal with round numbers anymore?
