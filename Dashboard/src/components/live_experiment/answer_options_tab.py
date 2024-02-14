@@ -24,7 +24,7 @@ presets = {
         "num_scenarios": 1,
         "num_options": 3,
         "shuffle-checklist": [],
-        "iterations": 50,
+        "iterations": 5,
         "models": ["gpt-3.5-turbo"],
         "temperature": 1,
         "answer_texts": ['Win a car.', 'Win a house.', 'Win a boat.'],
