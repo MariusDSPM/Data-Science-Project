@@ -58,7 +58,8 @@ layout = [
                 However, once **option B was removed** and the choice had to be made only between A and C, **68%** of the participants chose option **A**, while only **32%** chose option **C**.   
                 Obviously, the presence and absence of the Decoy option had a significant impact on the participants' choices. 
                 This suggests, that utilizing the Decoy Effect can be a valuable tool for Marketing purposes, for example in developing pricing strategies.    
-                Since one important apsectr of this research is, whether Large Language Models can act as surrogates in the field of market research, it is especially interesting to see,
+                Since one important apsect
+                          of this research is, whether Large Language Models can act as surrogates in the field of market research, it is especially interesting to see,
                 whether those LLMs too exhibit this pattern in their decision-making process. On top of that, the study design being multiple choice between 3 or less options
                 can easily be adapted to be conducted on LLMs. That is why we chose to conduct this specific experiment."""),
                 title = "Description and motivation of the experiment"
