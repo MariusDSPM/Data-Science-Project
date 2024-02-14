@@ -61,7 +61,7 @@ def numeric_layout():
                                         dbc.Input(
                                             id="individual-iterations-numeric",
                                             type="number",
-                                            value=1,
+                                            value=50,
                                             min=0,
                                             max=500,
                                             step=1,
